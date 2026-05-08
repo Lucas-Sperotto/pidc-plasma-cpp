@@ -57,7 +57,7 @@ Criar as estruturas mínimas para nós, partículas, domínio e busca de vizinha
 - [x] `Domain2D`
 - [x] `NodeCloud`
 - [ ] `PeriodicBoundary2D`
-- [ ] `RegularNodeCloud2D`
+- [x] `RegularNodeCloud2D`
 - [ ] `NeighborSearchGrid`
 
 ### Critérios de aceite

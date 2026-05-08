@@ -134,3 +134,18 @@ Mitigação:
 Decidir a estratégia de quadratura (DEC-0017) antes de implementar o assembler.
 Candidato natural para grade regular: células retangulares com Gauss 2×2.
 O assembler recebe as células como parâmetro (não as embutidas em `NodeCloud`).
+
+---
+
+## R-013 — Teste de MLS frágil mascara bug de gradiente
+
+Status: descoberto (2026-05-08, Gemini, T-020)
+
+Contexto:
+A auditoria matemática da implementação de `mls_evaluate` (T-017) revelou que a fórmula do gradiente da função de forma está incorreta. Ela contém um termo extra, `(∇p)ᵀ c wᵢ`. No entanto, o teste de reprodução linear para os gradientes (`test_mls_shape_function`) passou.
+
+Risco:
+O teste passou porque a nuvem de nós e o ponto de avaliação são perfeitamente simétricos, uma condição especial que anula o termo de erro. Isso significa que o teste não é robusto e o código MLS produzirá gradientes incorretos para qualquer caso geral (partículas em posições arbitrárias), quebrando a conservação de momento e a precisão do solver EFG.
+
+Mitigação:
+Corrigir a fórmula do gradiente em `MLSShapeFunction.hpp`. Adicionar um novo caso de teste em `test_mls_shape_function.cpp` com um ponto de avaliação assimétrico (e.g., `x = {0.6, 0.4}`) que teria falhado e detectado o bug. Ver tarefa `T-021`.

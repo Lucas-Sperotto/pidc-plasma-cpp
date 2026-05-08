@@ -21,8 +21,10 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-020 | Auditar matematicamente MLSShapeFunction e gradientes | Gemini | proposta |
-| T-018 | Implementar RegularNodeCloud2D com teste determinístico | Codex | proposta |
+| T-021 | Corrigir bug no gradiente MLS (R-013) e adicionar teste assimétrico | Claude | proposta |
+| T-022 | Auditar a correção da T-021 e confirmar fórmulas de gradiente MLS | Gemini | proposta |
+| T-023 | Definir semântica de `Node::volume` antes do assembler EFG | Professor + Gemini | proposta |
+| T-024 | Implementar teste explícito de ausência de NaN/Inf em MLS | Codex | proposta |
 | T-Poisson | Implementar assembler EFG Poisson (MMS) — aguarda DEC-0018 aceita | Codex | bloqueada |
 
 ---
@@ -31,6 +33,8 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-020 | Auditar matematicamente MLSShapeFunction e gradientes | Gemini | 2026-05-08 |
+| T-018 | Implementar RegularNodeCloud2D com teste determinístico | Gemini + Codex revisão | 2026-05-08 |
 | T-019 | Revisar arquitetura MLS → EFG; registrar R-010/011/012, propor DEC-0018 | Claude | 2026-05-08 |
 | T-005 | Definir framework de testes | Codex | 2026-05-08 |
 | T-017 | Implementar MLSShapeFunction::evaluate com PU e LR (DEC-0016, Fase C/MLS) | Claude | 2026-05-08 |

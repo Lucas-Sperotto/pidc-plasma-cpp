@@ -12,12 +12,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | --- | --- |
 | core | bootstrap mínimo compilando |
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
-| geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` criado como proprietário canônico de nós |
+| geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` e `RegularNodeCloud2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados) |
 | efg | não iniciado |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | CTest com 8 testes; `tests/test_utils.hpp`; partição da unidade e reprodução linear validadas |
+| validation | CTest com 9 testes; `tests/test_utils.hpp`; partição da unidade e reprodução linear validadas, mas gradiente MLS bloqueado por R-013 |
 | scripts | não iniciado |
 
 ## Testes
@@ -33,6 +33,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | polynomial_basis | passou em 2026-05-08 |
 | eigen_dependency | passou em 2026-05-08 |
 | mls_shape_function | passou em 2026-05-08 |
+| regular_node_cloud | passou em 2026-05-08 |
 | partition unity | passou em 2026-05-08 (coberto por mls_shape_function) |
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation | não iniciado |
@@ -40,6 +41,24 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Codex revisou a T-018 após ela ter sido atribuída ao Gemini por engano. A implementação inicial de `RegularNodeCloud2D` usava caminhos e métodos inexistentes de `Domain2D`; foi corrigida para usar `pidc/Domain2D.hpp`, `lower()`, `width()` e `height()`, e o teste foi adaptado ao framework `tests/test_utils.hpp`. O duplicado de `R-013` em `docs/ai/RISKS.md` foi removido. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_test_regular_node_cloud`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 9/9 testes.
+
+---
+
+### Histórico anterior
+
+Gemini concluiu T-020: Auditoria matemática de `MLSShapeFunction`. **Foi encontrado um bug crítico na implementação do gradiente (T-017).** A fórmula implementada está incorreta, mas o teste passou devido a uma simetria no caso de teste que mascarou o erro. O risco foi registrado como R-013 e uma nova tarefa de correção, T-021, foi proposta para Claude. **A implementação do solver de Poisson (T-Poisson) está bloqueada até que T-021 seja concluída.**
+
+---
+
+### Histórico anterior
+
+T-018 foi integrada e revisada: `RegularNodeCloud2D` cria uma `NodeCloud` determinística a partir de `Domain2D`, incluindo domínios quadrados/retangulares, linha única, coluna única e erro controlado para dimensão zero. Com isso, a Fase B do `TODO.md` avança. O CTest agora executa 9/9 testes com sucesso.
+
+---
+
+### Histórico anterior
 
 Claude concluiu T-019: revisão de arquitetura MLS → EFG. Registrados R-010 (raio de suporte sem propriedade), R-011 (busca O(N) acumulada em EFG) e R-012 (células de integração não definidas) em `docs/ai/RISKS.md`. Proposta DEC-0018 (quadratura por células retangulares Gauss 2×2) em `docs/ai/DECISIONS.md`. `CURRENT_CONTEXT.md` atualizado para refletir o estado real. `TODO.md` Fase C sincronizado. **Bloqueante:** DEC-0018 precisa ser aceita antes de implementar o assembler EFG Poisson.
 
