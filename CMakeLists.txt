@@ -44,3 +44,14 @@ add_test(
     NAME periodic_boundary
     COMMAND pidc_test_periodic_boundary
 )
+
+add_executable(pidc_test_shape_function_data
+    tests/test_shape_function_data.cpp
+)
+
+target_link_libraries(pidc_test_shape_function_data PRIVATE pidc_core)
+
+add_test(
+    NAME shape_function_data
+    COMMAND pidc_test_shape_function_data
+)
