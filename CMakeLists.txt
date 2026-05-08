@@ -161,3 +161,14 @@ add_test(
     NAME neighbor_search_grid
     COMMAND pidc_test_neighbor_search_grid
 )
+
+add_executable(pidc_test_periodic_boundary2d
+    tests/test_periodic_boundary2d.cpp
+)
+
+target_link_libraries(pidc_test_periodic_boundary2d PRIVATE pidc_core)
+
+add_test(
+    NAME periodic_boundary2d
+    COMMAND pidc_test_periodic_boundary2d
+)
