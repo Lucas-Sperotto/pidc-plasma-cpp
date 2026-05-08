@@ -11,6 +11,7 @@
 #include "pidc/Vec2.hpp"
 #include "pidc/geometry/NodeCloud.hpp"
 #include "pidc/geometry/RegularNodeCloud2D.hpp"
+#include "pidc/mls/MLSConfig.hpp"
 #include "pidc/mls/MLSShapeFunction.hpp"
 #include "pidc/mls/PolynomialBasis.hpp"
 #include "pidc/mls/WeightFunction.hpp"
@@ -100,6 +101,17 @@ int main()
         const double condition_number = moment_condition_number(point, cloud, support_radius);
         require(std::isfinite(condition_number), "MLS moment condition number must be finite");
         require(condition_number < max_condition_number, "MLS moment condition number must stay below threshold");
+    }
+
+    const pidc::ShapeFunctionData by_radius =
+        pidc::mls_evaluate(pidc::Vec2{0.37, 0.61}, cloud, support_radius);
+    const pidc::ShapeFunctionData by_config =
+        pidc::mls_evaluate(pidc::Vec2{0.37, 0.61}, cloud, pidc::MLSConfig{support_radius});
+    require(by_radius.neighbor_ids == by_config.neighbor_ids, "MLSConfig overload must preserve neighbours");
+    require(by_radius.phi.size() == by_config.phi.size(), "MLSConfig overload must preserve phi size");
+    for (std::size_t i = 0; i < by_radius.phi.size(); ++i) {
+        require(std::abs(by_radius.phi[i] - by_config.phi[i]) < 1.0e-14,
+                "MLSConfig overload must preserve phi values");
     }
 
     require_invalid_radius_throws(cloud, 0.0, "zero support radius must throw invalid_argument");

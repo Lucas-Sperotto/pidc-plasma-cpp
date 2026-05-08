@@ -183,3 +183,14 @@ add_test(
     NAME gauss_cell2d
     COMMAND pidc_test_gauss_cell2d
 )
+
+add_executable(pidc_test_efg_poisson_mms
+    tests/test_efg_poisson_mms.cpp
+)
+
+target_link_libraries(pidc_test_efg_poisson_mms PRIVATE pidc_core)
+
+add_test(
+    NAME efg_poisson_mms
+    COMMAND pidc_test_efg_poisson_mms
+)

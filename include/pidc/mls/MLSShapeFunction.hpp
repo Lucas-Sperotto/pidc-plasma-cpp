@@ -8,6 +8,7 @@
 #include "pidc/ShapeFunctionData.hpp"
 #include "pidc/Vec2.hpp"
 #include "pidc/geometry/NodeCloud.hpp"
+#include "pidc/mls/MLSConfig.hpp"
 #include "pidc/mls/PolynomialBasis.hpp"
 #include "pidc/mls/WeightFunction.hpp"
 
@@ -16,11 +17,10 @@ namespace pidc {
 inline ShapeFunctionData mls_evaluate(
     Vec2 x,
     const NodeCloud& cloud,
-    double support_radius)
+    const MLSConfig& config)
 {
-    if (!(support_radius > 0.0) || !std::isfinite(support_radius)) {
-        throw std::invalid_argument{"mls_evaluate requires a positive finite support radius"};
-    }
+    validate_mls_config(config);
+    const double support_radius = config.support_radius;
 
     // pass 1: collect neighbours inside support
     std::vector<std::size_t> ids;
@@ -97,6 +97,14 @@ inline ShapeFunctionData mls_evaluate(
     }
 
     return result;
+}
+
+inline ShapeFunctionData mls_evaluate(
+    Vec2 x,
+    const NodeCloud& cloud,
+    double support_radius)
+{
+    return mls_evaluate(x, cloud, MLSConfig{support_radius});
 }
 
 } // namespace pidc
