@@ -467,3 +467,35 @@ Impacto na validação:
 Partição da unidade ($\sum\phi_i = 1$) e reprodução linear
 ($\sum\phi_i\mathbf{x}_i = \mathbf{x}$) e seus gradientes validados com
 tolerância $10^{-10}$ em nuvem regular 5×5. 8/8 testes passando.
+
+---
+
+## DEC-0017 — Framework de testes inicial
+
+Status: aceita
+Proposta por: Codex — 2026-05-08
+Implementada por: Codex — 2026-05-08
+
+Contexto:
+O projeto já possui vários testes executáveis simples registrados no CTest.
+Ainda não há necessidade concreta de fixtures complexas, parametrização ou
+relatórios avançados que justifiquem uma dependência externa.
+
+Decisão:
+Usar CTest com executáveis C++ simples como framework inicial. Centralizar
+asserções mínimas em `tests/test_utils.hpp`, com `pidc::test::require(...)` e
+`pidc::test::approx_equal(...)`. Adiar Catch2/doctest até a suíte exigir
+recursos que o helper simples não ofereça.
+
+Justificativa:
+Mantém o bootstrap leve, transparente e suficiente para validar os blocos
+numéricos iniciais. Também evita introduzir uma dependência de teste antes de
+consolidar as primeiras interfaces matemáticas.
+
+Impacto no código:
+Testes novos devem incluir `tests/test_utils.hpp` e ser registrados com
+`add_test(...)` no CMake.
+
+Impacto na validação:
+A suíte atual continua passando com 8/8 testes, agora usando helpers comuns
+para falhas e comparações numéricas.

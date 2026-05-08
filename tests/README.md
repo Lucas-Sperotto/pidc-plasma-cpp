@@ -1,6 +1,20 @@
 # tests
 
-Testes planejados.
+Testes do projeto.
+
+## Framework atual
+
+O projeto usa executáveis C++ simples registrados no CTest. Cada arquivo
+`tests/test_*.cpp` deve:
+
+- incluir `tests/test_utils.hpp`;
+- usar `pidc::test::require(...)` para asserções;
+- usar `pidc::test::approx_equal(...)` para comparações de ponto flutuante;
+- retornar `0` em sucesso;
+- imprimir mensagens curtas de falha em `stderr`.
+
+Frameworks externos como Catch2/doctest ficam adiados até haver necessidade
+real de fixtures, parametrização ou relatórios mais ricos.
 
 ## Núcleo
 

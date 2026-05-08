@@ -144,11 +144,12 @@ Registros das intervenções das IAs.
 - C++17;
 - CMake;
 - Eigen.
+- CTest com executáveis C++ simples e `tests/test_utils.hpp`.
 
 ### Depois
 
 - nlohmann/json;
-- Catch2 ou doctest;
+- Catch2 ou doctest, apenas se os testes simples ficarem insuficientes;
 - OpenMP;
 - FFTW;
 - Gmsh.

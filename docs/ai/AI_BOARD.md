@@ -21,8 +21,11 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
+| T-020 | Auditar matematicamente MLSShapeFunction e gradientes | Gemini | proposta |
+| T-019 | Revisar arquitetura de MLS antes de Poisson | Claude | proposta |
+| T-018 | Implementar RegularNodeCloud2D com teste determinístico | Codex | proposta |
 | T-016 | Adicionar dependência da biblioteca Eigen ao CMake | Codex | concluída |
-| T-005 | Definir framework de testes | Codex + Claude | proposta |
+| T-005 | Definir framework de testes | Codex + Claude | concluída |
 
 ---
 
@@ -30,6 +33,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-005 | Definir framework de testes | Codex | 2026-05-08 |
 | T-017 | Implementar MLSShapeFunction::evaluate com PU e LR (DEC-0016, Fase C/MLS) | Claude | 2026-05-08 |
 | T-016 | Adicionar dependência da biblioteca Eigen ao CMake | Codex | 2026-05-08 |
 | T-015 | Confirmar sincronia e propor tarefa para adicionar Eigen | Gemini | 2026-05-08 |

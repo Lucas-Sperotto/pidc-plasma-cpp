@@ -17,7 +17,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | efg | não iniciado |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | CTest com 8 testes; partição da unidade e reprodução linear validadas |
+| validation | CTest com 8 testes; `tests/test_utils.hpp`; partição da unidade e reprodução linear validadas |
 | scripts | não iniciado |
 
 ## Testes
@@ -40,6 +40,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Codex concluiu T-005: framework de testes definido como CTest + executáveis C++ simples, com helper comum `tests/test_utils.hpp` para `require` e `approx_equal`. Todos os testes existentes foram migrados para o helper. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 8/8 testes.
+
+---
+
+### Histórico anterior
 
 Claude concluiu T-017: `MLSShapeFunction` implementada em `include/pidc/mls/MLSShapeFunction.hpp` como função livre `mls_evaluate(Vec2, const NodeCloud&, double) -> ShapeFunctionData`. Monta a matriz de momento $A$ (3×3), resolve $A\mathbf{c} = \mathbf{p}(\mathbf{x})$ via `PartialPivLU`, e computa gradientes diferenciando implicitamente o sistema linear. Teste `test_mls_shape_function.cpp` cobre partição da unidade, reprodução linear, gradientes de PU e LR, segundo ponto de consulta e exceção com vizinhos insuficientes. 8/8 testes passando (DEC-0016).
 
