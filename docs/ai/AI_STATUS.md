@@ -13,11 +13,11 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | core | bootstrap mínimo compilando |
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` criado como proprietário canônico de nós |
-| mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D criadas |
+| mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados) |
 | efg | não iniciado |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | CTest com 7 testes; Eigen validado via alvo consumidor de `pidc_core` |
+| validation | CTest com 8 testes; partição da unidade e reprodução linear validadas |
 | scripts | não iniciado |
 
 ## Testes
@@ -32,13 +32,20 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | weight_function | passou em 2026-05-08 |
 | polynomial_basis | passou em 2026-05-08 |
 | eigen_dependency | passou em 2026-05-08 |
-| partition unity | não iniciado |
-| linear reproduction | não iniciado |
+| mls_shape_function | passou em 2026-05-08 |
+| partition unity | passou em 2026-05-08 (coberto por mls_shape_function) |
+| linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation | não iniciado |
 | Poisson MMS | não iniciado |
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Claude concluiu T-017: `MLSShapeFunction` implementada em `include/pidc/mls/MLSShapeFunction.hpp` como função livre `mls_evaluate(Vec2, const NodeCloud&, double) -> ShapeFunctionData`. Monta a matriz de momento $A$ (3×3), resolve $A\mathbf{c} = \mathbf{p}(\mathbf{x})$ via `PartialPivLU`, e computa gradientes diferenciando implicitamente o sistema linear. Teste `test_mls_shape_function.cpp` cobre partição da unidade, reprodução linear, gradientes de PU e LR, segundo ponto de consulta e exceção com vizinhos insuficientes. 8/8 testes passando (DEC-0016).
+
+---
+
+### Histórico anterior
 
 Codex concluiu T-016: Eigen foi adicionada ao CMake com `find_package(Eigen3 3.3 REQUIRED NO_MODULE)` e propagada por `pidc_core` via `Eigen3::Eigen`. O teste `eigen_dependency` foi registrado no CTest e passou. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `./build/pidc_test_eigen_dependency`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 7/7 testes.
 

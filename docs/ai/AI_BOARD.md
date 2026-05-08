@@ -30,6 +30,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-017 | Implementar MLSShapeFunction::evaluate com PU e LR (DEC-0016, Fase C/MLS) | Claude | 2026-05-08 |
 | T-016 | Adicionar dependência da biblioteca Eigen ao CMake | Codex | 2026-05-08 |
 | T-015 | Confirmar sincronia e propor tarefa para adicionar Eigen | Gemini | 2026-05-08 |
 | T-014 | Revisão e conclusão de tarefas pendentes (T-004, T-008) | Gemini | 2026-05-08 |

@@ -117,3 +117,14 @@ add_test(
     NAME eigen_dependency
     COMMAND pidc_test_eigen_dependency
 )
+
+add_executable(pidc_test_mls_shape_function
+    tests/test_mls_shape_function.cpp
+)
+
+target_link_libraries(pidc_test_mls_shape_function PRIVATE pidc_core)
+
+add_test(
+    NAME mls_shape_function
+    COMMAND pidc_test_mls_shape_function
+)

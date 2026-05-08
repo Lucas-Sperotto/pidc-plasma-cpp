@@ -430,3 +430,40 @@ Alvos consumidores de `pidc_core` herdam os includes de Eigen sem configuração
 
 Impacto na validação:
 O teste `eigen_dependency` confirma que um consumidor de `pidc_core` consegue incluir `<Eigen/Dense>` e executar uma solução linear pequena.
+
+---
+
+## DEC-0016 — Interface de MLSShapeFunction: função livre `mls_evaluate`
+
+Status: aceita
+
+Data: 2026-05-08
+Responsável: Claude (T-017)
+
+Contexto:
+Com WeightFunction, PolynomialBasis e Eigen disponíveis, é necessário definir a
+interface pública da avaliação MLS antes de implementar a montagem EFG.
+
+Decisão:
+Implementar como função livre header-only
+`pidc::mls_evaluate(Vec2 x, const NodeCloud& cloud, double support_radius) -> ShapeFunctionData`
+em `include/pidc/mls/MLSShapeFunction.hpp`.
+
+Justificativa:
+
+- Função livre evita estado interno desnecessário neste estágio.
+- Retornar `ShapeFunctionData` respeita o contrato DEC-0009.
+- `PartialPivLU` (3×3) é reusada para os três RHS (c, dc_dx, dc_dy),
+  minimizando fatorações de matriz.
+- Busca linear sobre todos os nós é suficiente para validação inicial;
+  estrutura espacial é trabalho futuro.
+
+Impacto no código:
+`include/pidc/mls/MLSShapeFunction.hpp` criado.
+`tests/test_mls_shape_function.cpp` cobre partição da unidade, reprodução
+linear, gradientes e exceção com vizinhos insuficientes.
+
+Impacto na validação:
+Partição da unidade ($\sum\phi_i = 1$) e reprodução linear
+($\sum\phi_i\mathbf{x}_i = \mathbf{x}$) e seus gradientes validados com
+tolerância $10^{-10}$ em nuvem regular 5×5. 8/8 testes passando.
