@@ -1,65 +1,27 @@
-# OPEN_QUESTIONS — Perguntas abertas
+# OPEN_QUESTIONS — Questões em aberto
 
-## Q-001 — Qual sistema de unidades será adotado no código?
-
-Opções:
-
-1. SI;
-2. CGS/Gaussiano;
-3. sistema normalizado.
-
-Impacto:
-Afeta Poisson, constantes físicas, frequência e escala dos resultados.
+Este arquivo registra ambiguidades científicas, matemáticas ou de implementação que precisam ser resolvidas.
 
 ---
 
-## Q-002 — Como tratar Poisson com contorno periódico?
+## Q-0001 — Sistema de unidades para constantes físicas
 
-Opções:
+**Status:** aberto
 
-1. remover modo médio;
-2. fixar potencial médio zero;
-3. fixar um nó como gauge;
-4. usar solver especializado.
+**Contexto:** A equação de Poisson e as constantes físicas mudam de forma dependendo do sistema de unidades (e.g., SI vs. Gaussiano). A tese usa convenções que sugerem o sistema Gaussiano (`-4πρ`), enquanto código moderno geralmente prefere SI (`-ρ/ε₀`).
 
-Impacto:
-Afeta simulação de plasma com contorno periódico.
+**Questão:** Qual sistema de unidades será o padrão para a implementação do núcleo físico do simulador?
+
+**Proposta de Resolução:** Ver `DEC-0005`.
 
 ---
 
-## Q-003 — Qual função peso inicial?
+## Q-0002 — Gauge do potencial em contorno periódico
 
-Opções:
+**Status:** aberto
 
-1. Schwarz truncada singular/interpolante;
-2. spline cúbica compacta;
-3. função suave regular para depuração.
+**Contexto:** A equação de Poisson com condições de contorno periódicas tem uma solução para o potencial `u` que é definida a menos de uma constante. Para que o sistema linear `K u = b` tenha solução única, o potencial precisa ser "fixado" (gauge fixing).
 
-Impacto:
-Afeta Kronecker, Dirichlet, condicionamento e continuidade.
+**Questão:** Qual estratégia será usada para fixar o gauge do potencial? As opções comuns incluem: a) fixar o potencial em um nó (`u_k = 0`); b) exigir que a média do potencial seja nula (`sum(u_i) = 0`).
 
----
-
-## Q-004 — Começar com domínio de influência circular ou retangular?
-
-Opções:
-
-1. circular: mais natural fisicamente;
-2. retangular: busca mais simples e próxima da tese/publicação.
-
-Impacto:
-Afeta célula difusa, busca de vizinhança e desempenho.
-
----
-
-## Q-005 — Qual framework de testes?
-
-Opções:
-
-1. doctest;
-2. Catch2;
-3. testes simples com executáveis e asserts;
-4. GoogleTest.
-
-Impacto:
-Afeta dependências e facilidade de uso.
+**Proposta de Resolução:** Ver `DEC-0007`.
