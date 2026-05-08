@@ -18,6 +18,10 @@ inline ShapeFunctionData mls_evaluate(
     const NodeCloud& cloud,
     double support_radius)
 {
+    if (!(support_radius > 0.0) || !std::isfinite(support_radius)) {
+        throw std::invalid_argument{"mls_evaluate requires a positive finite support radius"};
+    }
+
     // pass 1: collect neighbours inside support
     std::vector<std::size_t> ids;
     std::vector<double>      w, dw_dx, dw_dy;

@@ -129,6 +129,17 @@ add_test(
     COMMAND pidc_test_mls_shape_function
 )
 
+add_executable(pidc_test_mls_robustness
+    tests/test_mls_robustness.cpp
+)
+
+target_link_libraries(pidc_test_mls_robustness PRIVATE pidc_core)
+
+add_test(
+    NAME mls_robustness
+    COMMAND pidc_test_mls_robustness
+)
+
 add_executable(pidc_test_regular_node_cloud
     tests/test_regular_node_cloud.cpp
 )
