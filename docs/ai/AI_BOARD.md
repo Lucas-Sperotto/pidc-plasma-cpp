@@ -24,7 +24,7 @@ Nenhuma tarefa em andamento no momento.
 | T-002 | Auditar equações mínimas e sinais | Gemini | proposta |
 | T-004 | Definir convenção de unidades | Professor + Gemini | proposta |
 | T-005 | Definir framework de testes | Codex + Claude | proposta |
-| T-006 | Implementar DEC-0008: remover applyPeriodic de Domain2D | Codex | proposta |
+| T-006 | Implementar DEC-0008: remover applyPeriodic de Domain2D | Codex | concluída |
 | T-007 | Implementar DEC-0009: criar ShapeFunctionData.hpp | Codex | proposta |
 | T-008 | Implementar DEC-0011: criar Species e refatorar Particle | Codex | proposta |
 | T-009 | Implementar DEC-0012: criar NodeCloud | Codex | proposta |
@@ -35,6 +35,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-006 | Implementar DEC-0008: remover applyPeriodic de Domain2D | Codex | 2026-05-08 |
 | T-003 | Revisar arquitetura e riscos | Claude | 2026-05-08 |
 | T-001 | Criar bootstrap CMake + smoke test | Codex | 2026-05-08 |
 | P-000 | Planejamento inicial do repositório | ChatGPT | 2026-05-08 |

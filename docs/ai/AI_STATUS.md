@@ -12,7 +12,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 |---|---|
 | core | bootstrap mínimo compilando |
 | particles | estruturas `Particle` e `Vec2` iniciais |
-| geometry | `Domain2D` inicial com contorno periódico |
+| geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; sem dependência de `Particle` |
 | mls | não iniciado |
 | efg | não iniciado |
 | pic | não iniciado |
@@ -34,4 +34,4 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 
 ## Último resumo
 
-Codex concluiu `T-001`: bootstrap CMake, estruturas básicas (`Vec2`, `Particle`, `Node`, `Domain2D`), app `pidc_smoke` e teste executável `pidc_test_periodic_boundary`. O comando `ctest` do PATH local falhou por apontar para um wrapper Python sem módulo `cmake`; `/usr/bin/ctest --test-dir build --output-on-failure` passou com 1/1 teste.
+Codex concluiu `T-006`: `Domain2D` agora é geometria pura e não inclui nem menciona `Particle`; chamadores usam `wrapPeriodic(Vec2)` diretamente. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram.
