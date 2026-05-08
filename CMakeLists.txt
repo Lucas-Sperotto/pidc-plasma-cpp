@@ -150,3 +150,14 @@ add_test(
     NAME regular_node_cloud
     COMMAND pidc_test_regular_node_cloud
 )
+
+add_executable(pidc_test_neighbor_search_grid
+    tests/test_neighbor_search_grid.cpp
+)
+
+target_link_libraries(pidc_test_neighbor_search_grid PRIVATE pidc_core)
+
+add_test(
+    NAME neighbor_search_grid
+    COMMAND pidc_test_neighbor_search_grid
+)
