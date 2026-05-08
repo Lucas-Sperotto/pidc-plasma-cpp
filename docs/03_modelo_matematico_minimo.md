@@ -36,17 +36,17 @@ Usando potencial escalar:
 \mathbf{E} = -\nabla u
 ```
 
+Conforme a decisão `DEC-0005`, o projeto adota o Sistema Internacional (SI) de unidades. A equação de Poisson para o potencial elétrico `u` em um meio com permissividade elétrica `ε` e densidade de carga volumétrica `ρ` é:
+
 ```math
 \nabla \cdot (\varepsilon \nabla u) = -\rho
 ```
 
-ou, no sistema de unidades adotado pela tese/publicação:
+Para o vácuo ou plasma pouco denso, onde `ε ≈ ε₀` (permissividade do vácuo), a equação se simplifica para:
 
 ```math
-\nabla \cdot (\varepsilon \nabla u) = -4\pi \rho
+\nabla^2 u = -\frac{\rho}{\varepsilon_0}
 ```
-
-A escolha de unidade deve ser explicitada no código.
 
 ## 4. Aproximação EFG/MLS
 
@@ -103,8 +103,7 @@ com:
 
 ## 8. Pontos de atenção
 
-- Definir claramente SI versus CGS/Gaussiano.
-- Evitar misturar `-rho`, `rho`, `4*pi*rho` sem documentação.
-- Registrar sinal da equação de Poisson.
-- Registrar como o potencial é fixado em contorno periódico.
-- Para Poisson periódico, remover modo médio ou fixar gauge.
+- **Unidades e Sinais**: A convenção de unidades (SI) e o sinal da equação de Poisson foram definidos em `DEC-0005`. A implementação deve ser consistente com `∇²u = -ρ/ε₀`.
+- **Contorno Periódico**: A estratégia para o problema de Poisson com condições de contorno periódicas foi definida em `DEC-0007`. A implementação inicial focará em condições de Dirichlet, adiando a complexidade do caso periódico.
+- **Conservação de Carga**: A formulação da deposição de carga (`Q_i = Σ_p φ_i(x_p) q_p`) e a propriedade de partição da unidade (`Σ_i φ_i(x) = 1`) garantem a conservação de carga global (`Σ_p q_p = Σ_i Q_i`). Testes devem validar essa propriedade numericamente.
+- **Interpolação de Campo**: O campo elétrico sobre uma partícula `p` deve ser calculado usando os mesmos nós e funções de forma da sua "célula difusa" usada na deposição de carga, para garantir a conservação de momento (ausência de auto-força).

@@ -86,7 +86,7 @@ Poisson MMS deve testar a convenção escolhida.
 
 ## DEC-0005 — Adoção do Sistema Internacional (SI) de unidades
 
-Status: proposta
+Status: aceita
 
 Contexto:
 A ambiguidade no fator `4π` da equação de Poisson (`∇²u = -ρ/ε₀` vs. `∇²u = -4πρ`) precisa ser resolvida. Esta é a questão `Q-0001`.
@@ -152,7 +152,7 @@ O teste MMS com Dirichlet valida `K` e `b`. Um novo teste será necessário para
 
 ## DEC-0008 — Remover `applyPeriodic(Particle&)` de `Domain2D`
 
-Status: proposta
+Status: aceita
 Proposta por: Claude — 2026-05-08
 
 Contexto:
@@ -348,8 +348,7 @@ Testes de MLS e EFG devem criar um `NodeCloud` explícito — isso é bom para l
 
 ## DEC-0013 — Função peso compacta: spline quártica
 
-Status: proposta (hipótese — aguarda confirmação na tese de Marques)
-Proposta por: Claude — 2026-05-08
+Status: aceita
 
 Contexto:
 O MLS requer uma função peso compacta $w(r) \geq 0$ definida no raio normalizado

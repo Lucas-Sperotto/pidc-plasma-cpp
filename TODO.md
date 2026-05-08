@@ -52,9 +52,10 @@ Criar as estruturas mínimas para nós, partículas, domínio e busca de vizinha
 
 - [x] `Vec2`
 - [x] `Particle`
-- [ ] `Species`
+- [x] `Species`
 - [x] `Node`
 - [x] `Domain2D`
+- [x] `NodeCloud`
 - [ ] `PeriodicBoundary2D`
 - [ ] `RegularNodeCloud2D`
 - [ ] `NeighborSearchGrid`
@@ -76,8 +77,8 @@ Implementar funções de forma e gradientes.
 
 ### Tarefas
 
-- [ ] Implementar base linear 2D: `p(x,y) = [1, x, y]`.
-- [ ] Implementar função peso compacta.
+- [x] Implementar base linear 2D: `p(x,y) = [1, x, y]`.
+- [x] Implementar função peso compacta.
 - [ ] Implementar domínios circulares e retangulares.
 - [ ] Implementar cálculo de `phi_i(x)`.
 - [ ] Implementar cálculo de `grad(phi_i)(x)`.
