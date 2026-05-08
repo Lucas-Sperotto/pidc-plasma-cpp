@@ -172,3 +172,14 @@ add_test(
     NAME periodic_boundary2d
     COMMAND pidc_test_periodic_boundary2d
 )
+
+add_executable(pidc_test_gauss_cell2d
+    tests/test_gauss_cell2d.cpp
+)
+
+target_link_libraries(pidc_test_gauss_cell2d PRIVATE pidc_core)
+
+add_test(
+    NAME gauss_cell2d
+    COMMAND pidc_test_gauss_cell2d
+)
