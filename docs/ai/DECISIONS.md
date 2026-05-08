@@ -304,8 +304,9 @@ O teste de contorno periódico não usa `charge`/`mass` — impacto mínimo.
 
 ## DEC-0012 — `NodeCloud` como proprietário canônico da lista de nós
 
-Status: proposta
+Status: aceita
 Proposta por: Claude — 2026-05-08
+Implementada por: Codex — 2026-05-08
 
 Contexto:
 `EFGPoissonSolver`, `MLSShapeFunction`, `PIDCChargeDepositor` e `PIDCFieldInterpolator` todos precisam da lista de nós (R-008). Sem uma entidade proprietária clara, surgem cópias ou ponteiros com tempo de vida ambíguo.
