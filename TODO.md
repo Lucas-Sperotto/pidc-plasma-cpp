@@ -23,7 +23,7 @@ Criar um repositório limpo, compilável e preparado para desenvolvimento increm
 
 - [x] Criar `CMakeLists.txt` funcional.
 - [x] Definir padrão C++17.
-- [ ] Adicionar dependência Eigen.
+- [x] Adicionar dependência Eigen.
 - [ ] Adicionar opção futura para `nlohmann_json`.
 - [x] Criar diretórios `include/pidc`, `src`, `apps`, `tests`, `configs`, `scripts`.
 - [ ] Criar script `scripts/build.sh`.

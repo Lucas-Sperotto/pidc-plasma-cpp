@@ -17,7 +17,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | efg | não iniciado |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | não iniciado |
+| validation | CTest com 7 testes; Eigen validado via alvo consumidor de `pidc_core` |
 | scripts | não iniciado |
 
 ## Testes
@@ -31,6 +31,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | species | passou em 2026-05-08 |
 | weight_function | passou em 2026-05-08 |
 | polynomial_basis | passou em 2026-05-08 |
+| eigen_dependency | passou em 2026-05-08 |
 | partition unity | não iniciado |
 | linear reproduction | não iniciado |
 | charge conservation | não iniciado |
@@ -38,6 +39,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Codex concluiu T-016: Eigen foi adicionada ao CMake com `find_package(Eigen3 3.3 REQUIRED NO_MODULE)` e propagada por `pidc_core` via `Eigen3::Eigen`. O teste `eigen_dependency` foi registrado no CTest e passou. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `./build/pidc_test_eigen_dependency`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 7/7 testes.
+
+---
+
+### Histórico anterior
 
 Gemini concluiu T-015: Confirmação de que o repositório está sincronizado com as tarefas T-002, T-013 e T-014. Como próximo passo, foi proposta a tarefa T-016 para o Codex: adicionar a dependência da biblioteca Eigen via CMake, um pré-requisito para a Fase C (MLS/EFG).
 

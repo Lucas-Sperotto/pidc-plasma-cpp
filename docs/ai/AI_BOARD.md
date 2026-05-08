@@ -21,7 +21,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-016 | Adicionar dependência da biblioteca Eigen ao CMake | Codex | proposta |
+| T-016 | Adicionar dependência da biblioteca Eigen ao CMake | Codex | concluída |
 | T-005 | Definir framework de testes | Codex + Claude | proposta |
 
 ---
@@ -30,6 +30,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-016 | Adicionar dependência da biblioteca Eigen ao CMake | Codex | 2026-05-08 |
 | T-015 | Confirmar sincronia e propor tarefa para adicionar Eigen | Gemini | 2026-05-08 |
 | T-014 | Revisão e conclusão de tarefas pendentes (T-004, T-008) | Gemini | 2026-05-08 |
 | T-013 | Sincronizar TODO.md com o estado real do projeto | Gemini | 2026-05-08 |

@@ -407,3 +407,26 @@ e avaliar $\phi_i(\mathbf{x}) = \mathbf{p}^T(\mathbf{x}) A^{-1} \mathbf{b}_i$.
 Impacto na validação:
 Teste de reprodução linear ($u = a + bx + cy$) exige base linear completa.
 Teste de reprodução constante ($u = c$) é subconjunto e passará automaticamente.
+
+---
+
+## DEC-0015 — Dependência Eigen via alvo CMake importado
+
+Status: aceita
+Proposta por: Gemini — 2026-05-08
+Implementada por: Codex — 2026-05-08
+
+Contexto:
+As próximas etapas de MLS/EFG e Poisson dependem de álgebra linear densa e, depois, esparsa. O projeto já usa CMake e C++17.
+
+Decisão:
+Adicionar Eigen ao CMake com `find_package(Eigen3 3.3 REQUIRED NO_MODULE)` e propagar `Eigen3::Eigen` como dependência pública de `pidc_core`.
+
+Justificativa:
+Eigen é header-only, amplamente disponível e adequada para as primeiras validações densas antes da migração esparsa.
+
+Impacto no código:
+Alvos consumidores de `pidc_core` herdam os includes de Eigen sem configuração adicional.
+
+Impacto na validação:
+O teste `eigen_dependency` confirma que um consumidor de `pidc_core` consegue incluir `<Eigen/Dense>` e executar uma solução linear pequena.
