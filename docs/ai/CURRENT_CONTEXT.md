@@ -19,7 +19,16 @@ Implementar e validar o PIDC de forma incremental:
 
 ## Estado atual
 
-**Fase C (MLS) concluída:**
+**Fase B geométrica mínima concluída:**
+
+- `Vec2`, `Particle`, `Species`, `Node` e `Domain2D` existem.
+- `Domain2D` permanece geometria pura; contorno periódico básico via `wrapPeriodic(Vec2)`.
+- `NodeCloud` é o proprietário canônico dos nós.
+- `RegularNodeCloud2D` cria nuvens regulares determinísticas.
+- `NeighborSearchGrid` faz busca não periódica por raio e retorna IDs ordenados.
+- `PeriodicBoundary2D` fornece `wrap(Vec2)` e `minimum_image(Vec2)`.
+
+**Fase C (MLS) concluída para a base linear inicial:**
 
 - `WeightFunction` quártica implementada e testada.
 - `PolynomialBasis` linear 2D implementada e testada.
@@ -27,31 +36,30 @@ Implementar e validar o PIDC de forma incremental:
   - Partição da unidade validada: $\sum\phi_i(\mathbf{x}) = 1$.
   - Reprodução linear validada: $\sum\phi_i(\mathbf{x})\,\mathbf{x}_i = \mathbf{x}$.
   - Gradientes de PU e LR validados com tolerância $10^{-10}$.
-- CTest: **8/8 testes passando**.
+  - Raio de suporte inválido rejeitado por `std::invalid_argument`.
+  - Ausência de `NaN`/`Inf` e condicionamento de $A$ testados em `mls_robustness`.
+- CTest: **12/12 testes passando**.
 
 **Infra:**
 
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
-
-**Pendente (Fase B):**
-
-- `RegularNodeCloud2D` (T-018, Codex).
-- `NeighborSearchGrid` (antes de simulação em escala).
+- `scripts/build.sh` e `scripts/run_tests.sh` existem.
 
 ## Próximos passos
 
 | Tarefa | Responsável | Prioridade |
 | --- | --- | --- |
-| T-018 | Implementar `RegularNodeCloud2D` | Codex |
-| T-020 | Auditar matematicamente `MLSShapeFunction` e gradientes | Gemini |
+| T-023 | Definir semântica de `Node::volume`; aceitar/rejeitar DEC-0019 | Professor + Gemini |
+| T-028 | Revisar `docs/validation/VALIDATION_PLAN.md` contra a tese | Gemini |
+| T-029 | Revisar contratos `NeighborSearchGrid` + `PeriodicBoundary2D` antes de acoplamento | Claude + Gemini |
 | T-Poisson | Implementar assembler EFG Poisson (MMS) | Codex |
 
 **Bloqueios antes de T-Poisson:**
 
-- DEC-0018 (proposta): estratégia de quadratura — células retangulares Gauss 2×2.
-- R-009: semântica de `Node::volume` precisa de decisão.
-- R-010: raio de suporte precisa ser centralizado.
+- DEC-0018 está aceita: estratégia de quadratura — células retangulares Gauss 2×2.
+- R-009/DEC-0019: semântica de `Node::volume` ainda precisa de decisão.
+- R-010: raio de suporte ainda precisa ser centralizado antes de usos extensos.
 
 ## Decisões-chave vigentes
 
@@ -66,7 +74,10 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0015 | Eigen via `find_package(Eigen3 3.3 REQUIRED)` | aceita |
 | DEC-0016 | `mls_evaluate` como função livre, retorna `ShapeFunctionData` | aceita |
 | DEC-0017 | Framework de testes: CTest + `test_utils.hpp` | aceita |
-| DEC-0018 | Quadratura EFG: células retangulares Gauss 2×2 | proposta |
+| DEC-0018 | Quadratura EFG: células retangulares Gauss 2×2 | aceita |
+| DEC-0019 | Semântica de `Node::volume` | proposta |
+| DEC-0020 | `NeighborSearchGrid` v1 não periódico | aceita |
+| DEC-0021 | `PeriodicBoundary2D` como helper geométrico | aceita |
 
 ## Regras críticas
 

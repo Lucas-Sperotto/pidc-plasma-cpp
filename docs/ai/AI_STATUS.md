@@ -12,12 +12,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | --- | --- |
 | core | bootstrap mínimo compilando |
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
-| geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` e `RegularNodeCloud2D` criados |
-| mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados) |
+| geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud`, `RegularNodeCloud2D`, `NeighborSearchGrid` e `PeriodicBoundary2D` criados |
+| mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados, guarda de raio de suporte e robustez finita testadas) |
 | efg | não iniciado (T-Poisson proposta, DEC-0018 aceita) |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | CTest com 9 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado |
+| validation | CTest com 12 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado; robustez MLS, busca de vizinhança e fronteira periódica testadas |
 | scripts | `scripts/build.sh` e `scripts/run_tests.sh` criados |
 
 ## Testes
@@ -34,6 +34,9 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | eigen_dependency | passou em 2026-05-08 |
 | mls_shape_function | passou em 2026-05-08 |
 | regular_node_cloud | passou em 2026-05-08 |
+| mls_robustness | passou em 2026-05-08 |
+| neighbor_search_grid | passou em 2026-05-08 |
+| periodic_boundary2d | passou em 2026-05-08 |
 | partition unity | passou em 2026-05-08 (coberto por mls_shape_function) |
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation | não iniciado |
@@ -41,6 +44,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Codex concluiu T-024, T-025 e T-026 (2026-05-08). T-024 adicionou guarda explícita em `mls_evaluate` para raio de suporte positivo e finito, além do teste `mls_robustness` para ausência de NaN/Inf e condicionamento da matriz MLS. T-025 criou `NeighborSearchGrid` não periódico, com resultados ordenados e teste contra busca bruta. T-026 criou `PeriodicBoundary2D` com `wrap` e `minimum_image`, sem acoplar partículas, MLS ou PIDC. A Fase B geométrica mínima está completa para a próxima validação. CTest passou com 12/12 testes.
+
+---
+
+### Histórico anterior
 
 Claude concluiu auditoria das Fases 0/A/B/C (2026-05-08). Resultados: (1) scripts/build.sh e run_tests.sh criados — Fase A completa; (2) DEC-0018 aceita — T-Poisson desbloqueada para Codex; (3) DEC-0019 proposta sobre semântica de Node::volume — aguarda decisão de Professor/Gemini (T-023); (4) docs/validation/VALIDATION_PLAN.md criado com tolerâncias quantitativas para Fases C e D; (5) Tarefas T-025 (NeighborSearchGrid), T-026 (PeriodicBoundary2D), T-028 (revisar VALIDATION_PLAN) e T-Poisson formalizadas no AI_BOARD. Fase B permanece incompleta (NeighborSearchGrid e PeriodicBoundary2D ausentes). 9/9 testes passando.
 

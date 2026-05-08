@@ -56,16 +56,16 @@ Criar as estruturas mínimas para nós, partículas, domínio e busca de vizinha
 - [x] `Node`
 - [x] `Domain2D`
 - [x] `NodeCloud`
-- [ ] `PeriodicBoundary2D`
+- [x] `PeriodicBoundary2D`
 - [x] `RegularNodeCloud2D`
-- [ ] `NeighborSearchGrid`
+- [x] `NeighborSearchGrid`
 
 ### Critérios de aceite
 
 - [x] Uma partícula que sai pela direita deve reaparecer pela esquerda.
 - [x] Uma partícula que sai pelo topo deve reaparecer pela base.
-- [ ] A busca de vizinhança deve retornar todos os nós cujo domínio de influência contém o ponto de avaliação.
-- [ ] Nenhum teste deve depender de ordem aleatória.
+- [x] A busca de vizinhança deve retornar todos os nós cujo domínio de influência contém o ponto de avaliação.
+- [x] Nenhum teste deve depender de ordem aleatória.
 
 ---
 
@@ -83,7 +83,7 @@ Implementar funções de forma e gradientes.
 - [x] Implementar cálculo de `phi_i(x)` — `mls_evaluate` em MLSShapeFunction.hpp (T-017).
 - [x] Implementar cálculo de `grad(phi_i)(x)` — diferenciação implícita em mls_evaluate (T-017).
 - [x] Monitorar cardinalidade local `n >= m` — lança `std::runtime_error` se n < 3 (T-017).
-- [ ] Monitorar condicionamento da matriz MLS — verificado indiretamente (LR passa com tol 1e-10); teste explícito proposto em T-024 (Codex).
+- [x] Monitorar condicionamento da matriz MLS — teste explícito em `mls_robustness` (T-024).
 
 ### Testes obrigatórios
 
@@ -91,7 +91,7 @@ Implementar funções de forma e gradientes.
 - [x] Reprodução constante: `u(x,y)=c` — coberta por partição da unidade (T-017).
 - [x] Reprodução linear: `u(x,y)=a+bx+cy` — test_mls_shape_function (T-017).
 - [x] Gradiente de função linear: `grad(u) = [b, c]` — gradientes de LR em test_mls_shape_function (T-017).
-- [ ] Nenhum `NaN` ou `Inf` — não há teste explícito; garantido indiretamente pela LR passando.
+- [x] Nenhum `NaN` ou `Inf` — teste explícito em `mls_robustness` (T-024).
 - [x] Falha controlada se `n < m` — lança runtime_error com < 3 vizinhos (T-017).
 
 ### Critério de aceite

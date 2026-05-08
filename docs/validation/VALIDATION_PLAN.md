@@ -37,21 +37,26 @@ incluindo pelo menos 3 pontos assimétricos (i.e., $x \neq y$ e $x,y \notin \{0,
 
 O número de condição de $A$ (razão entre maior e menor valor singular) deve
 ser $< 10^8$ para que a solução do sistema linear seja numericamente estável.
-Atualmente verificado indiretamente pelos testes de LR (se $A$ fosse mal
-condicionada, LR falha). Um teste explícito de condicionamento é proposto em
-T-024 (Codex).
+Além dos testes de LR, `tests/test_mls_robustness.cpp` verifica explicitamente
+esse limite nos pontos de consulta de referência (T-024).
 
 ### Robustez
 
+- `mls_evaluate` deve lançar `std::invalid_argument` se o raio de suporte não
+  for positivo e finito.
 - `mls_evaluate` deve lançar `std::runtime_error` se $n < m = 3$.
 - Nenhum `NaN` ou `Inf` deve aparecer nos vetores `phi` ou `grad_phi`
   para qualquer ponto de consulta com $n \geq 3$ vizinhos em posição geral.
 
 ### Implementação de referência
 
-`tests/test_mls_shape_function.cpp` — cobre todos os critérios acima com
+`tests/test_mls_shape_function.cpp` — cobre PU, LR e gradientes com
 4 pontos de consulta: `{0.5,0.5}`, `{0.3,0.7}`, `{0.6,0.4}`, `{0.37,0.61}`.
-Tolerância: $10^{-10}$. 9/9 testes passando em 2026-05-08.
+Tolerância: $10^{-10}$.
+
+`tests/test_mls_robustness.cpp` — cobre ausência de NaN/Inf, condicionamento
+explícito de $A$ e falha controlada para raio de suporte inválido. 12/12 testes
+passando em 2026-05-08.
 
 ---
 

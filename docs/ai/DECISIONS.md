@@ -574,3 +574,82 @@ Nenhum impacto nos testes existentes. Clarifica contrato de `Node` antes
 de T-Poisson.
 
 Responsável pela decisão: Professor + Gemini (T-023).
+
+---
+
+## DEC-0020 — `NeighborSearchGrid` v1 não periódico
+
+Status: aceita
+Proposta por: Codex — 2026-05-08
+Implementada por: Codex — 2026-05-08 (T-025)
+
+Contexto:
+A avaliação MLS atual ainda faz busca linear sobre todos os nós. Antes de
+integrar uma otimização ao MLS/EFG/PIDC, é necessário validar uma estrutura
+espacial pequena e determinística para a Fase B.
+
+Decisão:
+Criar `NeighborSearchGrid` em `include/pidc/geometry/NeighborSearchGrid.hpp`
+como grade 2D não periódica. A API inicial é:
+
+```cpp
+NeighborSearchGrid(const NodeCloud& cloud, const Domain2D& domain, double cell_size);
+std::vector<std::size_t> query_radius(Vec2 point, double radius) const;
+```
+
+O construtor valida `cell_size` positivo e finito. `query_radius` valida raio
+não negativo e finito. A resposta é filtrada por distância euclidiana exata e
+ordenada por índice global de nó.
+
+Justificativa:
+A busca por grade reduz custo assintótico em etapas futuras, mas a versão v1
+permanece isolada e testável. A ordenação evita dependência de ordem aleatória
+nos testes e consumidores.
+
+Impacto no código:
+`NeighborSearchGrid` guarda ponteiro para `NodeCloud`; portanto, a nuvem deve
+viver mais que a grade. Nós na borda superior do domínio são aceitos e
+indexados por clamp na última célula. A estrutura ainda não é usada por
+`mls_evaluate`.
+
+Impacto na validação:
+`tests/test_neighbor_search_grid.cpp` compara a busca da grade contra busca
+bruta em pontos internos, de borda e externos. Também valida entradas inválidas.
+
+---
+
+## DEC-0021 — `PeriodicBoundary2D` como helper geométrico
+
+Status: aceita
+Proposta por: Codex — 2026-05-08
+Implementada por: Codex — 2026-05-08 (T-026)
+
+Contexto:
+`Domain2D` já sabe embrulhar posições periódicas, mas a menor imagem periódica
+será necessária para distâncias e deslocamentos sem acoplar geometria a
+partículas, MLS ou PIDC.
+
+Decisão:
+Criar `PeriodicBoundary2D` em `include/pidc/geometry/PeriodicBoundary2D.hpp`
+como helper geométrico separado. A API inicial é:
+
+```cpp
+explicit PeriodicBoundary2D(Domain2D domain);
+Vec2 wrap(Vec2 point) const noexcept;
+Vec2 minimum_image(Vec2 displacement) const noexcept;
+```
+
+`wrap` delega para `Domain2D::wrapPeriodic`. `minimum_image` reduz cada
+componente para a menor imagem e preserva empates exatos em `+/-L/2`.
+
+Justificativa:
+Mantém `Domain2D` simples e evita reacoplar a geometria a `Particle`. A menor
+imagem fica disponível para futura busca periódica e cálculo de distâncias.
+
+Impacto no código:
+Nenhum consumidor existente foi alterado. `NeighborSearchGrid` continua não
+periódico nesta versão.
+
+Impacto na validação:
+`tests/test_periodic_boundary2d.cpp` cobre múltiplas voltas, deslocamentos
+positivos/negativos e empates de meia-caixa.
