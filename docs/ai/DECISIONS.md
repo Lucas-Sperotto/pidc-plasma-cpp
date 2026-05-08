@@ -653,3 +653,42 @@ periódico nesta versão.
 Impacto na validação:
 `tests/test_periodic_boundary2d.cpp` cobre múltiplas voltas, deslocamentos
 positivos/negativos e empates de meia-caixa.
+
+---
+
+## DEC-0022 — Estratégia para MLS e busca periódica (Fase F)
+
+Status: proposta
+Proposta por: Claude — 2026-05-08 (T-029)
+
+Contexto:
+R-015 e R-016. `mls_evaluate` e `NeighborSearchGrid::query_radius` são não
+periódicos. Para Phase D (Poisson Dirichlet) isso é correto. Para Phase F
+(PIDC periódico), ambos precisam de variantes periódicas.
+
+Decisão proposta:
+Não modificar as interfaces atuais (não-periódicas). Em vez disso, antes de
+Phase F, adicionar:
+
+1. Sobrecarga `mls_evaluate_periodic(Vec2 x, const NodeCloud& cloud,
+   double support_radius, const PeriodicBoundary2D& boundary)` em
+   `MLSShapeFunction.hpp`. Usa `boundary.minimum_image(x - xi)` em vez de
+   `x - xi` para calcular `dx`, `dy` e `dist`. Passa distância periódica
+   para `weight_quartic`.
+
+2. Método `query_radius_periodic(Vec2 point, double radius,
+   const PeriodicBoundary2D& boundary) const` em `NeighborSearchGrid`.
+   Replica o ponto nas até 9 imagens periódicas e une os resultados.
+
+Justificativa:
+Manter a versão não-periódica preserva a implementação validada para Phase D.
+A sobrecarga periódica será criada e testada independentemente, reduzindo risco
+de regressão.
+
+Impacto no código:
+Afeta `include/pidc/mls/MLSShapeFunction.hpp` e
+`include/pidc/geometry/NeighborSearchGrid.hpp` apenas em Phase F.
+
+Impacto na validação:
+A variante periódica deve passar nos mesmos testes de PU e LR que a versão
+não-periódica, com pontos de consulta próximos às fronteiras.

@@ -167,3 +167,69 @@ os testes assimétricos são discriminativos. **T-Poisson desbloqueada.**
 Lição: o teste original era frágil por não verificar gradientes em pontos
 assimétricos. Isso foi corrigido em T-021 — o teste agora cobre 4 pontos de
 consulta com todas as 9 propriedades de gradiente.
+
+---
+
+## R-014 — `NeighborSearchGrid` armazena ponteiro bruto para `NodeCloud`
+
+Registrado por: Claude — 2026-05-08 (T-029)
+
+`NeighborSearchGrid` guarda `const NodeCloud* cloud_` como ponteiro bruto.
+Se a `NodeCloud` for destruída antes do grid (ex.: grid em escopo mais longo,
+cloud recriada após refinamento), o comportamento é indefinido — sem qualquer
+diagnóstico em tempo de execução.
+
+No EFG assembler (T-Poisson), `EFGPoissonSolver`, `NeighborSearchGrid` e
+`NodeCloud` coexistirão: o chamador deve garantir que a cloud sobrevive ao grid.
+
+Mitigação:
+Documentar explicitamente o contrato de lifetime em `NeighborSearchGrid.hpp`.
+Em fase posterior (se a cloud puder mudar), considerar `std::shared_ptr<const NodeCloud>`
+ou passar a cloud por referência em cada `query_radius` em vez de armazená-la.
+Para Phase D (nuvem estática), o contrato por ponteiro é aceitável se documentado.
+
+Arquivo afetado: `include/pidc/geometry/NeighborSearchGrid.hpp`.
+
+---
+
+## R-015 — `mls_evaluate` usa distância euclidiana simples (não periódica)
+
+Registrado por: Claude — 2026-05-08 (T-029)
+
+`mls_evaluate` calcula `dx = x.x - xi.x`, `dy = x.y - xi.y` e `dist = sqrt(dx²+dy²)`
+diretamente. Em domínio periódico, um ponto de consulta perto de x=0 deveria
+"ver" nós perto de x=L como vizinhos próximos — o que não acontece com distância
+euclidiana simples.
+
+Para Phase D (EFG Poisson com BC Dirichlet em [0,1]²): **não é bloqueante** —
+nenhuma periodicidade é usada no solver.
+
+Para Phase F (PIDC com partículas e domínio periódico): **bloqueante** — partículas
+perto de uma fronteira usarão funções de forma incorretas se `mls_evaluate` não
+usar `minimum_image`.
+
+Mitigação:
+Antes de Phase F, criar sobrecarga `mls_evaluate_periodic(Vec2, const NodeCloud&,
+double, const PeriodicBoundary2D&)` que substitui `dx/dy` por
+`boundary.minimum_image(x - xi)`. Ver DEC-0022 proposta.
+
+Arquivos afetados: `include/pidc/mls/MLSShapeFunction.hpp` (futuro).
+
+---
+
+## R-016 — `NeighborSearchGrid::query_radius` não é periódico
+
+Registrado por: Claude — 2026-05-08 (T-029)
+
+`query_radius` não procura vizinhos além das fronteiras periódicas. Um ponto de
+consulta em x=0.05 com suporte h=0.3 em domínio [0,1] não encontrará nós em
+x=0.75–1.0, embora a distância mínima periódica seja < h.
+
+Para Phase D (EFG Poisson Dirichlet): **não é bloqueante**.
+Para Phase F (PIDC periódico): **bloqueante** — busca de vizinhança produzirá
+conjunto incompleto de vizinhos para partículas perto de fronteiras.
+
+Mitigação:
+Antes de Phase F, criar `NeighborSearchGrid::query_radius_periodic(Vec2, double,
+const PeriodicBoundary2D&)` que replica o ponto de consulta nas 8 imagens
+periódicas vizinhas e une os resultados (removendo duplicatas). DEC-0022 proposta.

@@ -45,6 +45,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 
 ## Último resumo
 
+Claude concluiu T-029 (2026-05-08): revisão dos contratos de `NeighborSearchGrid` e `PeriodicBoundary2D`. Implementações estão corretas para Phase D (não-periódica). Registrados R-014 (ponteiro bruto para NodeCloud), R-015 (mls_evaluate não periódico, bloqueante para Phase F) e R-016 (query_radius não periódico, bloqueante para Phase F). Proposta DEC-0022 (estratégia de sobrecargas periódicas para Phase F). T-Poisson permanece desbloqueada para Phase D. T-030 proposta para Gemini confirmar os riscos antes de T-Poisson.
+
+---
+
+### Histórico anterior
+
 Codex concluiu T-024, T-025 e T-026 (2026-05-08). T-024 adicionou guarda explícita em `mls_evaluate` para raio de suporte positivo e finito, além do teste `mls_robustness` para ausência de NaN/Inf e condicionamento da matriz MLS. T-025 criou `NeighborSearchGrid` não periódico, com resultados ordenados e teste contra busca bruta. T-026 criou `PeriodicBoundary2D` com `wrap` e `minimum_image`, sem acoplar partículas, MLS ou PIDC. A Fase B geométrica mínima está completa para a próxima validação. CTest passou com 12/12 testes.
 
 ---

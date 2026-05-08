@@ -23,7 +23,7 @@ Nenhuma tarefa em andamento no momento.
 | --- | --- | --- | --- |
 | T-023 | Definir semântica de `Node::volume`; aceitar ou rejeitar DEC-0019 | Professor + Gemini | proposta |
 | T-028 | Revisar `docs/validation/VALIDATION_PLAN.md` contra a tese; aceitar ou ajustar tolerâncias | Gemini | proposta |
-| T-029 | Revisar contratos `NeighborSearchGrid` + `PeriodicBoundary2D` antes de acoplá-los a MLS/PIDC | Claude + Gemini | proposta |
+| T-030 | Confirmar que R-014/R-015/R-016 e DEC-0022 são corretos antes de T-Poisson | Gemini | proposta |
 | T-Poisson | Implementar assembler EFG Poisson (GaussCell2D + Gauss 2×2); teste MMS — DEC-0018 aceita | Codex | proposta |
 
 ---
@@ -32,6 +32,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-029 | Revisar contratos `NeighborSearchGrid` + `PeriodicBoundary2D`; registrar R-014/015/016, DEC-0022 | Claude | 2026-05-08 |
 | T-026 | Implementar `PeriodicBoundary2D` com `wrap` e `minimum_image` (Fase B) | Codex | 2026-05-08 |
 | T-025 | Implementar `NeighborSearchGrid` — grade 2D para busca de vizinhos (Fase B) | Codex | 2026-05-08 |
 | T-024 | Implementar teste explícito de ausência de NaN/Inf e condicionamento em `mls_evaluate` | Codex | 2026-05-08 |
