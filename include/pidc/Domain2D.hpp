@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pidc/Particle.hpp"
 #include "pidc/Vec2.hpp"
 
 namespace pidc {
@@ -17,7 +16,6 @@ public:
 
     bool contains(Vec2 point) const noexcept;
     Vec2 wrapPeriodic(Vec2 point) const noexcept;
-    void applyPeriodic(Particle& particle) const noexcept;
 
 private:
     Vec2 lower_{};

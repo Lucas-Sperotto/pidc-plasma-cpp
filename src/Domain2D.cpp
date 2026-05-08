@@ -45,11 +45,6 @@ Vec2 Domain2D::wrapPeriodic(Vec2 point) const noexcept
     };
 }
 
-void Domain2D::applyPeriodic(Particle& particle) const noexcept
-{
-    particle.position = wrapPeriodic(particle.position);
-}
-
 double Domain2D::wrapValue(double value, double lower, double upper) noexcept
 {
     const double length = upper - lower;
