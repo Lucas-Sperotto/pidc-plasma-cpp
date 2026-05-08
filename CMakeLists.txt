@@ -77,3 +77,14 @@ add_test(
     NAME node_cloud
     COMMAND pidc_test_node_cloud
 )
+
+add_executable(pidc_test_weight_function
+    tests/test_weight_function.cpp
+)
+
+target_link_libraries(pidc_test_weight_function PRIVATE pidc_core)
+
+add_test(
+    NAME weight_function
+    COMMAND pidc_test_weight_function
+)
