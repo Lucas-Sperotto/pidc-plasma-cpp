@@ -13,7 +13,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | core | bootstrap mínimo compilando |
 | particles | estruturas `Particle` e `Vec2` iniciais |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; sem dependência de `Particle` |
-| mls | não iniciado |
+| mls | `ShapeFunctionData` (contrato de interface) criada; sem implementação de cálculo |
 | efg | não iniciado |
 | pic | não iniciado |
 | pidc | não iniciado |
@@ -26,6 +26,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 |---|---|
 | smoke build | passou em 2026-05-08 |
 | periodic boundary | passou em 2026-05-08 |
+| shape_function_data | passou em 2026-05-08 |
 | partition unity | não iniciado |
 | linear reproduction | não iniciado |
 | charge conservation | não iniciado |
@@ -34,4 +35,4 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 
 ## Último resumo
 
-Codex concluiu `T-006`: `Domain2D` agora é geometria pura e não inclui nem menciona `Particle`; chamadores usam `wrapPeriodic(Vec2)` diretamente. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram.
+Claude concluiu `T-007` (DEC-0009): `ShapeFunctionData` criada em `include/pidc/ShapeFunctionData.hpp` como contrato entre MLS, EFG e PIDC. Struct header-only com `neighbor_ids`, `phi`, `grad_phi` e função livre `is_valid()`. Teste `shape_function_data` registrado no CTest e passando. 2/2 testes passando.

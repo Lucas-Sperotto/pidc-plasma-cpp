@@ -181,8 +181,9 @@ O teste existente de contorno periódico deve ser adaptado e continuar passando.
 
 ## DEC-0009 — Definir `ShapeFunctionData` como contrato entre MLS, EFG e PIDC
 
-Status: proposta
+Status: aceita
 Proposta por: Claude — 2026-05-08
+Implementada por: Claude — 2026-05-08
 
 Contexto:
 O módulo MLS produz $\phi_i(\mathbf{x})$ e $\nabla\phi_i(\mathbf{x})$ para um ponto $\mathbf{x}$. Esse resultado é consumido por EFG (montagem de `K` e `b`) e por PIDC (deposição de carga e interpolação de campo). Sem struct definida, os módulos terão representações incompatíveis (R-005).
