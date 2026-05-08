@@ -7,9 +7,9 @@ Este arquivo é o mapa mestre de pendências do repositório.
 - [x] Planejamento conceitual do repositório.
 - [x] Separação das fases: EFG/MLS, Poisson, PIC, PIDC e reprodução da tese.
 - [x] Criação do protocolo de cooperação entre Gemini, Codex e Claude.
-- [ ] Implementação do esqueleto CMake real.
+- [x] Implementação do esqueleto CMake real.
 - [ ] Implementação do núcleo matemático.
-- [ ] Primeiros testes unitários.
+- [x] Primeiros testes unitários.
 
 ---
 
@@ -21,14 +21,14 @@ Criar um repositório limpo, compilável e preparado para desenvolvimento increm
 
 ### Tarefas
 
-- [ ] Criar `CMakeLists.txt` funcional.
-- [ ] Definir padrão C++17.
+- [x] Criar `CMakeLists.txt` funcional.
+- [x] Definir padrão C++17.
 - [ ] Adicionar dependência Eigen.
 - [ ] Adicionar opção futura para `nlohmann_json`.
-- [ ] Criar diretórios `include/pidc`, `src`, `apps`, `tests`, `configs`, `scripts`.
+- [x] Criar diretórios `include/pidc`, `src`, `apps`, `tests`, `configs`, `scripts`.
 - [ ] Criar script `scripts/build.sh`.
 - [ ] Criar script `scripts/run_tests.sh`.
-- [ ] Criar primeiro executável `apps/smoke.cpp`.
+- [x] Criar primeiro executável `apps/smoke.cpp`.
 
 ### Critério de aceite
 
@@ -50,19 +50,19 @@ Criar as estruturas mínimas para nós, partículas, domínio e busca de vizinha
 
 ### Tarefas
 
-- [ ] `Vec2`
-- [ ] `Particle`
+- [x] `Vec2`
+- [x] `Particle`
 - [ ] `Species`
-- [ ] `Node`
-- [ ] `Domain2D`
+- [x] `Node`
+- [x] `Domain2D`
 - [ ] `PeriodicBoundary2D`
 - [ ] `RegularNodeCloud2D`
 - [ ] `NeighborSearchGrid`
 
 ### Critérios de aceite
 
-- [ ] Uma partícula que sai pela direita deve reaparecer pela esquerda.
-- [ ] Uma partícula que sai pelo topo deve reaparecer pela base.
+- [x] Uma partícula que sai pela direita deve reaparecer pela esquerda.
+- [x] Uma partícula que sai pelo topo deve reaparecer pela base.
 - [ ] A busca de vizinhança deve retornar todos os nós cujo domínio de influência contém o ponto de avaliação.
 - [ ] Nenhum teste deve depender de ordem aleatória.
 

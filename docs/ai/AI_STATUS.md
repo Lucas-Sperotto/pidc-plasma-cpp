@@ -4,15 +4,15 @@ Atualizado em: 2026-05-08
 
 ## Estado geral
 
-Planejamento inicial criado. Ainda não há implementação C/C++ validada.
+Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui biblioteca `pidc_core`, executável smoke e teste simples de contorno periódico registrado no CTest.
 
 ## Módulos
 
 | Módulo | Estado |
 |---|---|
-| core | não iniciado |
-| particles | não iniciado |
-| geometry | não iniciado |
+| core | bootstrap mínimo compilando |
+| particles | estruturas `Particle` e `Vec2` iniciais |
+| geometry | `Domain2D` inicial com contorno periódico |
 | mls | não iniciado |
 | efg | não iniciado |
 | pic | não iniciado |
@@ -24,8 +24,8 @@ Planejamento inicial criado. Ainda não há implementação C/C++ validada.
 
 | Teste | Estado |
 |---|---|
-| smoke build | não iniciado |
-| periodic boundary | não iniciado |
+| smoke build | passou em 2026-05-08 |
+| periodic boundary | passou em 2026-05-08 |
 | partition unity | não iniciado |
 | linear reproduction | não iniciado |
 | charge conservation | não iniciado |
@@ -34,4 +34,4 @@ Planejamento inicial criado. Ainda não há implementação C/C++ validada.
 
 ## Último resumo
 
-O projeto deve começar pelo bootstrap CMake e pelas estruturas básicas. O primeiro teste matemático relevante será a partição da unidade das funções de forma MLS/EFG.
+Codex concluiu `T-001`: bootstrap CMake, estruturas básicas (`Vec2`, `Particle`, `Node`, `Domain2D`), app `pidc_smoke` e teste executável `pidc_test_periodic_boundary`. O comando `ctest` do PATH local falhou por apontar para um wrapper Python sem módulo `cmake`; `/usr/bin/ctest --test-dir build --output-on-failure` passou com 1/1 teste.

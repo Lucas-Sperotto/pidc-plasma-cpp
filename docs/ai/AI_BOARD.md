@@ -13,9 +13,7 @@ Atualizado em: 2026-05-08
 
 ## Em andamento
 
-| ID | Tarefa | Responsável | Status | Início |
-|---|---|---|---|---|
-| T-001 | Criar bootstrap CMake + smoke test | Codex | em andamento | 2026-05-08 |
+Nenhuma tarefa em andamento no momento.
 
 ---
 
@@ -23,7 +21,7 @@ Atualizado em: 2026-05-08
 
 | ID | Tarefa | Responsável sugerido | Status |
 |---|---|---|---|
-| T-001 | Criar bootstrap CMake + smoke test | Codex | proposta |
+| T-001 | Criar bootstrap CMake + smoke test | Codex | concluída |
 | T-002 | Auditar equações mínimas e sinais | Gemini | proposta |
 | T-003 | Revisar arquitetura e riscos | Claude | proposta |
 | T-004 | Definir convenção de unidades | Professor + Gemini | proposta |
@@ -35,6 +33,7 @@ Atualizado em: 2026-05-08
 
 | ID | Tarefa | Responsável | Data |
 |---|---|---|---|
+| T-001 | Criar bootstrap CMake + smoke test | Codex | 2026-05-08 |
 | P-000 | Planejamento inicial do repositório | ChatGPT | 2026-05-08 |
 
 ---
