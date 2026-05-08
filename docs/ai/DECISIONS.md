@@ -258,8 +258,9 @@ Teste MMS deve chamar `assemble()` uma vez e `solve()` com o rhs manufaturado. U
 
 ## DEC-0011 — Introduzir `Species` para evitar charge/mass por instância
 
-Status: proposta
+Status: aceita
 Proposta por: Claude — 2026-05-08
+Implementada por: Claude — 2026-05-08
 
 Contexto:
 `Particle::charge` e `Particle::mass` são armazenados por instância (R-007). Em uma simulação de plasma, todos os elétrons têm a mesma carga e massa. O armazenamento por instância usa memória desnecessária e permite inconsistência por bug de inicialização.

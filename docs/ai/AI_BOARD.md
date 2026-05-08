@@ -25,9 +25,7 @@ Nenhuma tarefa em andamento no momento.
 | T-004 | Definir convenção de unidades | Professor + Gemini | proposta |
 | T-005 | Definir framework de testes | Codex + Claude | proposta |
 | T-006 | Implementar DEC-0008: remover applyPeriodic de Domain2D | Codex | concluída |
-| T-007 | Implementar DEC-0009: criar ShapeFunctionData.hpp | Codex | concluída |
-| T-008 | Implementar DEC-0011: criar Species e refatorar Particle | Codex | proposta |
-| T-009 | Implementar DEC-0012: criar NodeCloud | Codex | concluída |
+| T-007 | Implementar DEC-0009: criar ShapeFunctionData.hpp | Claude | concluída |
 
 ---
 
@@ -35,6 +33,8 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-010 | Resgatar T-008: Species.hpp, refatorar Particle, teste (DEC-0011) | Claude | 2026-05-08 |
+| T-008 | Implementar DEC-0011: criar Species e refatorar Particle | Gemini | 2026-05-08 |
 | T-009 | Implementar DEC-0012: criar NodeCloud | Codex | 2026-05-08 |
 | T-007 | Implementar DEC-0009: criar ShapeFunctionData.hpp | Claude | 2026-05-08 |
 | T-006 | Implementar DEC-0008: remover applyPeriodic de Domain2D | Codex | 2026-05-08 |

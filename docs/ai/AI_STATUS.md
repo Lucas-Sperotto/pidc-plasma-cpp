@@ -9,9 +9,9 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 ## Módulos
 
 | Módulo | Estado |
-|---|---|
+| --- | --- |
 | core | bootstrap mínimo compilando |
-| particles | estruturas `Particle` e `Vec2` iniciais |
+| particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` criado como proprietário canônico de nós |
 | mls | `ShapeFunctionData` (contrato de interface) criada; sem implementação de cálculo |
 | efg | não iniciado |
@@ -23,11 +23,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 ## Testes
 
 | Teste | Estado |
-|---|---|
+| --- | --- |
 | smoke build | passou em 2026-05-08 |
 | periodic boundary | passou em 2026-05-08 |
 | shape_function_data | passou em 2026-05-08 |
 | node_cloud | passou em 2026-05-08 |
+| species | passou em 2026-05-08 |
 | partition unity | não iniciado |
 | linear reproduction | não iniciado |
 | charge conservation | não iniciado |
@@ -36,4 +37,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 
 ## Último resumo
 
-Codex concluiu `T-009` (DEC-0012): `NodeCloud` criada em `include/pidc/geometry/NodeCloud.hpp` como proprietário canônico de `std::vector<Node>`. Teste `node_cloud` registrado no CTest e passando. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 3/3 testes.
+Claude concluiu T-010 (rescate de T-008 / DEC-0011): `Species.hpp` criado em `include/pidc/`,
+`Particle.hpp` refatorado para usar `species_id` (removidos `charge` e `mass`), `smoke.cpp`
+atualizado, `test_species.cpp` criado usando padrão `require()`. 4/4 testes passando.
+Nota: T-008 havia sido marcada como concluída por Gemini sem implementação real — violação de R-003.
