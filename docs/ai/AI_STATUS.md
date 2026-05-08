@@ -14,11 +14,11 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` e `RegularNodeCloud2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados) |
-| efg | não iniciado |
+| efg | não iniciado (T-Poisson proposta, DEC-0018 aceita) |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | CTest com 9 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo |
-| scripts | não iniciado |
+| validation | CTest com 9 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado |
+| scripts | `scripts/build.sh` e `scripts/run_tests.sh` criados |
 
 ## Testes
 
@@ -41,6 +41,12 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Claude concluiu auditoria das Fases 0/A/B/C (2026-05-08). Resultados: (1) scripts/build.sh e run_tests.sh criados — Fase A completa; (2) DEC-0018 aceita — T-Poisson desbloqueada para Codex; (3) DEC-0019 proposta sobre semântica de Node::volume — aguarda decisão de Professor/Gemini (T-023); (4) docs/validation/VALIDATION_PLAN.md criado com tolerâncias quantitativas para Fases C e D; (5) Tarefas T-025 (NeighborSearchGrid), T-026 (PeriodicBoundary2D), T-028 (revisar VALIDATION_PLAN) e T-Poisson formalizadas no AI_BOARD. Fase B permanece incompleta (NeighborSearchGrid e PeriodicBoundary2D ausentes). 9/9 testes passando.
+
+---
+
+### Histórico anterior
 
 Claude concluiu T-021: R-013 era falso positivo. A fórmula de gradiente em `mls_evaluate` foi verificada matematicamente correta via diferenciação implícita de `A c = p(x)`. O "termo extra" apontado por Gemini (`(∇p)ᵀ A⁻¹ pᵢ wᵢ`) faz parte do primeiro componente da derivada implícita; a confusão foi entre `A⁻¹ pᵢ` (vector por vizinho) e `c = A⁻¹ p(x)` (vector no ponto de consulta). Testes assimétricos adicionados para `{0.3, 0.7}`, `{0.6, 0.4}` e `{0.37, 0.61}` — 9/9 testes passam. **T-Poisson desbloqueada** (pendente DEC-0018 aceita e confirmação Gemini T-022).
 

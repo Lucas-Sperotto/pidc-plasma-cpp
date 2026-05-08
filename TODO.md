@@ -26,8 +26,8 @@ Criar um repositório limpo, compilável e preparado para desenvolvimento increm
 - [x] Adicionar dependência Eigen.
 - [ ] Adicionar opção futura para `nlohmann_json`.
 - [x] Criar diretórios `include/pidc`, `src`, `apps`, `tests`, `configs`, `scripts`.
-- [ ] Criar script `scripts/build.sh`.
-- [ ] Criar script `scripts/run_tests.sh`.
+- [x] Criar script `scripts/build.sh`.
+- [x] Criar script `scripts/run_tests.sh`.
 - [x] Criar primeiro executável `apps/smoke.cpp`.
 
 ### Critério de aceite
@@ -83,7 +83,7 @@ Implementar funções de forma e gradientes.
 - [x] Implementar cálculo de `phi_i(x)` — `mls_evaluate` em MLSShapeFunction.hpp (T-017).
 - [x] Implementar cálculo de `grad(phi_i)(x)` — diferenciação implícita em mls_evaluate (T-017).
 - [x] Monitorar cardinalidade local `n >= m` — lança `std::runtime_error` se n < 3 (T-017).
-- [ ] Monitorar condicionamento da matriz MLS (pendente).
+- [ ] Monitorar condicionamento da matriz MLS — verificado indiretamente (LR passa com tol 1e-10); teste explícito proposto em T-024 (Codex).
 
 ### Testes obrigatórios
 

@@ -21,10 +21,12 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-022 | Auditar resolução de R-013 e confirmar que T-Poisson está desbloqueada | Gemini | proposta |
-| T-023 | Definir semântica de `Node::volume` antes do assembler EFG | Professor + Gemini | proposta |
-| T-024 | Implementar teste explícito de ausência de NaN/Inf em MLS | Codex | proposta |
-| T-Poisson | Implementar assembler EFG Poisson (MMS) — aguarda DEC-0018 aceita e T-022 | Codex | proposta |
+| T-023 | Definir semântica de `Node::volume`; aceitar ou rejeitar DEC-0019 | Professor + Gemini | proposta |
+| T-024 | Implementar teste explícito de ausência de NaN/Inf em mls_evaluate | Codex | proposta |
+| T-025 | Implementar `NeighborSearchGrid` — grade 2D para busca O(1) de vizinhos (Fase B) | Codex | proposta |
+| T-026 | Implementar `PeriodicBoundary2D` com `wrap` e `minimum_image` (Fase B) | Codex | proposta |
+| T-028 | Revisar `docs/validation/VALIDATION_PLAN.md` contra a tese; aceitar ou ajustar tolerâncias | Gemini | proposta |
+| T-Poisson | Implementar assembler EFG Poisson (GaussCell2D + Gauss 2×2); teste MMS — DEC-0018 aceita | Codex | proposta |
 
 ---
 
@@ -32,6 +34,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-022 | Auditar resolução de R-013 e confirmar que T-Poisson está desbloqueada | Gemini | 2026-05-08 |
 | T-021 | Verificar R-013; confirmar fórmula correta; testes assimétricos {0.3,0.7}, {0.6,0.4}, {0.37,0.61} | Claude | 2026-05-08 |
 | T-020 | Auditar matematicamente MLSShapeFunction e gradientes | Gemini | 2026-05-08 |
 | T-018 | Implementar RegularNodeCloud2D com teste determinístico | Gemini + Codex revisão | 2026-05-08 |
