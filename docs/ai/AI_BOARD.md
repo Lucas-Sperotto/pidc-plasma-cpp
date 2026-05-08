@@ -33,6 +33,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-012 | Criar PolynomialBasis linear 2D (DEC-0014, Fase C/MLS) | Claude | 2026-05-08 |
 | T-011 | Criar WeightFunction spline quártica (DEC-0013, Fase C/MLS) | Claude | 2026-05-08 |
 | T-010 | Resgatar T-008: Species.hpp, refatorar Particle, teste (DEC-0011) | Claude | 2026-05-08 |
 | T-008 | Implementar DEC-0011: criar Species e refatorar Particle | Gemini | 2026-05-08 |

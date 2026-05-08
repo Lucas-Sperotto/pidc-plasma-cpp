@@ -379,3 +379,32 @@ Impacto na validação:
 Teste `weight_function` verifica propriedades matemáticas exatas. O teste de
 partição da unidade (futuro) validará indiretamente a função peso no contexto
 MLS completo.
+
+---
+
+## DEC-0014 — Base polinomial: linear 2D, m=3
+
+Status: aceita
+Proposta por: Claude — 2026-05-08
+
+Contexto:
+O MLS requer uma base polinomial completa de grau $k$. Para $k=1$ (linear) em
+2D, $m=3$ e $\mathbf{p}(\mathbf{x}) = [1, x, y]^T$.
+
+Decisão:
+Adotar a base linear como padrão inicial. Implementada como funções livres
+`linear_basis(Vec2)`, `linear_basis_dx()`, `linear_basis_dy()` em
+`include/pidc/mls/PolynomialBasis.hpp`. Interface: `std::array<double, 3>`.
+
+Justificativa:
+Base linear é suficiente para reprodução linear exata e é o caso descrito
+na tese de Marques. Base quadrática ($m=6$) pode ser adicionada futuramente
+se os testes de reprodução revelarem necessidade.
+
+Impacto no código:
+`MLSShapeFunction::evaluate` (futura) usa `linear_basis` para montar $A$
+e avaliar $\phi_i(\mathbf{x}) = \mathbf{p}^T(\mathbf{x}) A^{-1} \mathbf{b}_i$.
+
+Impacto na validação:
+Teste de reprodução linear ($u = a + bx + cy$) exige base linear completa.
+Teste de reprodução constante ($u = c$) é subconjunto e passará automaticamente.
