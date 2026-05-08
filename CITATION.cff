@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: "pidc-plasma-cpp"
+message: "If you use this repository, please cite the original PIDC thesis and this repository."
+type: software
+authors:
+  - family-names: "Marques"
+    given-names: "Gleber Nelson"
+  - family-names: "Sperotto"
+    given-names: "Lucas"
+    affiliation: "UNEMAT"
+repository-code: "https://github.com/SEU-USUARIO/pidc-plasma-cpp"
+abstract: "Reproducible C/C++ implementation plan for the Particle-In-Diffuse-Cell method for electrostatic plasma simulation."
+references:
+  - type: thesis
+    title: "O Método Particle-In-Diffuse-Cell: uma abordagem Meshfree para simulação de plasmas"
+    authors:
+      - family-names: "Marques"
+        given-names: "Gleber Nelson"
+    institution: "Instituto Nacional de Pesquisas Espaciais"
+    year: 2008
+  - type: conference-paper
+    title: "Uma abordagem meshfree para simulação de plasmas não-colisionais"
+    authors:
+      - family-names: "Marques"
+        given-names: "Gleber N."
+      - family-names: "Preto"
+        given-names: "Airam J."
+      - family-names: "Stephany"
+        given-names: "Stephan"
+      - family-names: "Passaro"
+        given-names: "Angelo"
+    conference:
+      name: "CMNE/CILAMCE 2007"
+    year: 2007
