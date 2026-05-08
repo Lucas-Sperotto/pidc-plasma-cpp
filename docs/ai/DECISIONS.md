@@ -343,3 +343,39 @@ Impacto no código:
 
 Impacto na validação:
 Testes de MLS e EFG devem criar um `NodeCloud` explícito — isso é bom para legibilidade dos testes.
+
+---
+
+## DEC-0013 — Função peso compacta: spline quártica
+
+Status: proposta (hipótese — aguarda confirmação na tese de Marques)
+Proposta por: Claude — 2026-05-08
+
+Contexto:
+O MLS requer uma função peso compacta $w(r) \geq 0$ definida no raio normalizado
+$r = \|\mathbf{x} - \mathbf{x}_i\| / r_{\max}$, com $w(r) = 0$ para $r \geq 1$.
+
+Decisão:
+Adotar a **spline quártica**:
+
+$$w(r) = \begin{cases} 1 - 6r^2 + 8r^3 - 3r^4 & r \leq 1 \\ 0 & r > 1 \end{cases}$$
+
+Derivada: $w'(r) = -12r(1-r)^2$ para $r \leq 1$, $0$ caso contrário.
+
+Implementada como funções livres `weight_quartic(r)` e `weight_quartic_deriv(r)`
+em `include/pidc/mls/WeightFunction.hpp`.
+
+Justificativa:
+Função padrão em métodos EFG/MEFG (Belytschko et al. 1994). Compacta, $C^1$
+contínua, positiva em $[0,1]$, monotonicamente decrescente. Pesos positivos
+garantem que a matriz de momento $A$ seja positiva definida quando há nós
+suficientes.
+
+Impacto no código:
+`MLSShapeFunction::evaluate` (futura) usará `weight_quartic` para ponderar
+cada vizinho.
+
+Impacto na validação:
+Teste `weight_function` verifica propriedades matemáticas exatas. O teste de
+partição da unidade (futuro) validará indiretamente a função peso no contexto
+MLS completo.

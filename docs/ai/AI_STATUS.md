@@ -13,7 +13,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | core | bootstrap mínimo compilando |
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud` criado como proprietário canônico de nós |
-| mls | `ShapeFunctionData` (contrato de interface) criada; sem implementação de cálculo |
+| mls | `ShapeFunctionData` (contrato); `WeightFunction` spline quártica criada; base polinomial pendente |
 | efg | não iniciado |
 | pic | não iniciado |
 | pidc | não iniciado |
@@ -29,6 +29,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | shape_function_data | passou em 2026-05-08 |
 | node_cloud | passou em 2026-05-08 |
 | species | passou em 2026-05-08 |
+| weight_function | passou em 2026-05-08 |
 | partition unity | não iniciado |
 | linear reproduction | não iniciado |
 | charge conservation | não iniciado |
@@ -36,6 +37,14 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Claude concluiu T-011: `WeightFunction` spline quártica criada em
+`include/pidc/mls/WeightFunction.hpp`. Funções `weight_quartic(r)` e
+`weight_quartic_deriv(r)`. 5/5 testes passando. DEC-0013 proposta.
+
+---
+
+### Histórico anterior
 
 Claude concluiu T-010 (rescate de T-008 / DEC-0011): `Species.hpp` criado em `include/pidc/`,
 `Particle.hpp` refatorado para usar `species_id` (removidos `charge` e `mass`), `smoke.cpp`
