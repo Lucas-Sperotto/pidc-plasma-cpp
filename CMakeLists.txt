@@ -55,3 +55,14 @@ add_test(
     NAME shape_function_data
     COMMAND pidc_test_shape_function_data
 )
+
+add_executable(pidc_test_node_cloud
+    tests/test_node_cloud.cpp
+)
+
+target_link_libraries(pidc_test_node_cloud PRIVATE pidc_core)
+
+add_test(
+    NAME node_cloud
+    COMMAND pidc_test_node_cloud
+)
