@@ -88,3 +88,14 @@ add_test(
     NAME weight_function
     COMMAND pidc_test_weight_function
 )
+
+add_executable(pidc_test_polynomial_basis
+    tests/test_polynomial_basis.cpp
+)
+
+target_link_libraries(pidc_test_polynomial_basis PRIVATE pidc_core)
+
+add_test(
+    NAME polynomial_basis
+    COMMAND pidc_test_polynomial_basis
+)
