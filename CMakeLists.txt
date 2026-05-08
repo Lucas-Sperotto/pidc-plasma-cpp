@@ -128,3 +128,14 @@ add_test(
     NAME mls_shape_function
     COMMAND pidc_test_mls_shape_function
 )
+
+add_executable(pidc_test_regular_node_cloud
+    tests/test_regular_node_cloud.cpp
+)
+
+target_link_libraries(pidc_test_regular_node_cloud PRIVATE pidc_core)
+
+add_test(
+    NAME regular_node_cloud
+    COMMAND pidc_test_regular_node_cloud
+)
