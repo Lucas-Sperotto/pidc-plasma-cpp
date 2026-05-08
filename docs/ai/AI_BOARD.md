@@ -21,11 +21,10 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-021 | Corrigir bug no gradiente MLS (R-013) e adicionar teste assimétrico | Claude | proposta |
-| T-022 | Auditar a correção da T-021 e confirmar fórmulas de gradiente MLS | Gemini | proposta |
+| T-022 | Auditar resolução de R-013 e confirmar que T-Poisson está desbloqueada | Gemini | proposta |
 | T-023 | Definir semântica de `Node::volume` antes do assembler EFG | Professor + Gemini | proposta |
 | T-024 | Implementar teste explícito de ausência de NaN/Inf em MLS | Codex | proposta |
-| T-Poisson | Implementar assembler EFG Poisson (MMS) — aguarda DEC-0018 aceita | Codex | bloqueada |
+| T-Poisson | Implementar assembler EFG Poisson (MMS) — aguarda DEC-0018 aceita e T-022 | Codex | proposta |
 
 ---
 
@@ -33,6 +32,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-021 | Verificar R-013; confirmar fórmula correta; testes assimétricos {0.3,0.7}, {0.6,0.4}, {0.37,0.61} | Claude | 2026-05-08 |
 | T-020 | Auditar matematicamente MLSShapeFunction e gradientes | Gemini | 2026-05-08 |
 | T-018 | Implementar RegularNodeCloud2D com teste determinístico | Gemini + Codex revisão | 2026-05-08 |
 | T-019 | Revisar arquitetura MLS → EFG; registrar R-010/011/012, propor DEC-0018 | Claude | 2026-05-08 |

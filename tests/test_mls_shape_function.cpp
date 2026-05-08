@@ -74,21 +74,61 @@ int main()
     require(approx_equal(sum_dy_x,    0.0, 1.0e-10),  "gradient LR: sum(dphi/dy * xi.x) == 0");
     require(approx_equal(sum_dy_y,    1.0, 1.0e-10),  "gradient LR: sum(dphi/dy * xi.y) == 1");
 
-    // --- second query point (off-centre) ---
+    // --- asymmetric query points: gradient correctness (R-013 verification) ---
+    // R-013 (Gemini T-020) claimed an extra (∇p)ᵀ c wᵢ term in the gradient.
+    // Mathematical analysis shows the formula is correct: dc_dx.dot(pki) already
+    // contains (∂p/∂x)ᵀ A⁻¹ pᵢ as its first component; Gemini confused A⁻¹pᵢ
+    // with c = A⁻¹p(x). These tests are asymmetric so symmetry cannot mask
+    // any potential error — they would fail if the formula were wrong.
+
+    auto check_all = [&](const pidc::ShapeFunctionData& s,
+                         pidc::Vec2 qp,
+                         const char* tag) {
+        double su = 0.0, sx = 0.0, sy = 0.0;
+        double sdx = 0.0, sdy = 0.0;
+        double sdx_x = 0.0, sdx_y = 0.0;
+        double sdy_x = 0.0, sdy_y = 0.0;
+        for (std::size_t k = 0; k < s.phi.size(); ++k) {
+            const pidc::Vec2 xi = cloud[s.neighbor_ids[k]].position;
+            su    += s.phi[k];
+            sx    += s.phi[k] * xi.x;
+            sy    += s.phi[k] * xi.y;
+            sdx   += s.grad_phi[k].x;
+            sdy   += s.grad_phi[k].y;
+            sdx_x += s.grad_phi[k].x * xi.x;
+            sdx_y += s.grad_phi[k].x * xi.y;
+            sdy_x += s.grad_phi[k].y * xi.x;
+            sdy_y += s.grad_phi[k].y * xi.y;
+        }
+        (void)tag;
+        require(approx_equal(su,    1.0,  1.0e-10), "PU");
+        require(approx_equal(sx,    qp.x, 1.0e-10), "LR x");
+        require(approx_equal(sy,    qp.y, 1.0e-10), "LR y");
+        require(approx_equal(sdx,   0.0,  1.0e-10), "grad PU x");
+        require(approx_equal(sdy,   0.0,  1.0e-10), "grad PU y");
+        require(approx_equal(sdx_x, 1.0,  1.0e-10), "grad LR xx");
+        require(approx_equal(sdx_y, 0.0,  1.0e-10), "grad LR xy");
+        require(approx_equal(sdy_x, 0.0,  1.0e-10), "grad LR yx");
+        require(approx_equal(sdy_y, 1.0,  1.0e-10), "grad LR yy");
+    };
+
+    // second query point (off-centre, T-017 original)
     const pidc::Vec2 x2{0.3, 0.7};
     const pidc::ShapeFunctionData sfd2 = pidc::mls_evaluate(x2, cloud, h);
     require(pidc::is_valid(sfd2), "second query: valid");
+    check_all(sfd2, x2, "x2");
 
-    double s2 = 0.0, s2x = 0.0, s2y = 0.0;
-    for (std::size_t k = 0; k < sfd2.phi.size(); ++k) {
-        const pidc::Vec2 xi = cloud[sfd2.neighbor_ids[k]].position;
-        s2  += sfd2.phi[k];
-        s2x += sfd2.phi[k] * xi.x;
-        s2y += sfd2.phi[k] * xi.y;
-    }
-    require(approx_equal(s2,  1.0, 1.0e-10),   "second query: partition of unity");
-    require(approx_equal(s2x, x2.x, 1.0e-10),  "second query: linear reproduction x");
-    require(approx_equal(s2y, x2.y, 1.0e-10),  "second query: linear reproduction y");
+    // third query point — explicitly suggested in R-013
+    const pidc::Vec2 x3{0.6, 0.4};
+    const pidc::ShapeFunctionData sfd3 = pidc::mls_evaluate(x3, cloud, h);
+    require(pidc::is_valid(sfd3), "third query: valid");
+    check_all(sfd3, x3, "x3");
+
+    // fourth query point — irrational-looking to minimise accidental symmetry
+    const pidc::Vec2 x4{0.37, 0.61};
+    const pidc::ShapeFunctionData sfd4 = pidc::mls_evaluate(x4, cloud, h);
+    require(pidc::is_valid(sfd4), "fourth query: valid");
+    check_all(sfd4, x4, "x4");
 
     // --- exception with too few neighbours ---
     const pidc::NodeCloud tiny{{pidc::Node{0, pidc::Vec2{0.5, 0.5}, 1.0}}};

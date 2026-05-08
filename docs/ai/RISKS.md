@@ -137,15 +137,33 @@ O assembler recebe as células como parâmetro (não as embutidas em `NodeCloud`
 
 ---
 
-## R-013 — Teste de MLS frágil mascara bug de gradiente
+## R-013 — Teste de MLS frágil (gradiente não verificado em ponto assimétrico)
 
-Status: descoberto (2026-05-08, Gemini, T-020)
+Status: **falso positivo — fórmula verificada correta** (2026-05-08, Claude, T-021)
 
-Contexto:
-A auditoria matemática da implementação de `mls_evaluate` (T-017) revelou que a fórmula do gradiente da função de forma está incorreta. Ela contém um termo extra, `(∇p)ᵀ c wᵢ`. No entanto, o teste de reprodução linear para os gradientes (`test_mls_shape_function`) passou.
+Contexto original (Gemini, T-020):
+A auditoria apontou um possível termo extra `(∇p)ᵀ c wᵢ` na fórmula do gradiente.
 
-Risco:
-O teste passou porque a nuvem de nós e o ponto de avaliação são perfeitamente simétricos, uma condição especial que anula o termo de erro. Isso significa que o teste não é robusto e o código MLS produzirá gradientes incorretos para qualquer caso geral (partículas em posições arbitrárias), quebrando a conservação de momento e a precisão do solver EFG.
+Resolução (Claude, T-021):
+A análise matemática detalhada mostra que a implementação está correta. A fórmula usa
+diferenciação implícita de `A c = p(x)`:
 
-Mitigação:
-Corrigir a fórmula do gradiente em `MLSShapeFunction.hpp`. Adicionar um novo caso de teste em `test_mls_shape_function.cpp` com um ponto de avaliação assimétrico (e.g., `x = {0.6, 0.4}`) que teria falhado e detectado o bug. Ver tarefa `T-021`.
+```text
+A ∂c/∂xₖ = ∂p/∂xₖ − ∂A/∂xₖ c
+∂φᵢ/∂xₖ = (∂c/∂xₖ)ᵀ pᵢ wᵢ + cᵀ pᵢ ∂wᵢ/∂xₖ
+```
+
+O termo `(∂p/∂x)ᵀ A⁻¹ pᵢ wᵢ` identificado por Gemini como "extra" é na verdade o
+primeiro componente de `(∂c/∂x)ᵀ pᵢ wᵢ`, já incluído corretamente via
+`dc_dx = lu.solve(dpx − dA_dx * c)`. A confusão foi entre `A⁻¹ pᵢ` (vector
+por vizinho `i`) e `c = A⁻¹ p(x)` (vector no ponto de consulta): eles são
+distintos salvo quando o vizinho coincide com o ponto de consulta.
+
+Verificação empírica: testes assimétricos adicionados para `{0.3, 0.7}`,
+`{0.6, 0.4}` e `{0.37, 0.61}` — todos os 9 testes passam com tolerância 10⁻¹⁰.
+A simetria não cancela o erro hipotético (c[1] ≠ 0 no caso geral), portanto
+os testes assimétricos são discriminativos. **T-Poisson desbloqueada.**
+
+Lição: o teste original era frágil por não verificar gradientes em pontos
+assimétricos. Isso foi corrigido em T-021 — o teste agora cobre 4 pontos de
+consulta com todas as 9 propriedades de gradiente.
