@@ -107,7 +107,8 @@ O teste de Poisson MMS deve ser construído com uma fonte `ρ` consistente com a
 
 ## DEC-0006 — Formulação variacional (fraca) para Poisson EFG
 
-Status: proposta
+Status: aceita
+Aceita por: Codex — 2026-05-08 (T-Poisson, após auditoria T-028/T-030)
 
 Contexto:
 Para implementar o solver EFG para a equação de Poisson, é preciso definir a forma fraca (variacional) que leva ao sistema linear `K u = b`.
@@ -682,3 +683,42 @@ Afeta `include/pidc/mls/MLSShapeFunction.hpp` e
 Impacto na validação:
 A variante periódica deve passar nos mesmos testes de PU e LR que a versão
 não-periódica, com pontos de consulta próximos às fronteiras.
+
+---
+
+## DEC-0023 — Raio de suporte MLS para Poisson MMS inicial
+
+Status: aceita
+Proposta por: Codex — 2026-05-08
+Implementada por: Codex — 2026-05-08 (T-Poisson)
+
+Contexto:
+R-010 registrou que `support_radius` era passado como `double` anônimo. O solver
+EFG precisa usar o mesmo raio em todos os pontos de quadratura para uma dada
+nuvem, evitando escolhas ad hoc durante a montagem.
+
+Decisão:
+Criar `MLSConfig` com `support_radius` positivo e finito. Para o MMS inicial
+com nuvem regular $N \times N$, usar:
+
+```text
+h_g = 1 / (N - 1)
+support_radius = 1.8 * h_g
+```
+
+A API antiga `mls_evaluate(..., double support_radius)` permanece disponível e
+encaminha para a nova configuração.
+
+Justificativa:
+O fator `1.8*h_g` fornece vizinhança suficiente para a base linear 2D sem
+degradar o erro MMS grosseiro. Foi validado no teste `efg_poisson_mms` com
+erro L2 5×5 abaixo de `1e-2` e melhora em 9×9.
+
+Impacto no código:
+Adiciona `include/pidc/mls/MLSConfig.hpp` e overload de `mls_evaluate` recebendo
+`const MLSConfig&`. `EFGPoissonSolver` recebe `MLSConfig` em `assemble`.
+
+Impacto na validação:
+`tests/test_mls_robustness.cpp` confirma equivalência entre as chamadas por
+`double` e por `MLSConfig`. `tests/test_efg_poisson_mms.cpp` usa a configuração
+centralizada no MMS.

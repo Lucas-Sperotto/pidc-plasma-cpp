@@ -14,10 +14,10 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud`, `RegularNodeCloud2D`, `NeighborSearchGrid` e `PeriodicBoundary2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados, guarda de raio de suporte e robustez finita testadas) |
-| efg | não iniciado (T-Poisson proposta, DEC-0018 aceita) |
+| efg | `GaussCell2D` e `EFGPoissonSolver` denso inicial implementados; Poisson MMS Dirichlet passou em 5×5 e 9×9 |
 | pic | não iniciado |
 | pidc | não iniciado |
-| validation | CTest com 12 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado; robustez MLS, busca de vizinhança e fronteira periódica testadas |
+| validation | CTest com 14 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado; robustez MLS, busca de vizinhança, fronteira periódica, quadratura e Poisson MMS testados |
 | scripts | `scripts/build.sh` e `scripts/run_tests.sh` criados |
 
 ## Testes
@@ -37,13 +37,21 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | mls_robustness | passou em 2026-05-08 |
 | neighbor_search_grid | passou em 2026-05-08 |
 | periodic_boundary2d | passou em 2026-05-08 |
+| gauss_cell2d | passou em 2026-05-08 |
+| efg_poisson_mms | passou em 2026-05-08; L2 5×5 = 0.00359684, L2 9×9 = 0.000827504 |
 | partition unity | passou em 2026-05-08 (coberto por mls_shape_function) |
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation | não iniciado |
-| Poisson MMS | não iniciado |
+| Poisson MMS | passou em 2026-05-08 |
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Codex concluiu T-Poisson (2026-05-08). Foram adicionados `MLSConfig`, `GaussCell2D` com quadratura Gauss 2×2, e `EFGPoissonSolver` denso inicial para o problema manufaturado Dirichlet. O teste `efg_poisson_mms` monta `K`, monta `b`, impõe Dirichlet homogêneo, resolve o sistema e valida erro L2: 5×5 = 0.00359684 (< 1e-2) e 9×9 = 0.000827504 (< 5×5). CTest passou com 14/14 testes. Não houve implementação de PIC, PIDC, deposição de carga, campo interpolado ou caso grande.
+
+---
+
+### Histórico anterior
 
 Gemini concluiu T-023 e Codex finalizou a remoção manual pendente: conforme `DEC-0019` (agora `aceita`), o campo `volume` foi removido da struct `Node`, e os testes/initializers foram ajustados. A justificativa é que a quadratura EFG (`DEC-0018`) usa células explícitas, tornando o campo redundante e uma fonte de ambiguidade (`R-009`).
 

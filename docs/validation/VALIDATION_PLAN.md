@@ -90,6 +90,21 @@ Condições de contorno: $u = 0$ em $\partial\Omega$ (Dirichlet homogêneo).
 A convergência com refinamento da nuvem não precisa ser demonstrada para
 aceite da Fase D, mas deve ser observável (erro reduz ao refinar).
 
+### Implementação de referência
+
+`tests/test_gauss_cell2d.cpp` — verifica soma de pesos e integração de
+polinômios simples por Gauss 2×2.
+
+`tests/test_efg_poisson_mms.cpp` — usa `support_radius = 1.8*h_g`, monta e
+resolve o sistema denso inicial. Resultado em 2026-05-08:
+
+| Nuvem | Erro L2 absoluto |
+| --- | --- |
+| 5×5 | 0.00359684 |
+| 9×9 | 0.000827504 |
+
+CTest: 14/14 testes passando.
+
 ---
 
 ## Fases posteriores (referência)

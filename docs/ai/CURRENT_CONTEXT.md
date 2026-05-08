@@ -10,7 +10,7 @@ baseado na tese de Gleber Nelson Marques (INPE, 2008).
 Implementar e validar o PIDC de forma incremental:
 
 1. MLS/EFG — **em progresso**;
-2. Poisson EFG — próxima fase;
+2. Poisson EFG — validação MMS inicial concluída;
 3. PIC baseline;
 4. deposição PIDC;
 5. interpolação PIDC;
@@ -38,7 +38,16 @@ Implementar e validar o PIDC de forma incremental:
   - Gradientes de PU e LR validados com tolerância $10^{-10}$.
   - Raio de suporte inválido rejeitado por `std::invalid_argument`.
   - Ausência de `NaN`/`Inf` e condicionamento de $A$ testados em `mls_robustness`.
-- CTest: **12/12 testes passando**.
+- CTest: **14/14 testes passando**.
+
+**Fase D (Poisson EFG) iniciada e validada no primeiro MMS:**
+
+- `GaussCell2D` gera células retangulares com quadratura Gauss 2×2.
+- `MLSConfig` centraliza o raio de suporte usado por EFG.
+- `EFGPoissonSolver` monta `K`, monta `b`, impõe Dirichlet por substituição direta e resolve com matriz densa.
+- Teste MMS Dirichlet para $u = \sin(\pi x)\sin(\pi y)$ passou:
+  - L2 5×5 = 0.00359684;
+  - L2 9×9 = 0.000827504.
 
 **Infra:**
 
@@ -50,20 +59,22 @@ Implementar e validar o PIDC de forma incremental:
 
 | Tarefa | Responsável | Prioridade |
 | --- | --- | --- |
-| T-Poisson | Implementar assembler EFG Poisson (MMS) | Codex |
+| T-031 | Auditar `EFGPoissonSolver` contra formulação fraca, sinal e Dirichlet | Gemini + Claude |
+| T-032 | Adicionar métricas L∞ do potencial e L2/L∞ do campo no MMS | Codex |
+| T-033 | Planejar migração densa → esparsa preservando teste MMS | Claude + Codex |
 
-**Bloqueios antes de T-Poisson:**
+**Pendências antes de avançar para PIC/PIDC:**
 
-- DEC-0018 está aceita: estratégia de quadratura — células retangulares Gauss 2×2.
-- DEC-0019 está aceita: `Node::volume` foi removido.
-- R-010: raio de suporte ainda precisa ser centralizado antes de usos extensos; T-Poisson deve introduzir `MLSConfig`.
+- Revisar matematicamente o solver EFG inicial.
+- Medir L∞ do potencial e erros de campo.
+- Só migrar para esparso depois de preservar o teste MMS como referência.
 
 ## Decisões-chave vigentes
 
 | DEC | Título | Status |
 | --- | --- | --- |
 | DEC-0005 | Unidades SI; Poisson = ∇²u = −ρ/ε₀ | aceita |
-| DEC-0006 | Formulação variacional de Galerkin para EFG | proposta |
+| DEC-0006 | Formulação variacional de Galerkin para EFG | aceita |
 | DEC-0009 | `ShapeFunctionData` como contrato MLS/EFG/PIDC | aceita |
 | DEC-0012 | `NodeCloud` como proprietário canônico de nós | aceita |
 | DEC-0013 | Função peso: spline quártica | aceita (hipótese) |
@@ -75,6 +86,7 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0019 | Semântica de `Node::volume` | aceita |
 | DEC-0020 | `NeighborSearchGrid` v1 não periódico | aceita |
 | DEC-0021 | `PeriodicBoundary2D` como helper geométrico | aceita |
+| DEC-0023 | Raio de suporte MMS inicial: `1.8*h_g` via `MLSConfig` | aceita |
 
 ## Regras críticas
 

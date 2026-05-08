@@ -104,6 +104,11 @@ em todas as chamadas para uma dada nuvem. Ver proposta DEC-0017.
 
 Arquivo afetado: `include/pidc/mls/MLSShapeFunction.hpp` (interface futura).
 
+**Atualização (T-Poisson, 2026-05-08):** resolvido para a Fase D inicial.
+`MLSConfig` centraliza o raio de suporte e `DEC-0023` fixa
+`support_radius = 1.8*h_g` para o teste MMS. Fases futuras ainda devem evitar
+valores ad hoc fora de configuração explícita.
+
 ---
 
 ## R-011 — Busca de vizinhança O(N) em `mls_evaluate` acumulada em EFG
@@ -132,6 +137,9 @@ Mitigação:
 Decidir a estratégia de quadratura (DEC-0017) antes de implementar o assembler.
 Candidato natural para grade regular: células retangulares com Gauss 2×2.
 O assembler recebe as células como parâmetro (não as embutidas em `NodeCloud`).
+
+**Atualização (T-Poisson, 2026-05-08):** resolvido para a Fase D inicial por
+`GaussCell2D` e `gauss2x2_cells`, com teste específico de integração.
 
 ---
 

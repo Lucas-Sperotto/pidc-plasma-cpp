@@ -108,12 +108,12 @@ Resolver a equação de Poisson para casos manufaturados.
 
 ### Tarefas
 
-- [ ] Definir células de integração.
-- [ ] Implementar quadratura de Gauss 2D.
-- [ ] Montar matriz de rigidez `K`.
-- [ ] Montar vetor de fontes `b`.
-- [ ] Impor Dirichlet por substituição direta no caso interpolante.
-- [ ] Resolver inicialmente com matriz densa.
+- [x] Definir células de integração.
+- [x] Implementar quadratura de Gauss 2D.
+- [x] Montar matriz de rigidez `K`.
+- [x] Montar vetor de fontes `b`.
+- [x] Impor Dirichlet por substituição direta no caso interpolante.
+- [x] Resolver inicialmente com matriz densa.
 - [ ] Migrar para matriz esparsa após validação.
 
 ### Caso de referência
@@ -128,11 +128,11 @@ u(x,y) = \sin(\pi x)\sin(\pi y)
 
 ### Métricas
 
-- [ ] erro L2 do potencial;
+- [x] erro L2 do potencial;
 - [ ] erro L∞ do potencial;
 - [ ] erro L2 do campo;
 - [ ] erro L∞ do campo;
-- [ ] estudo de convergência ao refinar a nuvem.
+- [x] estudo de convergência ao refinar a nuvem.
 
 ---
 
@@ -208,7 +208,7 @@ para cada passo de tempo:
 
 ### Casos
 
-- [ ] Poisson MMS 2D.
+- [x] Poisson MMS 2D.
 - [ ] Deposição de carga com uma partícula no centro.
 - [ ] Deposição de carga com partículas aleatórias e semente fixa.
 - [ ] Campo elétrico manufaturado.
