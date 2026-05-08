@@ -80,19 +80,19 @@ Implementar funções de forma e gradientes.
 - [x] Implementar base linear 2D: `p(x,y) = [1, x, y]`.
 - [x] Implementar função peso compacta.
 - [ ] Implementar domínios circulares e retangulares.
-- [ ] Implementar cálculo de `phi_i(x)`.
-- [ ] Implementar cálculo de `grad(phi_i)(x)`.
-- [ ] Monitorar cardinalidade local `n >= m`.
-- [ ] Monitorar condicionamento da matriz MLS.
+- [x] Implementar cálculo de `phi_i(x)` — `mls_evaluate` em MLSShapeFunction.hpp (T-017).
+- [x] Implementar cálculo de `grad(phi_i)(x)` — diferenciação implícita em mls_evaluate (T-017).
+- [x] Monitorar cardinalidade local `n >= m` — lança `std::runtime_error` se n < 3 (T-017).
+- [ ] Monitorar condicionamento da matriz MLS (pendente).
 
 ### Testes obrigatórios
 
-- [ ] Partição da unidade: `sum_i phi_i(x) = 1`.
-- [ ] Reprodução constante: `u(x,y)=c`.
-- [ ] Reprodução linear: `u(x,y)=a+bx+cy`.
-- [ ] Gradiente de função linear: `grad(u) = [b, c]`.
-- [ ] Nenhum `NaN` ou `Inf`.
-- [ ] Falha controlada se `n < m`.
+- [x] Partição da unidade: `sum_i phi_i(x) = 1` — test_mls_shape_function (T-017).
+- [x] Reprodução constante: `u(x,y)=c` — coberta por partição da unidade (T-017).
+- [x] Reprodução linear: `u(x,y)=a+bx+cy` — test_mls_shape_function (T-017).
+- [x] Gradiente de função linear: `grad(u) = [b, c]` — gradientes de LR em test_mls_shape_function (T-017).
+- [ ] Nenhum `NaN` ou `Inf` — não há teste explícito; garantido indiretamente pela LR passando.
+- [x] Falha controlada se `n < m` — lança runtime_error com < 3 vizinhos (T-017).
 
 ### Critério de aceite
 

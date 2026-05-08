@@ -499,3 +499,42 @@ Testes novos devem incluir `tests/test_utils.hpp` e ser registrados com
 Impacto na validação:
 A suíte atual continua passando com 8/8 testes, agora usando helpers comuns
 para falhas e comparações numéricas.
+
+---
+
+## DEC-0018 — Estratégia de quadratura para EFG: células retangulares com Gauss 2×2
+
+Status: proposta
+Proposta por: Claude — 2026-05-08 (T-019)
+
+Contexto:
+A formulação de Galerkin (DEC-0006) exige integração numérica de
+$K_{ij} = \int_\Omega \nabla\phi_i \cdot \nabla\phi_j\,d\Omega$.
+Para o caso de validação MMS com domínio $[0,1]^2$ e nuvem regular $N \times N$,
+é necessário decidir a estrutura de integração antes de implementar o assembler EFG (R-012).
+
+Decisão:
+Usar células de integração retangulares de background, independentes da nuvem de nós.
+Para uma nuvem $N \times N$ com passo $h_g = 1/(N-1)$, criar $(N-1)^2$ células
+retangulares de lado $h_g$. Aplicar quadratura de Gauss 2×2 em cada célula (4 pontos,
+precisão exata para polinômios de grau ≤ 3).
+
+Justificativa:
+
+- Células de background são a abordagem padrão em EFG (Liu & Gu, 2005).
+- Desacopla a malha de integração da nuvem de nós: a quadratura não depende de
+  `Node::volume`, eliminando a ambiguidade de R-009.
+- Gauss 2×2 é suficiente para integrandos que envolvem produtos de gradientes de
+  funções MLS de base linear (grau efetivo do integrando ≈ 2).
+- A mesma estrutura de célula pode ser reutilizada por PIDC (deposição de carga).
+
+Impacto no código:
+
+- Criar `include/pidc/efg/GaussCell2D.hpp`: struct com `origin`, `size`, e vetor de
+  `{point, weight}` gerado por `gauss2x2_cells(domain, n_cells_x, n_cells_y)`.
+- `EFGPoissonSolver` recebe `std::vector<GaussCell2D>` e `const NodeCloud&`.
+- `Node::volume` pode ser removido ou mantido como campo auxiliar sem uso em quadratura.
+
+Impacto na validação:
+O teste MMS com $u(x,y) = \sin(\pi x)\sin(\pi y)$ deve convergir quando $h_g \to 0$,
+validando a quadratura e o assembler simultaneamente.

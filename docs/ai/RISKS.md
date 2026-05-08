@@ -82,3 +82,55 @@ Definir `NodeCloud` como proprietário canônico do vetor, passado por referênc
 
 Mitigação:
 Documentar a semântica antes de usar `volume` em qualquer cálculo. Candidato natural: área da célula de background de integração (não o domínio de influência MLS). Registrar decisão antes da Fase C.
+
+**Atualização (T-019, 2026-05-08):** R-009 é BLOQUEANTE para EFG. A montagem de K
+por quadratura de Gauss não usa `Node::volume` — usa as células de integração
+explicitamente. `volume` pode ser removido de `Node` ou documentado como
+"peso nodal para integração direta nodal" (abordagem alternativa). Decisão
+necessária antes de T-Poisson.
+
+---
+
+## R-010 — Raio de suporte sem propriedade definida
+
+`mls_evaluate` recebe `support_radius` como `double` anônimo. No ciclo EFG,
+o assembler, o loop PIDC e os testes usarão esse valor. Se cada chamador usar
+um valor ligeiramente diferente — por exemplo, `1.5 * dx` calculado
+independentemente —, $A(\mathbf{x})$ será inconsistente entre montagem de K
+e avaliação nas partículas, gerando erro sutil impossível de rastrear.
+
+Mitigação:
+Centralizar `support_radius` em um `MLSConfig` struct ou constante de configuração
+antes de implementar EFG. No mínimo, documentar que o mesmo valor deve ser usado
+em todas as chamadas para uma dada nuvem. Ver proposta DEC-0017.
+
+Arquivo afetado: `include/pidc/mls/MLSShapeFunction.hpp` (interface futura).
+
+---
+
+## R-011 — Busca de vizinhança O(N) em `mls_evaluate` acumulada em EFG
+
+`mls_evaluate` percorre todos os N nós para encontrar vizinhos dentro do suporte.
+Para a validação com N = 25 e ~100 pontos de Gauss: ~2 500 comparações. Aceitável.
+Para simulação com N = 1 024 e ~4 000 pontos de Gauss: ~4 × 10⁶ comparações por
+montagem de K. Ainda tolerável. Para N = 10 000+: passa a ser gargalo real.
+
+Mitigação:
+Aceitar a busca linear para todas as validações (Fase C, D). Registrar que
+`NeighborSearchGrid` (fase B, ainda não implementada) é pré-requisito antes
+de qualquer execução de simulação com N > 500. Não otimizar antes de validar.
+
+---
+
+## R-012 — Células de integração para EFG não definidas
+
+A formulação de Galerkin (DEC-0006) exige integração numérica de
+$K_{ij} = \int (\nabla\phi_i \cdot \nabla\phi_j)\,d\Omega$.
+Sem células de integração definidas, o assembler EFG não pode ser implementado.
+O campo `Node::volume` (R-009) não é suficiente: quadratura de Gauss de ordem 2
+ou 3 requer posições e pesos explícitos dentro de cada célula.
+
+Mitigação:
+Decidir a estratégia de quadratura (DEC-0017) antes de implementar o assembler.
+Candidato natural para grade regular: células retangulares com Gauss 2×2.
+O assembler recebe as células como parâmetro (não as embutidas em `NodeCloud`).
