@@ -9,7 +9,6 @@ namespace pidc {
 struct Node {
     std::size_t id{0};
     Vec2 position{};
-    double volume{0.0};
 };
 
 } // namespace pidc

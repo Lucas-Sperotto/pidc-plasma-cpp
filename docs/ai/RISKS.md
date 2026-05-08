@@ -83,11 +83,9 @@ Definir `NodeCloud` como proprietário canônico do vetor, passado por referênc
 Mitigação:
 Documentar a semântica antes de usar `volume` em qualquer cálculo. Candidato natural: área da célula de background de integração (não o domínio de influência MLS). Registrar decisão antes da Fase C.
 
-**Atualização (T-019, 2026-05-08):** R-009 é BLOQUEANTE para EFG. A montagem de K
-por quadratura de Gauss não usa `Node::volume` — usa as células de integração
-explicitamente. `volume` pode ser removido de `Node` ou documentado como
-"peso nodal para integração direta nodal" (abordagem alternativa). Decisão
-necessária antes de T-Poisson.
+**Atualização (T-023, 2026-05-08):** resolvido por DEC-0019 aceita.
+`Node::volume` foi removido, pois a montagem de K por quadratura de Gauss usa
+células de integração explícitas e não pesos nodais ambíguos.
 
 ---
 

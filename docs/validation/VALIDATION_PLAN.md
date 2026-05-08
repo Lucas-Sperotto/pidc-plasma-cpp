@@ -30,6 +30,11 @@ propriedades abaixo forem satisfeitas com as tolerâncias indicadas.
 | Gradiente LR — $\partial_y\phi \cdot x_i$ | $\|\sum_i \partial_y\phi_i\,x_i\|$ | $< 10^{-10}$ |
 | Gradiente LR — $\partial_y\phi \cdot y_i$ | $\|\sum_i \partial_y\phi_i\,y_i - 1\|$ | $< 10^{-10}$ |
 
+A tolerância de $10^{-10}$ é um padrão de projeto para verificar propriedades que
+devem ser satisfeitas até a precisão da máquina (double). A tese de Marques
+(2008) não especifica tolerâncias para estes testes, portanto este é um critério
+de robustez numérica definido para esta implementação.
+
 As 9 propriedades devem ser verificadas em **pelo menos 4 pontos de consulta**,
 incluindo pelo menos 3 pontos assimétricos (i.e., $x \neq y$ e $x,y \notin \{0, 0.25, 0.5, 0.75, 1.0\}$).
 

@@ -135,7 +135,7 @@ int main()
         std::numeric_limits<double>::quiet_NaN(),
         "NaN radius must throw");
 
-    const pidc::NodeCloud outside_cloud{{pidc::Node{0, pidc::Vec2{1.1, 0.5}, 0.0}}};
+    const pidc::NodeCloud outside_cloud{{pidc::Node{0, pidc::Vec2{1.1, 0.5}}}};
     bool outside_node_threw = false;
     try {
         (void)pidc::NeighborSearchGrid{outside_cloud, domain, 0.25};

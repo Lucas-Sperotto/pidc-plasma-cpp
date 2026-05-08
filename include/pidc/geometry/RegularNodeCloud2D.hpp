@@ -30,8 +30,7 @@ inline NodeCloud create_regular_node_cloud(const Domain2D& domain, std::size_t n
             const std::size_t id = j * nx + i;
             nodes.push_back(Node{
                 id,
-                Vec2{lower.x + static_cast<double>(i) * dx, lower.y + static_cast<double>(j) * dy},
-                0.0,
+                Vec2{lower.x + static_cast<double>(i) * dx, lower.y + static_cast<double>(j) * dy}
             });
         }
     }

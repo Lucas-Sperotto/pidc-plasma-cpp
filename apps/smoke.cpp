@@ -8,7 +8,7 @@ int main()
 {
     const pidc::Domain2D domain{{0.0, 0.0}, {1.0, 1.0}};
     pidc::Particle particle{{1.25, -0.25}, {0.0, 0.0}, 0};
-    const pidc::Node node{0, {0.5, 0.5}, 1.0};
+    const pidc::Node node{0, {0.5, 0.5}};
 
     particle.position = domain.wrapPeriodic(particle.position);
 

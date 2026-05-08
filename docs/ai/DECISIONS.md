@@ -544,36 +544,26 @@ validando a quadratura e o assembler simultaneamente.
 
 ## DEC-0019 — Semântica de Node::volume para quadratura EFG
 
-Status: proposta
-Proposta por: Claude — 2026-05-08 (auditoria Fases 0/A/B/C)
+Status: aceita
+Proposta por: Claude — 2026-05-08
+Decidido por: Professor + Gemini — 2026-05-08 (T-023)
 
 Contexto:
 R-009 e R-012. `Node::volume` existe mas sua semântica nunca foi documentada.
 DEC-0018 (aceita) adota células de integração explícitas (`GaussCell2D`);
 portanto `Node::volume` não é necessário para montar K.
 
-Decisão proposta:
-Setar `Node::volume = dx * dy` para nuvens regulares (área da célula de
-background). Documentar explicitamente que o campo é **informativo** e NÃO
-usado em nenhum cálculo de K nem de deposição de carga. Se Gemini/Professor
-confirmarem que não há uso planejado, remover o campo de `Node` completamente.
+Decisão:
+Remover completamente o campo `volume` da struct `Node`.
 
 Justificativa:
-Manter um campo sem semântica definida é fonte de bug silencioso (R-009).
-A decisão de remoção ou documentação deve vir antes de T-Poisson para que
-o assembler não introduza usos ad hoc de `Node::volume`.
+A estratégia de quadratura EFG (DEC-0018) não utiliza `Node::volume`. Manter um campo não utilizado e com semântica ambígua (R-009) é um risco. A remoção simplifica a interface de `Node` e elimina a ambiguidade. Se um método futuro (e.g., integração nodal) necessitar de um volume, ele será reintroduzido com semântica clara.
 
 Impacto no código:
+- `include/pidc/Node.hpp`: O membro `volume` deve ser removido da struct.
+- `include/pidc/geometry/RegularNodeCloud2D.hpp`: A inicialização do `volume` do nó é removida.
 
-- `include/pidc/Node.hpp`: documentar ou remover `volume`.
-- `include/pidc/geometry/RegularNodeCloud2D.hpp`: preencher `volume = dx*dy`
-  se campo for mantido.
-
-Impacto na validação:
-Nenhum impacto nos testes existentes. Clarifica contrato de `Node` antes
-de T-Poisson.
-
-Responsável pela decisão: Professor + Gemini (T-023).
+Impacto na validação: Nenhum. Os testes não dependem deste campo.
 
 ---
 

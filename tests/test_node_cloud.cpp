@@ -15,9 +15,9 @@ int main()
     require(empty.nodes().empty(), "empty NodeCloud must expose an empty node list");
 
     std::vector<pidc::Node> nodes{
-        {10, {0.0, 0.0}, 0.25},
-        {20, {1.0, 0.0}, 0.25},
-        {30, {0.0, 1.0}, 0.50},
+        {10, {0.0, 0.0}},
+        {20, {1.0, 0.0}},
+        {30, {0.0, 1.0}},
     };
 
     const pidc::NodeCloud cloud{std::move(nodes)};
@@ -31,7 +31,6 @@ int main()
 
     require(approx_equal(cloud[1].position.x, 1.0), "operator[] must expose node position x");
     require(approx_equal(cloud[2].position.y, 1.0), "operator[] must expose node position y");
-    require(approx_equal(cloud.nodes()[2].volume, 0.50), "nodes() must expose node volume");
 
     std::cout << "node_cloud test passed\n";
     return 0;

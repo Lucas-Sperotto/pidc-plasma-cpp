@@ -50,16 +50,13 @@ Implementar e validar o PIDC de forma incremental:
 
 | Tarefa | Responsável | Prioridade |
 | --- | --- | --- |
-| T-023 | Definir semântica de `Node::volume`; aceitar/rejeitar DEC-0019 | Professor + Gemini |
-| T-028 | Revisar `docs/validation/VALIDATION_PLAN.md` contra a tese | Gemini |
-| T-029 | Revisar contratos `NeighborSearchGrid` + `PeriodicBoundary2D` antes de acoplamento | Claude + Gemini |
 | T-Poisson | Implementar assembler EFG Poisson (MMS) | Codex |
 
 **Bloqueios antes de T-Poisson:**
 
 - DEC-0018 está aceita: estratégia de quadratura — células retangulares Gauss 2×2.
-- R-009/DEC-0019: semântica de `Node::volume` ainda precisa de decisão.
-- R-010: raio de suporte ainda precisa ser centralizado antes de usos extensos.
+- DEC-0019 está aceita: `Node::volume` foi removido.
+- R-010: raio de suporte ainda precisa ser centralizado antes de usos extensos; T-Poisson deve introduzir `MLSConfig`.
 
 ## Decisões-chave vigentes
 
@@ -75,7 +72,7 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0016 | `mls_evaluate` como função livre, retorna `ShapeFunctionData` | aceita |
 | DEC-0017 | Framework de testes: CTest + `test_utils.hpp` | aceita |
 | DEC-0018 | Quadratura EFG: células retangulares Gauss 2×2 | aceita |
-| DEC-0019 | Semântica de `Node::volume` | proposta |
+| DEC-0019 | Semântica de `Node::volume` | aceita |
 | DEC-0020 | `NeighborSearchGrid` v1 não periódico | aceita |
 | DEC-0021 | `PeriodicBoundary2D` como helper geométrico | aceita |
 

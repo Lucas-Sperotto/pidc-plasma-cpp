@@ -18,7 +18,7 @@ pidc::NodeCloud make_regular_cloud()
     std::size_t id = 0;
     for (int j = 0; j < 5; ++j)
         for (int i = 0; i < 5; ++i)
-            nodes.push_back({id++, pidc::Vec2{i * 0.25, j * 0.25}, 1.0});
+            nodes.push_back({id++, pidc::Vec2{i * 0.25, j * 0.25}});
     return pidc::NodeCloud{std::move(nodes)};
 }
 
@@ -131,7 +131,7 @@ int main()
     check_all(sfd4, x4, "x4");
 
     // --- exception with too few neighbours ---
-    const pidc::NodeCloud tiny{{pidc::Node{0, pidc::Vec2{0.5, 0.5}, 1.0}}};
+    const pidc::NodeCloud tiny{{pidc::Node{0, pidc::Vec2{0.5, 0.5}}}};
     bool threw = false;
     try {
         pidc::mls_evaluate({0.5, 0.5}, tiny, 1.0);
