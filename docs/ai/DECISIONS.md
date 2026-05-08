@@ -504,8 +504,9 @@ para falhas e comparações numéricas.
 
 ## DEC-0018 — Estratégia de quadratura para EFG: células retangulares com Gauss 2×2
 
-Status: proposta
+Status: aceita
 Proposta por: Claude — 2026-05-08 (T-019)
+Aceita por: Claude — 2026-05-08 (auditoria Fases 0/A/B/C, após T-022 confirmar T-Poisson desbloqueada). Desbloqueia T-Poisson (Codex).
 
 Contexto:
 A formulação de Galerkin (DEC-0006) exige integração numérica de
@@ -538,3 +539,38 @@ Impacto no código:
 Impacto na validação:
 O teste MMS com $u(x,y) = \sin(\pi x)\sin(\pi y)$ deve convergir quando $h_g \to 0$,
 validando a quadratura e o assembler simultaneamente.
+
+---
+
+## DEC-0019 — Semântica de Node::volume para quadratura EFG
+
+Status: proposta
+Proposta por: Claude — 2026-05-08 (auditoria Fases 0/A/B/C)
+
+Contexto:
+R-009 e R-012. `Node::volume` existe mas sua semântica nunca foi documentada.
+DEC-0018 (aceita) adota células de integração explícitas (`GaussCell2D`);
+portanto `Node::volume` não é necessário para montar K.
+
+Decisão proposta:
+Setar `Node::volume = dx * dy` para nuvens regulares (área da célula de
+background). Documentar explicitamente que o campo é **informativo** e NÃO
+usado em nenhum cálculo de K nem de deposição de carga. Se Gemini/Professor
+confirmarem que não há uso planejado, remover o campo de `Node` completamente.
+
+Justificativa:
+Manter um campo sem semântica definida é fonte de bug silencioso (R-009).
+A decisão de remoção ou documentação deve vir antes de T-Poisson para que
+o assembler não introduza usos ad hoc de `Node::volume`.
+
+Impacto no código:
+
+- `include/pidc/Node.hpp`: documentar ou remover `volume`.
+- `include/pidc/geometry/RegularNodeCloud2D.hpp`: preencher `volume = dx*dy`
+  se campo for mantido.
+
+Impacto na validação:
+Nenhum impacto nos testes existentes. Clarifica contrato de `Node` antes
+de T-Poisson.
+
+Responsável pela decisão: Professor + Gemini (T-023).
