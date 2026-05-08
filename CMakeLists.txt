@@ -56,6 +56,17 @@ add_test(
     COMMAND pidc_test_shape_function_data
 )
 
+add_executable(pidc_test_species
+    tests/test_species.cpp
+)
+
+target_link_libraries(pidc_test_species PRIVATE pidc_core)
+
+add_test(
+    NAME species
+    COMMAND pidc_test_species
+)
+
 add_executable(pidc_test_node_cloud
     tests/test_node_cloud.cpp
 )
