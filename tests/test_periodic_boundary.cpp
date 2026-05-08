@@ -1,30 +1,14 @@
-#include <cmath>
-#include <cstdlib>
 #include <iostream>
-#include <string>
 
 #include "pidc/Domain2D.hpp"
 #include "pidc/Vec2.hpp"
-
-namespace {
-
-bool approx_equal(double lhs, double rhs)
-{
-    return std::abs(lhs - rhs) < 1.0e-12;
-}
-
-void require(bool condition, const std::string& message)
-{
-    if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
-        std::exit(1);
-    }
-}
-
-} // namespace
+#include "test_utils.hpp"
 
 int main()
 {
+    using pidc::test::approx_equal;
+    using pidc::test::require;
+
     const pidc::Domain2D domain{{0.0, 0.0}, {1.0, 2.0}};
 
     const pidc::Vec2 right_top = domain.wrapPeriodic({1.25, 2.75});

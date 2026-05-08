@@ -1,25 +1,14 @@
-#include <cstdlib>
 #include <iostream>
-#include <string>
 #include <vector>
 
 #include "pidc/Particle.hpp"
 #include "pidc/Species.hpp"
-
-namespace {
-
-void require(bool condition, const std::string& message)
-{
-    if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
-        std::exit(1);
-    }
-}
-
-} // namespace
+#include "test_utils.hpp"
 
 int main()
 {
+    using pidc::test::require;
+
     // Caso 1: defaults
     {
         const pidc::Species s{};

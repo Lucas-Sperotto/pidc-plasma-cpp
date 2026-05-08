@@ -1,32 +1,15 @@
-#include <cstdlib>
 #include <iostream>
-#include <string>
 #include <utility>
 #include <vector>
 
 #include "pidc/geometry/NodeCloud.hpp"
-
-namespace {
-
-void require(bool condition, const std::string& message)
-{
-    if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
-        std::exit(1);
-    }
-}
-
-bool approx_equal(double lhs, double rhs)
-{
-    const double tolerance = 1.0e-12;
-    const double diff = lhs - rhs;
-    return diff < tolerance && diff > -tolerance;
-}
-
-} // namespace
+#include "test_utils.hpp"
 
 int main()
 {
+    using pidc::test::approx_equal;
+    using pidc::test::require;
+
     const pidc::NodeCloud empty{std::vector<pidc::Node>{}};
     require(empty.size() == 0, "empty NodeCloud must have size zero");
     require(empty.nodes().empty(), "empty NodeCloud must expose an empty node list");

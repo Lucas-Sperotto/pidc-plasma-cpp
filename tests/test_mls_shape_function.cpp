@@ -1,5 +1,3 @@
-#include <cmath>
-#include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -8,21 +6,9 @@
 #include "pidc/Vec2.hpp"
 #include "pidc/geometry/NodeCloud.hpp"
 #include "pidc/mls/MLSShapeFunction.hpp"
+#include "test_utils.hpp"
 
 namespace {
-
-void require(bool cond, const char* msg)
-{
-    if (!cond) {
-        std::cerr << "FAIL: " << msg << '\n';
-        std::exit(1);
-    }
-}
-
-bool approx_equal(double lhs, double rhs, double tol = 1.0e-10)
-{
-    return std::abs(lhs - rhs) < tol;
-}
 
 // Regular 5x5 node grid in [0,1]^2 with spacing 0.25
 pidc::NodeCloud make_regular_cloud()
@@ -40,6 +26,9 @@ pidc::NodeCloud make_regular_cloud()
 
 int main()
 {
+    using pidc::test::approx_equal;
+    using pidc::test::require;
+
     const pidc::NodeCloud cloud = make_regular_cloud();
     const double h = 0.6;  // support radius — covers ~12 neighbours from centre
 
@@ -75,15 +64,15 @@ int main()
         sum_dy_y    += sfd.grad_phi[k].y * xi.y;
     }
 
-    require(approx_equal(sum_phi,     1.0),  "partition of unity: sum(phi) == 1");
-    require(approx_equal(sum_phi_x,   x.x),  "linear reproduction: sum(phi * xi.x) == x.x");
-    require(approx_equal(sum_phi_y,   x.y),  "linear reproduction: sum(phi * xi.y) == x.y");
-    require(approx_equal(sum_dphi_dx, 0.0),  "gradient PU x: sum(dphi/dx) == 0");
-    require(approx_equal(sum_dphi_dy, 0.0),  "gradient PU y: sum(dphi/dy) == 0");
-    require(approx_equal(sum_dx_x,    1.0),  "gradient LR: sum(dphi/dx * xi.x) == 1");
-    require(approx_equal(sum_dx_y,    0.0),  "gradient LR: sum(dphi/dx * xi.y) == 0");
-    require(approx_equal(sum_dy_x,    0.0),  "gradient LR: sum(dphi/dy * xi.x) == 0");
-    require(approx_equal(sum_dy_y,    1.0),  "gradient LR: sum(dphi/dy * xi.y) == 1");
+    require(approx_equal(sum_phi,     1.0, 1.0e-10),  "partition of unity: sum(phi) == 1");
+    require(approx_equal(sum_phi_x,   x.x, 1.0e-10),  "linear reproduction: sum(phi * xi.x) == x.x");
+    require(approx_equal(sum_phi_y,   x.y, 1.0e-10),  "linear reproduction: sum(phi * xi.y) == x.y");
+    require(approx_equal(sum_dphi_dx, 0.0, 1.0e-10),  "gradient PU x: sum(dphi/dx) == 0");
+    require(approx_equal(sum_dphi_dy, 0.0, 1.0e-10),  "gradient PU y: sum(dphi/dy) == 0");
+    require(approx_equal(sum_dx_x,    1.0, 1.0e-10),  "gradient LR: sum(dphi/dx * xi.x) == 1");
+    require(approx_equal(sum_dx_y,    0.0, 1.0e-10),  "gradient LR: sum(dphi/dx * xi.y) == 0");
+    require(approx_equal(sum_dy_x,    0.0, 1.0e-10),  "gradient LR: sum(dphi/dy * xi.x) == 0");
+    require(approx_equal(sum_dy_y,    1.0, 1.0e-10),  "gradient LR: sum(dphi/dy * xi.y) == 1");
 
     // --- second query point (off-centre) ---
     const pidc::Vec2 x2{0.3, 0.7};
@@ -97,9 +86,9 @@ int main()
         s2x += sfd2.phi[k] * xi.x;
         s2y += sfd2.phi[k] * xi.y;
     }
-    require(approx_equal(s2,  1.0),   "second query: partition of unity");
-    require(approx_equal(s2x, x2.x),  "second query: linear reproduction x");
-    require(approx_equal(s2y, x2.y),  "second query: linear reproduction y");
+    require(approx_equal(s2,  1.0, 1.0e-10),   "second query: partition of unity");
+    require(approx_equal(s2x, x2.x, 1.0e-10),  "second query: linear reproduction x");
+    require(approx_equal(s2y, x2.y, 1.0e-10),  "second query: linear reproduction y");
 
     // --- exception with too few neighbours ---
     const pidc::NodeCloud tiny{{pidc::Node{0, pidc::Vec2{0.5, 0.5}, 1.0}}};

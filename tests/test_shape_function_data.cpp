@@ -1,23 +1,12 @@
-#include <cstdlib>
 #include <iostream>
-#include <string>
 
 #include "pidc/ShapeFunctionData.hpp"
-
-namespace {
-
-void require(bool condition, const std::string& message)
-{
-    if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
-        std::exit(1);
-    }
-}
-
-} // namespace
+#include "test_utils.hpp"
 
 int main()
 {
+    using pidc::test::require;
+
     // Caso 1: struct vazia e válida (0 == 0 == 0).
     {
         const pidc::ShapeFunctionData empty{};

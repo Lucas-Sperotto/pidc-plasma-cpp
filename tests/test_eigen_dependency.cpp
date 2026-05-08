@@ -1,32 +1,15 @@
-#include <cstdlib>
 #include <iostream>
-#include <string>
 
 #include <Eigen/Dense>
 
 #include "pidc/Vec2.hpp"
-
-namespace {
-
-void require(bool condition, const std::string& message)
-{
-    if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
-        std::exit(1);
-    }
-}
-
-bool approx_equal(double lhs, double rhs)
-{
-    const double tolerance = 1.0e-12;
-    const double diff = lhs - rhs;
-    return diff < tolerance && diff > -tolerance;
-}
-
-} // namespace
+#include "test_utils.hpp"
 
 int main()
 {
+    using pidc::test::approx_equal;
+    using pidc::test::require;
+
     const Eigen::Matrix2d matrix = (Eigen::Matrix2d{} << 2.0, 0.0, 0.0, 4.0).finished();
     const Eigen::Vector2d rhs{6.0, 8.0};
     const Eigen::Vector2d solution = matrix.ldlt().solve(rhs);

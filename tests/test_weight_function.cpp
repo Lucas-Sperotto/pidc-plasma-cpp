@@ -1,29 +1,13 @@
-#include <cmath>
-#include <cstdlib>
 #include <iostream>
-#include <string>
 
 #include "pidc/mls/WeightFunction.hpp"
-
-namespace {
-
-void require(bool condition, const std::string& message)
-{
-    if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
-        std::exit(1);
-    }
-}
-
-bool approx_equal(double lhs, double rhs, double tol = 1.0e-12)
-{
-    return std::abs(lhs - rhs) < tol;
-}
-
-} // namespace
+#include "test_utils.hpp"
 
 int main()
 {
+    using pidc::test::approx_equal;
+    using pidc::test::require;
+
     // Valores na fronteira e fora do suporte
     require(approx_equal(pidc::weight_quartic(0.0), 1.0),
             "weight_quartic(0.0) must be 1.0");
