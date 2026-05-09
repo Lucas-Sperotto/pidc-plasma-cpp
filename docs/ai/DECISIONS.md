@@ -1000,3 +1000,37 @@ Impacto no código:
 (T-041) usará `rho(x)` como o termo fonte, e o teste validará a solução numérica
 `phi_h` contra a `phi(x)` analítica. `FieldInterpolation1D` (T-042) usará `E(x)`
 como o campo de referência.
+
+---
+
+## DEC-0031 — Cache da fatoração em EFGPoissonSolver
+
+Status: aceita
+Proposta por: Gemini — 2026-05-09 (T-GEMINI-F-READINESS)
+Implementada por: Claude — 2026-05-09 (T-045A)
+
+Contexto:
+R-017 identificou que `EFGPoissonSolver::solve()` re-fatora a matriz de rigidez
+`K` a cada chamada. Para o ciclo PIDC, onde `K` é constante, isso é
+extremamente ineficiente.
+
+Decisão:
+A interface do `EFGPoissonSolver` será refatorada para separar a fatoração da
+solução. A classe armazenará a fatoração internamente.
+
+```cpp
+class EFGPoissonSolver {
+public:
+    void assemble_and_factorize(...); // Monta K e armazena a fatoração.
+    Eigen::VectorXd solve(const Eigen::VectorXd& rhs) const; // Usa a fatoração cacheada.
+};
+```
+
+Justificativa:
+Esta mudança permite que o ciclo PIDC chame `assemble_and_factorize()` uma vez
+e, a cada passo de tempo, chame apenas `solve(rhs)`, que é muito mais rápido
+(substituição para frente/trás em vez de re-fatoração). Isso resolve R-017.
+
+Impacto no código:
+Modificar `EFGPoissonSolver.hpp`. O teste MMS (`test_efg_poisson_mms`) e o futuro
+app do ciclo PIDC (T-045) devem ser atualizados para usar a nova interface.

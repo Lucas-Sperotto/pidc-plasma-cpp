@@ -23,6 +23,8 @@ using ScalarField2D = std::function<double(Vec2)>;
 
 class EFGPoissonSolver {
 public:
+    // Assembles K and b from Gauss integration, applies Dirichlet penalty, and
+    // caches the LDLT factorization. For MMS tests and any single-solve use case.
     void assemble(
         const NodeCloud& nodes,
         const Domain2D& domain,
@@ -32,6 +34,7 @@ public:
         ScalarField2D dirichlet)
     {
         assembled_ = false;
+        factorized_ = false;
 
         if (nodes.size() == 0) {
             throw std::invalid_argument{"EFGPoissonSolver requires at least one node"};
@@ -77,30 +80,87 @@ public:
             throw std::runtime_error{"EFGPoissonSolver assembled non-finite matrix or rhs"};
         }
 
+        cache_factorization();
         assembled_ = true;
     }
 
+    // DEC-0031: Assembles K only (no source integral), applies Dirichlet penalty to K,
+    // and caches the LDLT factorization. For the PIDC loop where b changes every step
+    // (b comes from deposit_charge) while K stays constant.
+    // After this call, use solve(rhs) — not solve() — to provide the external RHS.
+    void assemble_stiffness_only(
+        const NodeCloud& nodes,
+        const Domain2D& domain,
+        const std::vector<GaussCell2D>& cells,
+        const MLSConfig& mls,
+        const ScalarField2D& dirichlet)
+    {
+        assembled_ = false;
+        factorized_ = false;
+
+        if (nodes.size() == 0) {
+            throw std::invalid_argument{"EFGPoissonSolver requires at least one node"};
+        }
+        if (cells.empty()) {
+            throw std::invalid_argument{"EFGPoissonSolver requires at least one integration cell"};
+        }
+        if (!dirichlet) {
+            throw std::invalid_argument{"EFGPoissonSolver requires a Dirichlet field"};
+        }
+
+        validate_mls_config(mls);
+
+        const auto n = static_cast<Eigen::Index>(nodes.size());
+        std::vector<Eigen::Triplet<double>> stiffness_entries;
+        rhs_ = Eigen::VectorXd::Zero(n);
+
+        for (const GaussCell2D& cell : cells) {
+            for (const GaussPoint2D& quadrature : cell.points) {
+                const ShapeFunctionData shape = mls_evaluate(quadrature.point, nodes, mls);
+
+                for (std::size_t a = 0; a < shape.neighbor_ids.size(); ++a) {
+                    for (std::size_t b = 0; b < shape.neighbor_ids.size(); ++b) {
+                        const auto row = static_cast<Eigen::Index>(shape.neighbor_ids[a]);
+                        const auto col = static_cast<Eigen::Index>(shape.neighbor_ids[b]);
+                        const double grad_dot =
+                            shape.grad_phi[a].x * shape.grad_phi[b].x +
+                            shape.grad_phi[a].y * shape.grad_phi[b].y;
+                        stiffness_entries.emplace_back(row, col, quadrature.weight * grad_dot);
+                    }
+                }
+            }
+        }
+
+        rebuild_stiffness(n, stiffness_entries);
+        impose_dirichlet_penalty(nodes, domain, dirichlet, stiffness_entries);
+
+        if (!sparse_matrix_all_finite(stiffness_)) {
+            throw std::runtime_error{"EFGPoissonSolver assembled non-finite stiffness matrix"};
+        }
+
+        cache_factorization();
+        // assembled_ stays false: rhs_ was not built from a source integral
+    }
+
+    // Solves K u = b using the cached RHS and factorization (after assemble()).
     Eigen::VectorXd solve() const
     {
         if (!assembled_) {
             throw std::runtime_error{"EFGPoissonSolver solve called before assemble"};
         }
+        return solve_with_cached_factorization(rhs_);
+    }
 
-        Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> ldlt;
-        ldlt.compute(stiffness_);
-        if (ldlt.info() != Eigen::Success) {
-            throw std::runtime_error{"EFGPoissonSolver stiffness matrix factorization failed"};
+    // DEC-0031: Solves K u = rhs using the cached factorization and a caller-provided RHS.
+    // Intended for the PIDC time loop: rhs = Q_nodal / epsilon0 (from deposit_charge).
+    // Requires assemble() or assemble_stiffness_only() to have been called first.
+    Eigen::VectorXd solve(const Eigen::VectorXd& rhs) const
+    {
+        if (!factorized_) {
+            throw std::runtime_error{
+                "EFGPoissonSolver solve(rhs) called before assemble or assemble_stiffness_only"};
         }
-
-        Eigen::VectorXd solution = ldlt.solve(rhs_);
-        if (ldlt.info() != Eigen::Success) {
-            throw std::runtime_error{"EFGPoissonSolver sparse solve failed"};
-        }
-        if (!solution.allFinite()) {
-            throw std::runtime_error{"EFGPoissonSolver produced a non-finite solution"};
-        }
-
-        return solution;
+        return solve_with_cached_factorization(rhs);
     }
 
     Eigen::MatrixXd stiffness_matrix() const
@@ -116,7 +176,32 @@ public:
 private:
     Eigen::SparseMatrix<double> stiffness_{};
     Eigen::VectorXd rhs_{};
+    // DEC-0031: cached factorization — computed once per assemble*() call,
+    // reused across all solve(rhs) calls in the PIDC time loop.
+    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> ldlt_{};
     bool assembled_{false};
+    bool factorized_{false};
+
+    void cache_factorization()
+    {
+        ldlt_.compute(stiffness_);
+        if (ldlt_.info() != Eigen::Success) {
+            throw std::runtime_error{"EFGPoissonSolver stiffness matrix factorization failed"};
+        }
+        factorized_ = true;
+    }
+
+    Eigen::VectorXd solve_with_cached_factorization(const Eigen::VectorXd& rhs) const
+    {
+        Eigen::VectorXd solution = ldlt_.solve(rhs);
+        if (ldlt_.info() != Eigen::Success) {
+            throw std::runtime_error{"EFGPoissonSolver sparse solve failed"};
+        }
+        if (!solution.allFinite()) {
+            throw std::runtime_error{"EFGPoissonSolver produced a non-finite solution"};
+        }
+        return solution;
+    }
 
     static void require_finite(double value, const char* message)
     {
