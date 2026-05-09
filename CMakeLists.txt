@@ -228,6 +228,17 @@ add_test(
     COMMAND pidc_test_cic_deposition_1d
 )
 
+add_executable(pidc_test_cic_deposition_reference_1d
+    tests/test_cic_deposition_reference_1d.cpp
+)
+
+target_link_libraries(pidc_test_cic_deposition_reference_1d PRIVATE pidc_core)
+
+add_test(
+    NAME cic_deposition_reference_1d
+    COMMAND pidc_test_cic_deposition_reference_1d
+)
+
 add_executable(pidc_test_manufactured_field_1d
     tests/test_manufactured_field_1d.cpp
 )
@@ -248,4 +259,37 @@ target_link_libraries(pidc_test_poisson_solver_1d PRIVATE pidc_core)
 add_test(
     NAME poisson_solver_1d
     COMMAND pidc_test_poisson_solver_1d
+)
+
+add_executable(pidc_test_field_interpolation_1d
+    tests/test_field_interpolation_1d.cpp
+)
+
+target_link_libraries(pidc_test_field_interpolation_1d PRIVATE pidc_core)
+
+add_test(
+    NAME field_interpolation_1d
+    COMMAND pidc_test_field_interpolation_1d
+)
+
+add_executable(pidc_test_leapfrog_1d
+    tests/test_leapfrog_1d.cpp
+)
+
+target_link_libraries(pidc_test_leapfrog_1d PRIVATE pidc_core)
+
+add_test(
+    NAME leapfrog_1d
+    COMMAND pidc_test_leapfrog_1d
+)
+
+add_executable(pidc_test_pic_periodic_motion_1d
+    tests/test_pic_periodic_motion_1d.cpp
+)
+
+target_link_libraries(pidc_test_pic_periodic_motion_1d PRIVATE pidc_core)
+
+add_test(
+    NAME pic_periodic_motion_1d
+    COMMAND pidc_test_pic_periodic_motion_1d
 )
