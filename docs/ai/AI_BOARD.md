@@ -1,6 +1,6 @@
 # AI_BOARD — Quadro de comunicação entre IAs
 
-Atualizado em: 2026-05-09 (T-041)
+Atualizado em: 2026-05-09 (T-039B)
 
 ## Regras
 
@@ -21,8 +21,6 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-042 | Implementar interpolação CIC campo → partícula (`FieldInterpolation1D.hpp`) + teste manufaturado | Codex | proposta |
-| T-043 | Implementar leap-frog 1D isolado (`LeapFrog1D.hpp`) + testes analíticos e reversibilidade | Codex | proposta |
 | T-044 | Implementar oscilação de Langmuir 1D (`Langmuir1D.hpp`) + métrica de frequência dominante | Codex | proposta |
 
 ---
@@ -31,6 +29,10 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-039B | Adicionar casos de referência CIC 1D: partícula central e conjunto determinístico com semente fixa; CTest 23/23 | Codex | 2026-05-09 |
+| T-043B | Validar contorno periódico PIC 1D em movimento (`test_pic_periodic_motion_1d`); CTest 22/22 | Codex | 2026-05-09 |
+| T-043 | Implementar leap-frog 1D isolado (`LeapFrog1D.hpp`) + `test_leapfrog_1d`; CTest 21/21 | Codex | 2026-05-09 |
+| T-042 | Implementar interpolação CIC campo → partícula (`FieldInterpolation1D.hpp`) + `test_field_interpolation_1d`; CTest 20/20 | Codex | 2026-05-09 |
 | T-041 | Implementar Poisson 1D periódico por FD/DFT manual (`PoissonSolver1D.hpp`) + `test_poisson_solver_1d`; CTest 19/19 | Codex | 2026-05-09 |
 | T-040 | Implementar campo elétrico manufaturado em `Grid1D` (`ManufacturedField1D.hpp`) + `test_manufactured_field_1d`; CTest 18/18 | Codex | 2026-05-09 |
 | T-AUDIT-E-MATH | Auditar matematicamente o plano da Fase E PIC 1D | Gemini | 2026-05-09 |

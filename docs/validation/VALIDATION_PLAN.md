@@ -112,6 +112,20 @@ CTest: 14/14 testes passando.
 
 ## Fase E — PIC 1D de referência
 
+### T-039B — Referências de deposição CIC 1D
+
+Critérios de aceite em `tests/test_cic_deposition_reference_1d.cpp`:
+
+| Propriedade | Tolerância |
+| --- | --- |
+| Uma partícula no centro de célula deposita 50/50 nos vizinhos | $< 10^{-12}$ |
+| Uma partícula no centro do domínio sobre nó deposita 100% no nó | $< 10^{-12}$ |
+| Conjunto determinístico com semente fixa é reprodutível | $< 10^{-12}$ |
+| Deposição do conjunto fixo coincide com referência manual CIC | $< 10^{-12}$ |
+| Conservação global no conjunto fixo | $< 10^{-12}$ |
+
+Resultado em 2026-05-09 (T-039B): `cic_deposition_reference_1d` passou; CTest 23/23.
+
 ### T-040 — Campo manufaturado 1D em grade periódica
 
 Campo analítico:
@@ -158,6 +172,66 @@ Critérios de aceite em `tests/test_poisson_solver_1d.cpp`:
 | Falha controlada para tamanho incorreto ou `epsilon0 <= 0` | obrigatório |
 
 Resultado em 2026-05-09 (T-041): `poisson_solver_1d` passou; CTest 19/19.
+
+### T-042 — Interpolação CIC campo → partícula
+
+Regra de interpolação:
+
+$$E_p = E_j(1-f) + E_{j+1}f$$
+
+onde `j = grid.left_node_index(x_p)`, `j+1` é periódico e
+`f = grid.fraction_in_cell(x_p)`.
+
+Critérios de aceite em `tests/test_field_interpolation_1d.cpp`:
+
+| Propriedade | Tolerância |
+| --- | --- |
+| Casos exatos em grid `[0,1)`, `nx=4`, campo `{0,4,8,12}` | $< 10^{-12}$ |
+| Wrap periódico para posições negativas e maiores que `xmax` | $< 10^{-12}$ |
+| Campo uniforme interpolado em posições arbitrárias | $< 10^{-12}$ |
+| Sobrecarga para `std::vector<Particle>` preserva tamanho e ordem | obrigatório |
+| Campo manufaturado senoidal amostrado com `nx=128` | erro absoluto $< 3\times10^{-3}$ |
+| Falha controlada para tamanho incorreto ou valor não finito | obrigatório |
+
+Resultado em 2026-05-09 (T-042): `field_interpolation_1d` passou; CTest 20/20.
+
+### T-043 — Leap-frog 1D isolado
+
+Convenção:
+
+- antes de `initialize_leapfrog_velocity_1d`, `Particle::velocity.x` é `v(t=0)`;
+- após a inicialização, `Particle::velocity.x` é `v(t=-dt/2)`;
+- cada avanço aplica `v_half += (q/m)E dt` e depois
+  `x = grid.wrap_position(x + v_half dt)`.
+
+Critérios de aceite em `tests/test_leapfrog_1d.cpp`:
+
+| Propriedade | Tolerância |
+| --- | --- |
+| Campo nulo → movimento uniforme | $< 10^{-12}$ |
+| Campo constante → posição analítica em dois passos | $< 10^{-12}$ |
+| Campo constante → velocidade de meio passo analítica | $< 10^{-12}$ |
+| Reversibilidade drift-only com `dt` e `-dt` | $< 10^{-10}$ |
+| Wrap periódico para cruzamento de `xmax` | $< 10^{-12}$ |
+| Falha controlada para entrada não finita | obrigatório |
+
+Resultado em 2026-05-09 (T-043): `leapfrog_1d` passou; CTest 21/21.
+
+### T-043B — Contorno periódico PIC 1D em movimento
+
+Critérios de aceite em `tests/test_pic_periodic_motion_1d.cpp`:
+
+| Propriedade | Tolerância |
+| --- | --- |
+| Cruzamento pela direita em campo nulo | $< 10^{-12}$ |
+| Cruzamento pela esquerda em campo nulo | $< 10^{-12}$ |
+| Imagem exata de `xmax` retorna a `xmin` | $< 10^{-12}$ |
+| Todas as partículas permanecem em `[xmin,xmax)` | obrigatório |
+| Número de partículas preservado após múltiplos passos | obrigatório |
+| Posições após múltiplos passos coincidem com `wrap(x0 + v*t)` | $< 10^{-12}$ |
+| Velocidades em campo nulo permanecem constantes | $< 10^{-12}$ |
+
+Resultado em 2026-05-09 (T-043B): `pic_periodic_motion_1d` passou; CTest 22/22.
 
 ---
 

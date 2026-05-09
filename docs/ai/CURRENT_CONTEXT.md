@@ -69,8 +69,9 @@ Implementar e validar o PIDC de forma incremental:
 - Algoritmo CIC: `Q[left] += q*(1-f)`, `Q[right] += q*f`, onde `f = fraction_in_cell(x_p)`.
 - Conservação `|ΣQ_i − Σq_p| < 1e-12` garantida pela partição da unidade dos pesos CIC.
 - `test_cic_deposition_1d`: 6 subtestes (centro 50/50, 100% sobre nó, periodicidade, conservação, tamanho, throw).
+- `test_cic_deposition_reference_1d`: casos de referência com partícula central e conjunto determinístico de semente fixa (T-039B).
 - Plano `docs/ai/PHASE_E_PIC1D_PLAN.md` criado e aprovado.
-- CTest: **17/17 testes passando**.
+- CTest após T-039: **17/17 testes passando**; após T-039B e tarefas seguintes, suíte atual **23/23**.
 
 **Campo manufaturado 1D implementado e testado (T-040, 2026-05-09):**
 
@@ -92,40 +93,69 @@ Implementar e validar o PIDC de forma incremental:
 - Gauge: potencial médio zero (`phi_hat[0] = 0` e remoção do resíduo médio numérico).
 - Campo nodal: diferença central periódica `E_i = -(phi_{i+1} - phi_{i-1})/(2 dx)`.
 - `test_poisson_solver_1d` valida MMS periódico contra `SineManufacturedField1D`, gauge, densidade zero e falhas de entrada.
-- Não há ainda interpolação campo→partícula, leap-frog ou Langmuir.
+- Não houve implementação de leap-frog ou Langmuir.
 - CTest: **19/19 testes passando**.
+
+**Interpolação CIC campo→partícula implementada e testada (T-042, 2026-05-09):**
+
+- `interpolate_field_cic_1d` em `include/pidc/pic/FieldInterpolation1D.hpp` (header-only, sem Eigen).
+- Sobrecargas:
+  - posição escalar `double x`;
+  - vetor de `pidc::Particle`, usando apenas `particle.position.x`.
+- Regra CIC periódica: `E_p = E_left*(1-f) + E_right*f`, com índices/fração vindos de `Grid1D`.
+- `test_field_interpolation_1d` cobre casos exatos, wrap periódico, campo uniforme, campo manufaturado senoidal e falhas de entrada.
+- Não houve implementação de leap-frog, Langmuir, MLS, EFG ou PIDC.
+- CTest: **20/20 testes passando**.
+
+**Leap-frog 1D isolado implementado e testado (T-043, 2026-05-09):**
+
+- `initialize_leapfrog_velocity_1d` e `leapfrog_advance_1d` em `include/pidc/pic/LeapFrog1D.hpp` (header-only, sem Eigen).
+- Convenção:
+  - antes da inicialização, `Particle::velocity.x` representa `v(t=0)`;
+  - após a inicialização, representa `v(t=-dt/2)`;
+  - após cada avanço, continua sendo velocidade de meio passo.
+- Atualização: `v_half += (q/m)E dt`; `x = grid.wrap_position(x + v_half dt)`.
+- `test_leapfrog_1d` cobre movimento uniforme, aceleração constante, reversibilidade drift-only, wrap periódico e falhas de entrada.
+- Não houve implementação de Langmuir, MLS, EFG ou PIDC.
+- CTest: **21/21 testes passando**.
+
+**Contorno periódico PIC 1D em movimento validado (T-043B, 2026-05-09):**
+
+- `tests/test_pic_periodic_motion_1d.cpp` usa `Grid1D` + `LeapFrog1D` com campo nulo.
+- Valida cruzamentos pela direita e pela esquerda, imagem exata `xmax -> xmin`, permanência em `[xmin,xmax)`, conservação do número de partículas e posições analíticas embrulhadas após múltiplos passos.
+- Não houve implementação de Langmuir, MLS, EFG ou PIDC.
+- CTest: **22/22 testes passando**.
 
 **PIC baseline 1D — grade criada e auditada (T-038A/B/C, 2026-05-09):**
 
 - `pic::Grid1D` em `include/pidc/pic/Grid1D.hpp` (namespace `pidc::pic`).
 - Semântica periódica semiaberta `[xmin, xmax)`, `nx` nós = `nx` células, `dx = L/nx` (DEC-0027 aceita).
 - Métodos: `size`, `coordinate`, `wrap_position`, `cell_index`, `left_node_index`, `right_node_index`, `fraction_in_cell`.
-- `test_pic_grid1d` passa; suíte atual 18/18 CTest passando.
+- `test_pic_grid1d` passa; após T-039B, a suíte atual está em 23/23 CTest passando.
 - **Fronteiras arquiteturais definidas (T-038C):** módulo `pic/` independente de `mls/`, `efg/` e Eigen.
   - Vetores nodais PIC 1D: `std::vector<double>` (DEC-0028).
   - Reutilizar `Particle`/`Species` existentes, usando apenas componente `.x`.
   - `PoissonSolver1D` será separado do `EFGPoissonSolver` (diferentes algoritmos/dimensões).
   - Comparação PIC vs PIDC adiada para depois das validações individuais.
 - Riscos R-018–R-021 registrados.
-- Sequência correta de implementação: T-039 (CIC) → T-040 (campo manufaturado) → T-041 (Poisson1D) → T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
+- Sequência correta de implementação: T-039 (CIC) → T-040 (campo manufaturado) → T-041 (Poisson1D) → T-042 (interpolação) → T-043 (leap-frog) → T-043B (contorno periódico) → T-044 (Langmuir).
 
 **Infra:**
 
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
 - `scripts/build.sh` e `scripts/run_tests.sh` existem.
-- CTest atual: **19/19 testes passando**.
+- CTest atual: **23/23 testes passando**.
 
 ## Próximos passos
 
 | Tarefa | Descrição | Responsável | Prioridade |
 | --- | --- | --- | --- |
-| T-042 | Interpolação campo CIC 1D: `interpolate_field_cic_1d`, teste com campo manufaturado | Codex | alta |
-| T-043 | Leap-frog 1D isolado com teste analítico e reversibilidade | Codex | média |
+| T-044 | Oscilação de Langmuir 1D após leap-frog | Codex | média |
 
 **Pendências antes de avançar para PIDC (Fase F):**
 
-- Completar sequência PIC 1D: T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
+- Completar sequência PIC 1D: T-044 (Langmuir).
 - R-017: cache LDLT em `EFGPoissonSolver` — resolver antes de Phase F.
 - R-015, R-016, DEC-0022: periodicidade MLS/busca — bloqueantes para Phase F.
 
@@ -152,6 +182,8 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0026 | `deposit_charge`: função livre para deposição conservativa de carga | aceita |
 | DEC-0027 | Grade periódica 1D: `nx` nós = `nx` células, `dx = L/nx` | aceita |
 | DEC-0028 | Vetores nodais PIC 1D como `std::vector<double>`, sem Eigen | aceita |
+| DEC-0029 | Validação separada para componentes do PIC 1D | proposta |
+| DEC-0030 | Convenção para MMS 1D senoidal | proposta |
 
 ## Regras críticas
 

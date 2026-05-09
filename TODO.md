@@ -148,9 +148,9 @@ Implementar um PIC simples para comparação com o PIDC.
 - [x] Deposição de carga em grade regular (`deposit_charge_cic_1d`, T-039).
 - [x] Campo elétrico manufaturado em `Grid1D` (`SineManufacturedField1D`, T-040).
 - [x] Solver de Poisson por diferenças finitas/DFT manual (`solve_poisson_periodic_1d`, T-041).
-- [ ] Interpolação do campo para partículas.
-- [ ] Leap-frog.
-- [ ] Contorno periódico.
+- [x] Interpolação do campo para partículas (`interpolate_field_cic_1d`, T-042).
+- [x] Leap-frog isolado (`initialize_leapfrog_velocity_1d`, `leapfrog_advance_1d`, T-043).
+- [x] Contorno periódico em movimento (`test_pic_periodic_motion_1d`, T-043B).
 - [ ] Caso físico de oscilação de Langmuir 1D.
 
 ### Critério de aceite
@@ -214,8 +214,8 @@ para cada passo de tempo:
 - [x] Poisson MMS 1D periódico (test_poisson_solver_1d).
 - [x] Conservação de carga global e por partícula (test_charge_conservation).
 - [x] Campo elétrico manufaturado em `Grid1D` (test_manufactured_field_1d).
-- [ ] Deposição de carga com uma partícula no centro.
-- [ ] Deposição de carga com partículas aleatórias e semente fixa.
+- [x] Deposição de carga com uma partícula no centro (`test_cic_deposition_reference_1d`, T-039B).
+- [x] Deposição de carga com partículas aleatórias e semente fixa (`test_cic_deposition_reference_1d`, T-039B).
 - [ ] Oscilação de Langmuir 1D.
 - [ ] Comparação PIC-FD versus PIDC.
 - [ ] Reprodução qualitativa da tese.

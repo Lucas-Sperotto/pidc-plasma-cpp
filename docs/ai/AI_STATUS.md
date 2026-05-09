@@ -4,6 +4,30 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Codex concluiu T-039B. `tests/test_cic_deposition_reference_1d.cpp` foi criado para registrar casos de referência de deposição CIC 1D: partícula no centro de célula com divisão 50/50, partícula no centro do domínio sobre nó, e conjunto determinístico gerado por semente fixa com conservação global e reprodutibilidade. Nenhum código de produção foi alterado nesta tarefa. **23/23 testes passando.**
+
+---
+
+## Último resumo anterior
+
+Codex concluiu T-043B. `tests/test_pic_periodic_motion_1d.cpp` valida o contorno periódico 1D em movimento usando `Grid1D` e `LeapFrog1D`: cruzamentos pela direita/esquerda, imagem exata de `xmax`, permanência em `[xmin,xmax)`, conservação do número de partículas e posições analíticas embrulhadas em múltiplos passos com campo nulo. Nenhum Langmuir, PIDC, MLS ou EFG foi alterado nesta tarefa. **22/22 testes passando.**
+
+---
+
+## Último resumo anterior
+
+Codex concluiu T-043. `initialize_leapfrog_velocity_1d` e `leapfrog_advance_1d` foram criados em `include/pidc/pic/LeapFrog1D.hpp`, seguindo a convenção de velocidade defasada de meio passo. `test_leapfrog_1d` valida movimento uniforme, aceleração constante, reversibilidade drift-only, wrap periódico e falhas para entradas não finitas. Nenhum Langmuir, PIDC, MLS ou EFG foi alterado nesta tarefa. **21/21 testes passando.**
+
+---
+
+## Último resumo anterior
+
+Codex concluiu T-042. `interpolate_field_cic_1d` foi criado em `include/pidc/pic/FieldInterpolation1D.hpp`, interpolando campos nodais em `Grid1D` com pesos CIC periódicos `E_p = E_left*(1-f) + E_right*f`. `test_field_interpolation_1d` valida casos exatos, wrap periódico, sobrecarga vetorial para partículas, campo manufaturado senoidal e falhas de entrada. Nenhum leap-frog, Langmuir, MLS, EFG ou PIDC foi alterado nesta tarefa. **20/20 testes passando.**
+
+---
+
+## Último resumo anterior
+
 Codex concluiu T-041. `solve_poisson_periodic_1d` foi criado em `include/pidc/pic/PoissonSolver1D.hpp`, resolvendo $\partial^2\phi/\partial x^2 = -\rho/\epsilon_0$ em `Grid1D` periódico via DFT manual e autovalores de diferenças finitas, com gauge de média zero. `test_poisson_solver_1d` valida MMS periódico contra `SineManufacturedField1D`, campo nodal, gauge, densidade zero e falhas de entrada. Nenhuma interpolação campo→partícula, leap-frog ou Langmuir foi implementado. **19/19 testes passando.**
 
 ---
@@ -43,9 +67,9 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud`, `RegularNodeCloud2D`, `NeighborSearchGrid` e `PeriodicBoundary2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados, guarda de raio de suporte e robustez finita testadas) |
 | efg | `GaussCell2D` e `EFGPoissonSolver` esparso implementados; Poisson MMS Dirichlet passou em 5×5 e 9×9 com métricas de potencial e campo |
-| pic | `Grid1D`, deposição CIC 1D, campo manufaturado 1D e Poisson 1D periódico implementados e testados; ainda sem interpolação campo→partícula, leap-frog ou Langmuir |
+| pic | `Grid1D`, deposição CIC 1D, campo manufaturado 1D, Poisson 1D periódico, interpolação CIC campo→partícula, leap-frog 1D isolado e contorno periódico em movimento implementados/testados; ainda sem Langmuir |
 | pidc | `deposit_charge` conservativo implementado em `include/pidc/pidc/ChargeDeposition.hpp` (T-037) |
-| validation | CTest com 19 testes; inclui MLS, EFG Poisson MMS, conservação de carga PIDC, `Grid1D`, deposição CIC 1D, campo manufaturado 1D e Poisson MMS 1D periódico |
+| validation | CTest com 23 testes; inclui MLS, EFG Poisson MMS, conservação de carga PIDC, `Grid1D`, deposição CIC 1D, referências CIC 1D, campo manufaturado 1D, Poisson MMS 1D periódico, interpolação CIC 1D, leap-frog 1D e movimento periódico PIC 1D |
 | scripts | `scripts/build.sh` e `scripts/run_tests.sh` criados |
 
 ## Testes
@@ -71,14 +95,30 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation (PIDC) | passou em 2026-05-09 (test_charge_conservation, 15 subtestes) |
 | cic_deposition_1d | passou em 2026-05-09 (test_cic_deposition_1d, 6 subtestes) |
+| cic_deposition_reference_1d | passou em 2026-05-09 |
 | manufactured_field_1d | passou em 2026-05-09 |
 | poisson_solver_1d | passou em 2026-05-09 |
+| field_interpolation_1d | passou em 2026-05-09 |
+| leapfrog_1d | passou em 2026-05-09 |
+| pic_periodic_motion_1d | passou em 2026-05-09 |
 | Poisson MMS | passou em 2026-05-08 |
 | Langmuir 1D | não iniciado |
 
 ---
 
 ## Histórico
+
+### 2026-05-09: T-039B (Codex — referências de deposição CIC 1D)
+Codex criou `tests/test_cic_deposition_reference_1d.cpp`, registrado no CMake como `cic_deposition_reference_1d`. O teste cobre partícula no centro de uma célula (50/50), partícula no centro do domínio sobre nó, e um conjunto determinístico com semente fixa, comparando contra referência manual, conservação global e reprodutibilidade. CTest 23/23 passando. Não houve alteração de código de produção.
+
+### 2026-05-09: T-043B (Codex — contorno periódico PIC 1D em movimento)
+Codex criou `tests/test_pic_periodic_motion_1d.cpp`, registrado no CMake como `pic_periodic_motion_1d`. O teste usa `Grid1D` e `LeapFrog1D` com campo nulo para verificar cruzamentos pelas duas bordas, imagem exata de `xmax -> xmin`, posições sempre em `[xmin,xmax)`, conservação do número de partículas e posições analíticas embrulhadas em múltiplos passos. CTest 22/22 passando. Não houve implementação de Langmuir ou mudanças em PIDC/MLS/EFG.
+
+### 2026-05-09: T-043 (Codex — leap-frog 1D isolado)
+Codex criou `include/pidc/pic/LeapFrog1D.hpp` com `initialize_leapfrog_velocity_1d` e `leapfrog_advance_1d`. A inicialização converte `Particle::velocity.x` de `v(t=0)` para `v(t=-dt/2)`, e o avanço aplica `v_half += (q/m)E dt` seguido de `x = wrap(x + v_half dt)`. `tests/test_leapfrog_1d.cpp` cobre campo nulo, campo constante com solução analítica, reversibilidade drift-only com `dt` e `-dt`, wrap periódico e falhas de entrada. CTest 21/21 passando. Próximo passo sugerido: T-044, oscilação de Langmuir 1D.
+
+### 2026-05-09: T-042 (Codex — interpolação CIC campo → partícula)
+Codex criou `include/pidc/pic/FieldInterpolation1D.hpp` com duas sobrecargas de `interpolate_field_cic_1d`: uma para uma posição escalar e outra para `std::vector<pidc::Particle>`. A interpolação usa a mesma semântica periódica de `Grid1D` e os pesos CIC da deposição 1D, sem Eigen, MLS, EFG ou PIDC. `tests/test_field_interpolation_1d.cpp` cobre casos exatos em grid `[0,1)`, periodicidade, campo uniforme, campo manufaturado senoidal com tolerância `3e-3`, tamanho da sobrecarga vetorial e falhas para tamanho incorreto/valor não finito. CTest 20/20 passando. Próximo passo sugerido: T-043, leap-frog 1D isolado.
 
 ### 2026-05-09: T-041 (Codex — Poisson 1D periódico)
 Codex criou `include/pidc/pic/PoissonSolver1D.hpp` com `PoissonResult1D` e `solve_poisson_periodic_1d`. O solver usa `std::vector<double>`, DFT manual com `std::complex<double>`, autovalores do operador de diferenças finitas periódico e gauge de potencial médio zero. O campo nodal é calculado por diferença central periódica. `tests/test_poisson_solver_1d.cpp` valida contra `SineManufacturedField1D`, verifica erro L∞ do potencial e do campo, média de potencial nula, densidade zero e falhas para tamanho incorreto/`epsilon0` inválido. CTest 19/19 passando. Não houve implementação de interpolação campo→partícula, leap-frog ou Langmuir.
