@@ -194,3 +194,36 @@ add_test(
     NAME efg_poisson_mms
     COMMAND pidc_test_efg_poisson_mms
 )
+
+add_executable(pidc_test_charge_conservation
+    tests/test_charge_conservation.cpp
+)
+
+target_link_libraries(pidc_test_charge_conservation PRIVATE pidc_core)
+
+add_test(
+    NAME charge_conservation
+    COMMAND pidc_test_charge_conservation
+)
+
+add_executable(pidc_test_pic_grid1d
+    tests/test_pic_grid1d.cpp
+)
+
+target_link_libraries(pidc_test_pic_grid1d PRIVATE pidc_core)
+
+add_test(
+    NAME pic_grid1d
+    COMMAND pidc_test_pic_grid1d
+)
+
+add_executable(pidc_test_cic_deposition_1d
+    tests/test_cic_deposition_1d.cpp
+)
+
+target_link_libraries(pidc_test_cic_deposition_1d PRIVATE pidc_core)
+
+add_test(
+    NAME cic_deposition_1d
+    COMMAND pidc_test_cic_deposition_1d
+)
