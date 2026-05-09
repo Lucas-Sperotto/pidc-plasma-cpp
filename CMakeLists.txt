@@ -304,3 +304,9 @@ add_test(
     NAME langmuir_1d
     COMMAND pidc_test_langmuir_1d
 )
+
+add_executable(pidc_phase_e_diagnostics
+    apps/phase_e_diagnostics.cpp
+)
+
+target_link_libraries(pidc_phase_e_diagnostics PRIVATE pidc_core)

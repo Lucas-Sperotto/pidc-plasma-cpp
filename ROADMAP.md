@@ -44,17 +44,19 @@ Entrega:
 
 ---
 
-## Marco 4 — PIC baseline
+## Marco 4 — PIC baseline ✓ CONCLUÍDO (2026-05-09)
 
 Resultado esperado: PIC regular simples funciona e serve como referência.
 
 Entrega:
 
-- deposição em grade
-- solver de Poisson FD/FFT
-- interpolação de campo
-- leap-frog
-- oscilação de Langmuir
+- [x] deposição em grade (`deposit_charge_cic_1d`, T-039)
+- [x] campo manufaturado 1D (`SineManufacturedField1D`, T-040)
+- [x] solver de Poisson FD/DFT (`solve_poisson_periodic_1d`, T-041)
+- [x] interpolação de campo CIC (`interpolate_field_cic_1d`, T-042)
+- [x] leap-frog (`leapfrog_advance_1d`, T-043)
+- [x] oscilação de Langmuir (`run_langmuir_1d`, T-044; ω_obs=1.005 ∈ [0.8,1.2]·ω_pe)
+- [x] app diagnóstico com convergência O(h²) e saída CSV (T-REVIEW-E)
 
 ---
 

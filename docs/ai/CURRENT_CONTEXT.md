@@ -126,6 +126,17 @@ Implementar e validar o PIDC de forma incremental:
 - Não houve implementação de Langmuir, MLS, EFG ou PIDC.
 - CTest: **22/22 testes passando**.
 
+**Revisão e diagnóstico Fase E concluídos (T-REVIEW-E, 2026-05-09):**
+
+- App `apps/phase_e_diagnostics.cpp` criado — executa as 3 seções diagnósticas:
+  - Poisson 1D MMS: convergência O(h²) para nx={16,32,64,128}; L∞(φ)=2.008e-04 em nx=128.
+  - Interpolação CIC: L∞ decresce de 1.18e-01 (nx=16) a 1.89e-03 (nx=128).
+  - Langmuir: ω_obs=1.005, deriva=2.51%, erro de carga=5.6e-16.
+- CSVs em `data/output/poisson1d_convergence.csv` e `data/output/langmuir1d_summary.csv`.
+- Script `scripts/plot_phase_e.py` gera `docs/figures/poisson1d_convergence.png`.
+- **Marco 4 fechado** em ROADMAP.md.
+- Task spec para Gemini criada em `docs/ai/GEMINI_TASKS/T_GEMINI_F_READINESS.md`.
+
 **Oscilação de Langmuir 1D implementada e testada (T-044, 2026-05-09):**
 
 - `run_langmuir_1d` em `include/pidc/pic/Langmuir1D.hpp` (header-only, sem Eigen).
@@ -161,13 +172,16 @@ Implementar e validar o PIDC de forma incremental:
 
 | Tarefa | Descrição | Responsável | Prioridade |
 | --- | --- | --- | --- |
-| T-045 | Iniciar Fase F — PIDC completo: resolver R-017 (cache LDLT), revisar R-015/R-016/DEC-0022 | Professor / Claude | proposta |
+| T-GEMINI-F-READINESS | Auditar R-015/R-016/R-017/DEC-0022; propor sequência mínima T-045 | Gemini | proposta |
+| T-045 | Iniciar Fase F — PIDC completo (aguarda T-GEMINI-F-READINESS) | Professor / Claude | proposta |
 
 **Pendências antes de avançar para PIDC (Fase F):**
 
-- Fase E concluída (T-044 ✓).
-- R-017: cache LDLT em `EFGPoissonSolver` — resolver antes de Phase F.
-- R-015, R-016, DEC-0022: periodicidade MLS/busca — bloqueantes para Phase F.
+- Fase E concluída + diagnósticos confirmados (T-REVIEW-E ✓).
+- T-GEMINI-F-READINESS: Gemini deve auditar bloqueadores antes de T-045.
+  - R-017: cache LDLT em `EFGPoissonSolver`.
+  - R-015, R-016, DEC-0022: periodicidade MLS/busca.
+  - Spec completa em `docs/ai/GEMINI_TASKS/T_GEMINI_F_READINESS.md`.
 
 ## Decisões-chave vigentes
 

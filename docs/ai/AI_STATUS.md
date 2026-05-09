@@ -4,6 +4,12 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Claude concluiu T-REVIEW-E. App diagnóstico `apps/phase_e_diagnostics.cpp` criado: (A) convergência Poisson 1D MMS — O(h²) confirmada para nx={16,32,64,128}, L∞(φ)=2.008e-04 e L∞(E)=1.262e-03 em nx=128; (B) interpolação CIC — erro decresce de 1.18e-01 para 1.89e-03 entre nx=16 e nx=128; (C) Langmuir ω_obs=1.005, deriva=2.51%, erro de carga=5.6e-16. CSVs exportados em `data/output/`. Script `scripts/plot_phase_e.py` gera figura de convergência log-log. Marco 4 fechado em ROADMAP.md. Tarefa para Gemini criada em `docs/ai/GEMINI_TASKS/T_GEMINI_F_READINESS.md`. **24/24 CTest passando.**
+
+---
+
+## Último resumo anterior
+
 Claude concluiu T-044 (Langmuir 1D). `run_langmuir_1d` implementada em `include/pidc/pic/Langmuir1D.hpp` (header-only, sem Eigen). Integra a cadeia completa PIC 1D: deposição CIC → Poisson periódico (DFT) → interpolação CIC → leap-frog → diagnóstico. Unidades normalizadas: ε₀=1, q_mac=-L/N, m_mac=L/N, q/m=-1, ω_pe=1. Perturbação modo-1 de amplitude 1e-3; 2500 passos de dt=0.05. Frequência observada extraída por DFT O(n²/2) da série temporal de Re[Ê_k=1]. Resultado: ω_obs=1.005 ∈ [0.8, 1.2]·ω_pe. Deriva de energia ≤ 25%; erro de carga ≤ 1e-10. `test_langmuir_1d` cobre T1–T4; tempo de execução ≈ 0.41 s. **Fase E completa. 24/24 testes passando.**
 
 ---
