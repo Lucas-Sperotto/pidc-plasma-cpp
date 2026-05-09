@@ -1034,3 +1034,72 @@ e, a cada passo de tempo, chame apenas `solve(rhs)`, que é muito mais rápido
 Impacto no código:
 Modificar `EFGPoissonSolver.hpp`. O teste MMS (`test_efg_poisson_mms`) e o futuro
 app do ciclo PIDC (T-045) devem ser atualizados para usar a nova interface.
+
+Impacto na validação:
+`tests/test_efg_poisson_external_rhs.cpp` valida que `solve(rhs)` reutiliza a
+fatoração, rejeita RHS externo inválido e preserva o termo de penalidade
+Dirichlet não-homogêneo ao somar o RHS externo ao cache de contorno.
+
+---
+
+## DEC-0032 — Domínios de influência como helpers geométricos
+
+Status: aceita
+Proposta e implementada por: Codex — 2026-05-09 (T-045D)
+
+Contexto:
+O TODO da Fase C pedia domínios circulares e retangulares. A formulação MLS
+validada até aqui usa raio circular via `MLSConfig::support_radius`; trocar a
+forma de suporte dentro de `mls_evaluate` sem auditoria poderia alterar a
+formulação matemática validada.
+
+Decisão:
+Adicionar `CircularInfluenceDomain` e `RectangularInfluenceDomain` em
+`include/pidc/mls/InfluenceDomain.hpp` como helpers testados de pertinência e
+distância normalizada. Eles não alteram `mls_evaluate` nem os testes MLS/EFG
+validados.
+
+Justificativa:
+Fecha a pendência estrutural sem misturar uma mudança matemática no núcleo MLS.
+O uso desses helpers em uma futura variante retangular de MLS deve passar por
+auditoria Gemini/Claude antes de substituir a distância circular já validada.
+
+Impacto no código:
+Novo header `InfluenceDomain.hpp` e teste `test_influence_domain`.
+
+Impacto na validação:
+`tests/test_influence_domain.cpp` valida inclusão de centro, bordas, pontos
+externos, distância normalizada e falhas para parâmetros inválidos.
+
+---
+
+## DEC-0033 — Smoke PIDC 2D inicial em domínio Dirichlet
+
+Status: aceita
+Proposta por: Gemini — 2026-05-09 (T-GEMINI-F-READINESS)
+Implementada por: Codex — 2026-05-09 (T-045D)
+
+Contexto:
+R-015/R-016 registram que MLS e busca de vizinhos ainda não são periódicos.
+Mesmo assim, é possível validar o ciclo PIDC mínimo em domínio não-periódico
+com Dirichlet homogêneo antes de implementar periodicidade.
+
+Decisão:
+O primeiro ciclo PIDC 2D usa domínio `[0,1]^2`, nuvem regular pequena, Poisson
+EFG Dirichlet, `K` fatorada uma vez por `assemble_stiffness_only`, deposição por
+células difusas cacheadas, RHS `Q/epsilon0` recalculado por passo e interpolação
+`E(x_p) = -Σ_i u_i grad_phi_i(x_p)`.
+
+Justificativa:
+Valida integração entre deposição PIDC, Poisson EFG, interpolação de campo e
+avanço leap-frog 2D sem confundir o resultado com os riscos periódicos ainda
+abertos.
+
+Impacto no código:
+Adiciona `DiffuseCell.hpp`, `PIDCFieldInterpolator.hpp`, `PIDCLoop.hpp` e
+`apps/pidc_smoke_2d.cpp`; estende `ChargeDeposition.hpp` com
+`deposit_charge_from_cells`.
+
+Impacto na validação:
+Novos testes `pidc_diffuse_cell`, `pidc_field_interpolation` e `pidc_loop`.
+O app `pidc_smoke_2d` exporta `data/output/pidc_smoke_2d.csv`.

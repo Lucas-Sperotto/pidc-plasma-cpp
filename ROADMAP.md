@@ -38,9 +38,9 @@ Entrega:
 - [x] montagem de `b`
 - [x] imposição de Dirichlet (penalidade, DEC-0024)
 - [x] métricas MMS: L2/L∞ do potencial e do campo com convergência verificada
-- [ ] exportação CSV — diferido (não bloqueia Marco 4)
-- [ ] script de plotagem — diferido (não bloqueia Marco 4)
-- [ ] relatório de validação formal — diferido (métricas registradas em AI_STATUS.md)
+- [x] exportação CSV — `data/output/efg_mms_convergence.csv`
+- [x] script de plotagem — `scripts/plot_efg_mms.py`
+- [x] relatório de validação formal — `docs/validation/marco3_poisson_efg_validation.md`
 
 ---
 
@@ -60,17 +60,18 @@ Entrega:
 
 ---
 
-## Marco 5 — PIDC pequeno
+## Marco 5 — PIDC pequeno ✓ CONCLUÍDO (2026-05-09)
 
 Resultado esperado: PIDC roda com poucas partículas, conserva carga e exporta dados.
 
 Entrega:
 
-- célula difusa
-- deposição PIDC
-- interpolação PIDC
-- ciclo temporal
-- relatório de conservação
+- [x] célula difusa (`DiffuseCell`)
+- [x] deposição PIDC com reuso de `ShapeFunctionData`
+- [x] interpolação PIDC (`E = -Σ u_i grad_phi_i`)
+- [x] ciclo temporal mínimo Dirichlet (`pidc_advance_one_step`)
+- [x] CSV de smoke — `data/output/pidc_smoke_2d.csv`
+- [x] testes: `pidc_diffuse_cell`, `pidc_field_interpolation`, `pidc_loop`
 
 ---
 

@@ -25,3 +25,21 @@ Este arquivo registra ambiguidades científicas, matemáticas ou de implementaç
 **Questão:** Qual estratégia será usada para fixar o gauge do potencial? As opções comuns incluem: a) fixar o potencial em um nó (`u_k = 0`); b) exigir que a média do potencial seja nula (`sum(u_i) = 0`).
 
 **Proposta de Resolução:** Ver `DEC-0007`.
+
+---
+
+## Q-0003 — Normalização do RHS PIDC a partir de carga nodal
+
+**Status:** aberto
+
+**Contexto:** O smoke PIDC 2D inicial usa `rhs = Q/epsilon0`, onde `Q` vem de
+`deposit_charge_from_cells`. Para validar o fluxo do código isso é suficiente,
+mas casos físicos podem exigir converter carga nodal em densidade/termo de fonte
+compatível com a medida de integração EFG.
+
+**Questão:** O RHS do Poisson PIDC deve usar `Q/epsilon0` diretamente ou
+`Q/(epsilon0 * volume_nodal_equivalente)`?
+
+**Proposta de Resolução:** Gemini deve auditar em
+`docs/ai/GEMINI_TASKS/T_GEMINI_F_AUDIT_PIDC_RHS_DOMAINS.md` antes de comparação
+PIC-PIDC ou reprodução física.

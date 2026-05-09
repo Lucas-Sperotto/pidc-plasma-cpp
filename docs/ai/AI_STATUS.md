@@ -4,6 +4,18 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Codex concluiu T-045D para fechamento operacional das Fases A-G. Adicionada a opção CMake `PIDC_ENABLE_JSON=OFF`; criados helpers `CircularInfluenceDomain` e `RectangularInfluenceDomain`; `EFGPoissonSolver::solve(rhs)` agora valida RHS externo e soma o RHS de penalidade Dirichlet cacheado. Fase F mínima implementada com `DiffuseCell`, `deposit_charge_from_cells`, `interpolate_field_pidc`, `pidc_advance_one_step` e app `pidc_smoke_2d`, que exporta `data/output/pidc_smoke_2d.csv` (3 passos, 4 partículas, carga total ≈ -5.97e-22, `max|E|=6.03e-07`, finito=1). Novos testes: `influence_domain`, `efg_poisson_external_rhs`, `pidc_diffuse_cell`, `pidc_field_interpolation`, `pidc_loop`. **29/29 CTest passando.** Tarefas de auditoria abertas para Gemini e Claude antes da comparação PIC-PIDC.
+
+---
+
+## Último resumo anterior
+
+Claude concluiu os três itens diferidos do Marco 3 (T-MARCO3-DEFERRED). App diagnóstico `apps/marco3_mms_diagnostics.cpp` criado: convergência MMS EFG Poisson para n∈{5,7,9,13,17} — L²(φ) ordem 2.06 no par 13→17 (critério: >1.7 ✓), L²(E) ordem 1.02 (regime assintótico confirmado). CSV exportado em `data/output/efg_mms_convergence.csv`. Script `scripts/plot_efg_mms.py` gera dois gráficos em `docs/figures/`. Relatório de validação formal em `docs/validation/marco3_poisson_efg_validation.md` (10 critérios, todos ✓). ROADMAP.md: Marco 3 agora 100% completo. **24/24 CTest passando.**
+
+---
+
+## Último resumo
+
 Gemini concluiu a auditoria de prontidão para a Fase F (T-GEMINI-F-READINESS). R-017 (ausência de cache de fatoração em `EFGPoissonSolver`) foi confirmado como um bloqueador de desempenho, e a `DEC-0031` foi proposta para corrigi-lo. Foi recomendado iniciar a Fase F com um domínio Dirichlet não-periódico para isolar a validação do ciclo PIDC da complexidade da periodicidade (R-015/R-016). A tarefa T-045 foi desmembrada em subtarefas: T-045A (refatorar `EFGPoissonSolver`), T-045B (implementar `interpolate_field_pidc`), e T-045C (criar app `pidc_smoke_2d` com o ciclo PIDC mínimo).
 ---
 
@@ -84,9 +96,9 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud`, `RegularNodeCloud2D`, `NeighborSearchGrid` e `PeriodicBoundary2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados, guarda de raio de suporte e robustez finita testadas) |
 | efg | `GaussCell2D` e `EFGPoissonSolver` esparso implementados; Poisson MMS Dirichlet passou em 5×5 e 9×9 com métricas de potencial e campo |
-| pic | `Grid1D`, deposição CIC 1D, campo manufaturado 1D, Poisson 1D periódico, interpolação CIC campo→partícula, leap-frog 1D isolado e contorno periódico em movimento implementados/testados; ainda sem Langmuir |
-| pidc | `deposit_charge` conservativo implementado em `include/pidc/pidc/ChargeDeposition.hpp` (T-037) |
-| validation | CTest com 23 testes; inclui MLS, EFG Poisson MMS, conservação de carga PIDC, `Grid1D`, deposição CIC 1D, referências CIC 1D, campo manufaturado 1D, Poisson MMS 1D periódico, interpolação CIC 1D, leap-frog 1D e movimento periódico PIC 1D |
+| pic | `Grid1D`, deposição CIC 1D, campo manufaturado 1D, Poisson 1D periódico, interpolação CIC campo→partícula, leap-frog 1D isolado, contorno periódico em movimento e Langmuir 1D implementados/testados |
+| pidc | `deposit_charge`, `DiffuseCell`, deposição cacheada, interpolação de campo e loop mínimo Dirichlet implementados/testados |
+| validation | CTest com 29 testes; inclui MLS, EFG Poisson MMS, RHS externo EFG, conservação de carga PIDC, smoke PIDC, PIC 1D e Langmuir |
 | scripts | `scripts/build.sh` e `scripts/run_tests.sh` criados |
 
 ## Testes
@@ -119,7 +131,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | leapfrog_1d | passou em 2026-05-09 |
 | pic_periodic_motion_1d | passou em 2026-05-09 |
 | Poisson MMS | passou em 2026-05-08 |
-| Langmuir 1D | não iniciado |
+| Langmuir 1D | passou em 2026-05-09 (`test_langmuir_1d`, ω_obs=1.005) |
 
 ---
 

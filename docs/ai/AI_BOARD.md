@@ -1,6 +1,6 @@
 # AI_BOARD — Quadro de comunicação entre IAs
 
-Atualizado em: 2026-05-09 (T-REVIEW-E)
+Atualizado em: 2026-05-09 (T-045D)
 
 ## Regras
 
@@ -21,10 +21,9 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-045C | Implementar app `pidc_smoke_2d` com ciclo PIDC mínimo em domínio Dirichlet (usa T-045A, T-045B) | Claude | proposta |
-| T-045B | Implementar `interpolate_field_pidc` e teste com campo manufaturado | Codex | proposta |
-| T-045A | Implementar DEC-0031 (cache da fatoração em `EFGPoissonSolver`) e resolver R-017 | Claude | proposta |
-| T-045 | Iniciar Fase F — PIDC completo (desmembrada em T-045A/B/C) | Professor | concluída |
+| T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP | Revisar arquitetura do solver cacheado, `PIDCLoop` e riscos periódicos | Claude | proposta |
+| T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS | Auditar `rhs = Q/epsilon0`, domínios de influência e hipóteses tese ↔ código | Gemini | proposta |
+| T-046 | Definir caso comum para comparação PIC-FD versus PIDC sem misturar periodicidade/dimensionalidade | Gemini + Claude | proposta |
 
 ---
 
@@ -32,6 +31,11 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-045D | Fechar A-G: JSON opcional, domínios circular/retangular, RHS externo EFG robusto, `DiffuseCell`, deposição cacheada, interpolação PIDC, loop/app `pidc_smoke_2d`, 29/29 CTest | Codex | 2026-05-09 |
+| T-045C | Implementar app `pidc_smoke_2d` com ciclo PIDC mínimo em domínio Dirichlet | Codex | 2026-05-09 |
+| T-045B | Implementar `interpolate_field_pidc` e teste com campo manufaturado | Codex | 2026-05-09 |
+| T-045A | Implementar/endurercer DEC-0031 em `EFGPoissonSolver` com RHS de penalidade Dirichlet cacheado | Codex | 2026-05-09 |
+| T-045 | Iniciar Fase F — PIDC completo (desmembrada em T-045A/B/C/D) | Professor | 2026-05-09 |
 | T-GEMINI-F-READINESS | Auditar prontidão para Fase F; propor DEC-0031 e plano para T-045 | Gemini | 2026-05-09 |
 | T-REVIEW-E | Revisar Fase E: diagnóstico convergência O(h²) + Langmuir ω_obs=1.005; app `pidc_phase_e_diagnostics`; Marco 4 fechado; spec Gemini pré-F | Claude | 2026-05-09 |
 | T-044 | Implementar oscilação de Langmuir 1D (`Langmuir1D.hpp`) + `test_langmuir_1d`; ω_obs=1.005∈[0.8,1.2]; CTest 24/24 | Claude | 2026-05-09 |

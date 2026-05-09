@@ -161,27 +161,44 @@ Implementar e validar o PIDC de forma incremental:
 - Riscos R-018–R-021 registrados.
 - Sequência correta de implementação: T-039 (CIC) → T-040 (campo manufaturado) → T-041 (Poisson1D) → T-042 (interpolação) → T-043 (leap-frog) → T-043B (contorno periódico) → T-044 (Langmuir).
 
+**Fase F mínima / PIDC 2D Dirichlet (T-045D, 2026-05-09):**
+
+- Opção CMake `PIDC_ENABLE_JSON=OFF` adicionada para integração futura com `nlohmann_json`.
+- `CircularInfluenceDomain` e `RectangularInfluenceDomain` adicionados como helpers geométricos testados; não alteram `mls_evaluate`.
+- `EFGPoissonSolver::solve(rhs)` usa fatoração cacheada e soma o RHS de penalidade Dirichlet cacheado ao RHS externo.
+- `DiffuseCell` + `evaluate_diffuse_cells` reaproveitam `ShapeFunctionData` entre deposição e interpolação.
+- `deposit_charge_from_cells` deposita cargas usando células já calculadas e bate com `deposit_charge`.
+- `interpolate_field_pidc` calcula `E(x_p) = -Σ_i u_i grad_phi_i(x_p)` e reproduz campo de potencial linear.
+- `pidc_advance_one_step` executa o ciclo PIDC mínimo Dirichlet: deposição → RHS `Q/ε₀` → solve com `K` cacheada → interpolação → avanço leap-frog 2D.
+- App `pidc_smoke_2d` exporta `data/output/pidc_smoke_2d.csv`:
+  - 3 passos;
+  - 4 partículas;
+  - carga total ≈ `-5.97224e-22`;
+  - `max|E| = 6.03262e-07`;
+  - finito = 1.
+- Testes novos: `influence_domain`, `efg_poisson_external_rhs`, `pidc_diffuse_cell`, `pidc_field_interpolation`, `pidc_loop`.
+- CTest atual: **29/29 testes passando**.
+
 **Infra:**
 
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
 - `scripts/build.sh` e `scripts/run_tests.sh` existem.
-- CTest atual: **24/24 testes passando**.
+- CTest atual: **29/29 testes passando**.
 
 ## Próximos passos
 
 | Tarefa | Descrição | Responsável | Prioridade |
 | --- | --- | --- | --- |
-| T-GEMINI-F-READINESS | Auditar R-015/R-016/R-017/DEC-0022; propor sequência mínima T-045 | Gemini | proposta |
-| T-045 | Iniciar Fase F — PIDC completo (aguarda T-GEMINI-F-READINESS) | Professor / Claude | proposta |
+| T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS | Auditar `rhs = Q/epsilon0`, domínios circular/retangular e hipóteses tese ↔ código | Gemini | proposta |
+| T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP | Revisar arquitetura do loop PIDC, solver cacheado e riscos periódicos | Claude | proposta |
+| T-046 | Definir caso comum para comparação PIC-FD versus PIDC | Gemini + Claude | proposta |
 
-**Pendências antes de avançar para PIDC (Fase F):**
+**Pendências antes de comparação PIC-PIDC / periodicidade PIDC:**
 
-- Fase E concluída + diagnósticos confirmados (T-REVIEW-E ✓).
-- T-GEMINI-F-READINESS: Gemini deve auditar bloqueadores antes de T-045.
-  - R-017: cache LDLT em `EFGPoissonSolver`.
-  - R-015, R-016, DEC-0022: periodicidade MLS/busca.
-  - Spec completa em `docs/ai/GEMINI_TASKS/T_GEMINI_F_READINESS.md`.
+- Gemini deve auditar se `rhs = Q/epsilon0` precisa de normalização por área/volume antes de casos físicos.
+- Claude deve revisar a arquitetura do `PIDCLoop` antes de expandir para periodicidade.
+- R-015/R-016 continuam bloqueantes para PIDC periódico: `mls_evaluate` e `NeighborSearchGrid` ainda são não-periódicos.
 
 ## Decisões-chave vigentes
 
@@ -208,6 +225,9 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0028 | Vetores nodais PIC 1D como `std::vector<double>`, sem Eigen | aceita |
 | DEC-0029 | Validação separada para componentes do PIC 1D | proposta |
 | DEC-0030 | Convenção para MMS 1D senoidal | proposta |
+| DEC-0031 | Cache da fatoração em EFGPoissonSolver | aceita |
+| DEC-0032 | Domínios de influência como helpers geométricos | aceita |
+| DEC-0033 | Smoke PIDC 2D inicial em domínio Dirichlet | aceita |
 
 ## Regras críticas
 

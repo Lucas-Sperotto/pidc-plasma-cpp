@@ -8,7 +8,7 @@ Este arquivo é o mapa mestre de pendências do repositório.
 - [x] Separação das fases: EFG/MLS, Poisson, PIC, PIDC e reprodução da tese.
 - [x] Criação do protocolo de cooperação entre Gemini, Codex e Claude.
 - [x] Implementação do esqueleto CMake real.
-- [ ] Implementação do núcleo matemático.
+- [x] Implementação do núcleo matemático validado para A-G.
 - [x] Primeiros testes unitários.
 
 ---
@@ -24,7 +24,7 @@ Criar um repositório limpo, compilável e preparado para desenvolvimento increm
 - [x] Criar `CMakeLists.txt` funcional.
 - [x] Definir padrão C++17.
 - [x] Adicionar dependência Eigen.
-- [ ] Adicionar opção futura para `nlohmann_json`.
+- [x] Adicionar opção futura para `nlohmann_json` (`PIDC_ENABLE_JSON=OFF` por padrão).
 - [x] Criar diretórios `include/pidc`, `src`, `apps`, `tests`, `configs`, `scripts`.
 - [x] Criar script `scripts/build.sh`.
 - [x] Criar script `scripts/run_tests.sh`.
@@ -79,7 +79,7 @@ Implementar funções de forma e gradientes.
 
 - [x] Implementar base linear 2D: `p(x,y) = [1, x, y]`.
 - [x] Implementar função peso compacta.
-- [ ] Implementar domínios circulares e retangulares.
+- [x] Implementar domínios circulares e retangulares como helpers testados (`InfluenceDomain.hpp`).
 - [x] Implementar cálculo de `phi_i(x)` — `mls_evaluate` em MLSShapeFunction.hpp (T-017).
 - [x] Implementar cálculo de `grad(phi_i)(x)` — diferenciação implícita em mls_evaluate (T-017).
 - [x] Monitorar cardinalidade local `n >= m` — lança `std::runtime_error` se n < 3 (T-017).
@@ -188,21 +188,21 @@ para cada passo de tempo:
 
 ### Tarefas
 
-- [ ] `DiffuseCell`
-- [ ] `PIDCChargeDepositor`
-- [ ] `PIDCFieldInterpolator`
-- [ ] `PIDCLoop`
-- [ ] Reaproveitar `ShapeFunctionData` entre deposição e interpolação.
-- [ ] Manter `K` constante quando a nuvem não muda.
-- [ ] Recalcular apenas `b` por passo de tempo.
+- [x] `DiffuseCell`
+- [x] `PIDCChargeDepositor`
+- [x] `PIDCFieldInterpolator`
+- [x] `PIDCLoop`
+- [x] Reaproveitar `ShapeFunctionData` entre deposição e interpolação.
+- [x] Manter `K` constante quando a nuvem não muda.
+- [x] Recalcular apenas `b` por passo de tempo.
 
 ### Testes
 
 - [x] Conservação de carga por partícula.
 - [x] Conservação de carga global.
-- [ ] Interpolação correta para campo manufaturado.
-- [ ] Estabilidade do leap-frog em caso simples.
-- [ ] Contorno periódico conservando número de partículas.
+- [x] Interpolação correta para campo manufaturado.
+- [x] Estabilidade do leap-frog em caso simples Dirichlet.
+- [ ] Contorno periódico conservando número de partículas (adiado; Fase F inicial usa Dirichlet não-periódico).
 
 ---
 
@@ -216,9 +216,10 @@ para cada passo de tempo:
 - [x] Campo elétrico manufaturado em `Grid1D` (test_manufactured_field_1d).
 - [x] Deposição de carga com uma partícula no centro (`test_cic_deposition_reference_1d`, T-039B).
 - [x] Deposição de carga com partículas aleatórias e semente fixa (`test_cic_deposition_reference_1d`, T-039B).
-- [ ] Oscilação de Langmuir 1D.
-- [ ] Comparação PIC-FD versus PIDC.
-- [ ] Reprodução qualitativa da tese.
+- [x] Oscilação de Langmuir 1D.
+- [x] Smoke PIDC 2D Dirichlet com CSV (`data/output/pidc_smoke_2d.csv`).
+- [ ] Comparação PIC-FD versus PIDC (aguarda definição Gemini/Claude de caso comum).
+- [ ] Reprodução qualitativa da tese (Fase H/I; não declarar sem evidência).
 
 ---
 

@@ -245,6 +245,7 @@ periódicas vizinhas e une os resultados (removendo duplicatas). DEC-0022 propos
 ## R-017 — `EFGPoissonSolver::solve()` recria fatoração LDLT a cada chamada
 
 Registrado por: Claude — 2026-05-09 (T-036)
+Status: resolvido para Fase F Dirichlet mínima — 2026-05-09, Codex, T-045D
 
 `solve()` instancia `Eigen::SimplicialLDLT` localmente e chama `.compute(stiffness_)`
 em toda invocação. Para Phase D (MMS estático: uma montagem + um solve), o custo
@@ -268,6 +269,12 @@ Se Phase F precisar inspecionar K, preferir iterador esparso direto.
 
 **Atualização R-006 (2026-05-09):** assemble/solve já são métodos distintos desde
 T-034/T-035. O problema residual é o cache da fatoração (descrito acima como R-017).
+
+**Atualização T-045D (2026-05-09):** `EFGPoissonSolver` armazena
+`Eigen::SimplicialLDLT` em `ldlt_`, computado em `assemble()` ou
+`assemble_stiffness_only()`. `solve(rhs)` reutiliza a fatoração, valida
+tamanho/finitude do RHS externo e soma o RHS de penalidade Dirichlet cacheado.
+Coberto por `tests/test_efg_poisson_external_rhs.cpp`.
 
 ---
 
