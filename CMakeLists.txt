@@ -9,7 +9,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(PIDC_ENABLE_JSON "Enable future nlohmann_json integration" OFF)
+
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
+if(PIDC_ENABLE_JSON)
+    find_package(nlohmann_json CONFIG REQUIRED)
+endif()
 
 add_library(pidc_core
     src/Domain2D.cpp
@@ -26,6 +32,10 @@ target_link_libraries(pidc_core
     PUBLIC
         Eigen3::Eigen
 )
+
+if(PIDC_ENABLE_JSON)
+    target_link_libraries(pidc_core PUBLIC nlohmann_json::nlohmann_json)
+endif()
 
 if(MSVC)
     target_compile_options(pidc_core PRIVATE /W4)
