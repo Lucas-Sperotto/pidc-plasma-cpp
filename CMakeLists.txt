@@ -217,6 +217,39 @@ add_test(
     COMMAND pidc_test_charge_conservation
 )
 
+add_executable(pidc_test_pidc_diffuse_cell
+    tests/test_pidc_diffuse_cell.cpp
+)
+
+target_link_libraries(pidc_test_pidc_diffuse_cell PRIVATE pidc_core)
+
+add_test(
+    NAME pidc_diffuse_cell
+    COMMAND pidc_test_pidc_diffuse_cell
+)
+
+add_executable(pidc_test_pidc_field_interpolation
+    tests/test_pidc_field_interpolation.cpp
+)
+
+target_link_libraries(pidc_test_pidc_field_interpolation PRIVATE pidc_core)
+
+add_test(
+    NAME pidc_field_interpolation
+    COMMAND pidc_test_pidc_field_interpolation
+)
+
+add_executable(pidc_test_pidc_loop
+    tests/test_pidc_loop.cpp
+)
+
+target_link_libraries(pidc_test_pidc_loop PRIVATE pidc_core)
+
+add_test(
+    NAME pidc_loop
+    COMMAND pidc_test_pidc_loop
+)
+
 add_executable(pidc_test_pic_grid1d
     tests/test_pic_grid1d.cpp
 )
