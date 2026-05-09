@@ -21,7 +21,8 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-035 | Implementar migração densa → esparsa em EFGPoissonSolver (DEC-0025) | Codex | proposta |
+| T-036 | Auditar T-032/T-035: métricas MMS e solver esparso contra DEC-0025 | Gemini + Claude | proposta |
+| T-037 | Definir teste mínimo de deposição conservativa de carga antes de implementar PIDC | Gemini + Claude | proposta |
 
 ---
 
@@ -29,6 +30,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-035 | Implementar migração densa → esparsa em EFGPoissonSolver (DEC-0025) | Codex | 2026-05-08 |
 | T-032 | Adicionar métricas L∞ do potencial e L2/L∞ do campo manufaturado para Poisson MMS | Codex | 2026-05-08 |
 | T-034 | Aceitar DEC-0024; refatorar `impose_dirichlet` → penalidade; planejar DEC-0025 (T-033) | Claude | 2026-05-08 |
 | T-033 | Planejar migração densa → esparsa: DEC-0025 registrada em DECISIONS.md | Claude | 2026-05-08 |

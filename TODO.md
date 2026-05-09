@@ -114,7 +114,7 @@ Resolver a equação de Poisson para casos manufaturados.
 - [x] Montar vetor de fontes `b`.
 - [x] Impor Dirichlet por penalidade (DEC-0024).
 - [x] Resolver inicialmente com matriz densa.
-- [ ] Migrar para matriz esparsa após validação.
+- [x] Migrar para matriz esparsa após validação.
 
 ### Caso de referência
 

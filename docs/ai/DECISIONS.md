@@ -764,43 +764,44 @@ Todos os 14 testes continuam passando. L2 5×5 e 9×9 inalterados.
 
 ## DEC-0025 — Migração do backend de K: denso → esparso
 
-Status: proposta
+Status: aceita
 Proposta por: Claude — 2026-05-08 (T-033)
+Aceita e implementada por: Codex — 2026-05-08 (T-035)
 
 Contexto:
 DEC-0003 (densa primeiro, esparsa depois) e DEC-0024 (penalidade aceita).
 Com o método de penalidade, K permanece simétrica positiva definida após as BCs,
 o que habilita `Eigen::SimplicialLDLT` como solver esparso.
 
-Decisão proposta:
-Quando a migração for executada (por Codex, em tarefa futura), substituir
-internamente em `EFGPoissonSolver`:
+Decisão:
+Substituir internamente em `EFGPoissonSolver`:
 
 ```text
 Eigen::MatrixXd stiffness_                  →  Eigen::SparseMatrix<double> stiffness_
 Eigen::FullPivLU<Eigen::MatrixXd>           →  Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
 assembly via stiffness_(row, col) +=        →  lista de Eigen::Triplet<double> + setFromTriplets()
-stiffness_matrix() retorna MatrixXd const&  →  retorna cópia densa (ou remover se testes dispensarem)
+stiffness_matrix() retorna MatrixXd const&  →  retorna cópia densa para testes/diagnóstico
 ```
 
-A interface pública (`assemble`, `solve`, `rhs`) permanece idêntica. Nenhum
-arquivo de teste precisa mudar.
+A interface pública principal (`assemble`, `solve`, `rhs`) permanece idêntica.
+`stiffness_matrix()` preserva o nome, mas retorna uma cópia densa porque o
+armazenamento interno passou a ser esparso.
 
 Justificativa:
 A simetria garantida por DEC-0024 é pré-condição para SimplicialLDLT (exige SPD).
 A interface estável permite a troca de backend sem alterar os testes de regressão MMS.
 
-Pré-requisitos:
+Pré-requisitos atendidos:
 
 - DEC-0024 aceita (feita em T-034).
 - Todos os testes MMS passando com backend denso (14/14).
-- Phase D completamente validada antes de migrar.
+- T-032 adicionou métricas de potencial/campo antes da migração.
 
 Impacto no código:
-Afeta apenas `include/pidc/efg/EFGPoissonSolver.hpp`. Nenhum outro módulo é afetado.
+Afeta `include/pidc/efg/EFGPoissonSolver.hpp`. O teste MMS usa a cópia densa
+retornada por `stiffness_matrix()` apenas para verificar finitude e simetria.
 
 Impacto na validação:
-Após a migração, executar `bash scripts/run_tests.sh` e confirmar que L2 5×5 e 9×9
-são numericamente idênticos ao backend denso (diferença < 1e-12).
-
-Responsável pela implementação: Codex (tarefa futura após Phase D validada).
+Após a migração, `efg_poisson_mms` manteve os erros do baseline denso com
+diferença abaixo de `1e-12` nos valores de referência de T-032. A suíte CTest
+permanece com 14/14 testes passando.

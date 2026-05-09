@@ -99,12 +99,12 @@ do campo usa a norma Euclidiana do erro vetorial em cada ponto de quadratura.
 polinômios simples por Gauss 2×2.
 
 `tests/test_efg_poisson_mms.cpp` — usa `support_radius = 1.8*h_g`, monta e
-resolve o sistema denso inicial. Resultado em 2026-05-08 (T-032):
+resolve o sistema esparso inicial. Resultado em 2026-05-08 (T-035):
 
 | Nuvem | Potencial L2 | Potencial L∞ | Campo L2 | Campo L∞ |
 | --- | --- | --- | --- | --- |
-| 5×5 | 0.00359684 | 0.0069852 | 0.033052 | 0.105394 |
-| 9×9 | 0.000827504 | 0.00169752 | 0.0136451 | 0.0554929 |
+| 5×5 | 0.00359683506821715 | 0.00698519578344722 | 0.0330520262581074 | 0.105393836778107 |
+| 9×9 | 0.000827503569222836 | 0.00169751665145062 | 0.0136450944195131 | 0.0554928606259795 |
 
 CTest: 14/14 testes passando.
 

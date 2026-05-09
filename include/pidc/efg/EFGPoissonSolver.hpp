@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 #include <algorithm>
 #include <cmath>
@@ -30,6 +31,8 @@ public:
         ScalarField2D source,
         ScalarField2D dirichlet)
     {
+        assembled_ = false;
+
         if (nodes.size() == 0) {
             throw std::invalid_argument{"EFGPoissonSolver requires at least one node"};
         }
@@ -43,7 +46,7 @@ public:
         validate_mls_config(mls);
 
         const auto n = static_cast<Eigen::Index>(nodes.size());
-        stiffness_ = Eigen::MatrixXd::Zero(n, n);
+        std::vector<Eigen::Triplet<double>> stiffness_entries;
         rhs_ = Eigen::VectorXd::Zero(n);
 
         for (const GaussCell2D& cell : cells) {
@@ -61,15 +64,16 @@ public:
                         const double grad_dot =
                             shape.grad_phi[a].x * shape.grad_phi[b].x +
                             shape.grad_phi[a].y * shape.grad_phi[b].y;
-                        stiffness_(row, col) += quadrature.weight * grad_dot;
+                        stiffness_entries.emplace_back(row, col, quadrature.weight * grad_dot);
                     }
                 }
             }
         }
 
-        impose_dirichlet_penalty(nodes, domain, dirichlet);
+        rebuild_stiffness(n, stiffness_entries);
+        impose_dirichlet_penalty(nodes, domain, dirichlet, stiffness_entries);
 
-        if (!stiffness_.allFinite() || !rhs_.allFinite()) {
+        if (!sparse_matrix_all_finite(stiffness_) || !rhs_.allFinite()) {
             throw std::runtime_error{"EFGPoissonSolver assembled non-finite matrix or rhs"};
         }
 
@@ -82,12 +86,16 @@ public:
             throw std::runtime_error{"EFGPoissonSolver solve called before assemble"};
         }
 
-        Eigen::FullPivLU<Eigen::MatrixXd> lu(stiffness_);
-        if (!lu.isInvertible()) {
-            throw std::runtime_error{"EFGPoissonSolver stiffness matrix is singular"};
+        Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> ldlt;
+        ldlt.compute(stiffness_);
+        if (ldlt.info() != Eigen::Success) {
+            throw std::runtime_error{"EFGPoissonSolver stiffness matrix factorization failed"};
         }
 
-        Eigen::VectorXd solution = lu.solve(rhs_);
+        Eigen::VectorXd solution = ldlt.solve(rhs_);
+        if (ldlt.info() != Eigen::Success) {
+            throw std::runtime_error{"EFGPoissonSolver sparse solve failed"};
+        }
         if (!solution.allFinite()) {
             throw std::runtime_error{"EFGPoissonSolver produced a non-finite solution"};
         }
@@ -95,9 +103,9 @@ public:
         return solution;
     }
 
-    const Eigen::MatrixXd& stiffness_matrix() const noexcept
+    Eigen::MatrixXd stiffness_matrix() const
     {
-        return stiffness_;
+        return Eigen::MatrixXd{stiffness_};
     }
 
     const Eigen::VectorXd& rhs() const noexcept
@@ -106,7 +114,7 @@ public:
     }
 
 private:
-    Eigen::MatrixXd stiffness_{};
+    Eigen::SparseMatrix<double> stiffness_{};
     Eigen::VectorXd rhs_{};
     bool assembled_{false};
 
@@ -115,6 +123,28 @@ private:
         if (!std::isfinite(value)) {
             throw std::runtime_error{message};
         }
+    }
+
+    static bool sparse_matrix_all_finite(const Eigen::SparseMatrix<double>& matrix) noexcept
+    {
+        for (Eigen::Index outer = 0; outer < matrix.outerSize(); ++outer) {
+            for (Eigen::SparseMatrix<double>::InnerIterator entry(matrix, outer); entry; ++entry) {
+                if (!std::isfinite(entry.value())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void rebuild_stiffness(
+        Eigen::Index node_count,
+        const std::vector<Eigen::Triplet<double>>& stiffness_entries)
+    {
+        stiffness_.resize(node_count, node_count);
+        stiffness_.setZero();
+        stiffness_.setFromTriplets(stiffness_entries.begin(), stiffness_entries.end());
+        stiffness_.makeCompressed();
     }
 
     static bool is_boundary_node(Vec2 point, const Domain2D& domain) noexcept
@@ -137,9 +167,13 @@ private:
     void impose_dirichlet_penalty(
         const NodeCloud& nodes,
         const Domain2D& domain,
-        const ScalarField2D& dirichlet)
+        const ScalarField2D& dirichlet,
+        std::vector<Eigen::Triplet<double>>& stiffness_entries)
     {
-        const double max_diag = stiffness_.diagonal().cwiseAbs().maxCoeff();
+        double max_diag = 0.0;
+        for (Eigen::Index i = 0; i < stiffness_.rows(); ++i) {
+            max_diag = std::max(max_diag, std::abs(stiffness_.coeff(i, i)));
+        }
         const double penalty  = 1.0e12 * std::max(max_diag, 1.0);
 
         for (std::size_t i = 0; i < nodes.size(); ++i) {
@@ -152,9 +186,11 @@ private:
             require_finite(value, "EFGPoissonSolver Dirichlet field returned a non-finite value");
 
             const auto index = static_cast<Eigen::Index>(i);
-            stiffness_(index, index) += penalty;
-            rhs_(index)              += penalty * value;
+            stiffness_entries.emplace_back(index, index, penalty);
+            rhs_(index) += penalty * value;
         }
+
+        rebuild_stiffness(static_cast<Eigen::Index>(nodes.size()), stiffness_entries);
     }
 };
 

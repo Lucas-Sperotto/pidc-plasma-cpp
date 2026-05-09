@@ -14,7 +14,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | particles | `Vec2`, `Particle` (refatorada) e `Species` implementadas (DEC-0011) |
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud`, `RegularNodeCloud2D`, `NeighborSearchGrid` e `PeriodicBoundary2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados, guarda de raio de suporte e robustez finita testadas) |
-| efg | `GaussCell2D` e `EFGPoissonSolver` denso inicial implementados; Poisson MMS Dirichlet passou em 5×5 e 9×9 com métricas de potencial e campo |
+| efg | `GaussCell2D` e `EFGPoissonSolver` esparso implementados; Poisson MMS Dirichlet passou em 5×5 e 9×9 com métricas de potencial e campo |
 | pic | não iniciado |
 | pidc | não iniciado |
 | validation | CTest com 14 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado; robustez MLS, busca de vizinhança, fronteira periódica, quadratura e Poisson MMS com campo testados |
@@ -38,7 +38,7 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | neighbor_search_grid | passou em 2026-05-08 |
 | periodic_boundary2d | passou em 2026-05-08 |
 | gauss_cell2d | passou em 2026-05-08 |
-| efg_poisson_mms | passou em 2026-05-08; potencial L2 5×5 = 0.00359684, potencial L2 9×9 = 0.000827504, potencial L∞ 5×5 = 0.0069852, potencial L∞ 9×9 = 0.00169752, campo L2 5×5 = 0.033052, campo L2 9×9 = 0.0136451, campo L∞ 5×5 = 0.105394, campo L∞ 9×9 = 0.0554929 |
+| efg_poisson_mms | passou em 2026-05-08 com backend esparso; potencial L2 5×5 = 0.00359683506821715, potencial L2 9×9 = 0.000827503569222836, potencial L∞ 5×5 = 0.00698519578344722, potencial L∞ 9×9 = 0.00169751665145062, campo L2 5×5 = 0.0330520262581074, campo L2 9×9 = 0.0136450944195131, campo L∞ 5×5 = 0.105393836778107, campo L∞ 9×9 = 0.0554928606259795 |
 | partition unity | passou em 2026-05-08 (coberto por mls_shape_function) |
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation | não iniciado |
@@ -46,6 +46,18 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | Langmuir 1D | não iniciado |
 
 ## Último resumo
+
+Codex concluiu T-035 (2026-05-08). `EFGPoissonSolver` agora armazena `K` como
+`Eigen::SparseMatrix<double>`, monta por `Eigen::Triplet<double>` e resolve com
+`Eigen::SimplicialLDLT`. A penalidade Dirichlet da DEC-0024 foi preservada como
+acréscimo diagonal, e `stiffness_matrix()` retorna uma cópia densa apenas para
+testes/diagnóstico. O teste MMS manteve as métricas de T-032 na escala de
+diferença esperada (< 1e-12 contra o baseline denso). Não houve implementação de
+PIC, PIDC, deposição, interpolação temporal ou caso grande.
+
+---
+
+### Histórico anterior
 
 Codex concluiu T-032 (2026-05-08). O teste `efg_poisson_mms` agora mede erro
 L2/L∞ do potencial e L2/L∞ do campo manufaturado, com campo avaliado como

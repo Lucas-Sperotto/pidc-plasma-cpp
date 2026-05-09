@@ -40,11 +40,12 @@ Implementar e validar o PIDC de forma incremental:
   - Ausência de `NaN`/`Inf` e condicionamento de $A$ testados em `mls_robustness`.
 - CTest: **14/14 testes passando**.
 
-**Fase D (Poisson EFG) iniciada e validada no primeiro MMS:**
+**Fase D (Poisson EFG) validada no MMS inicial:**
 
 - `GaussCell2D` gera células retangulares com quadratura Gauss 2×2.
 - `MLSConfig` centraliza o raio de suporte usado por EFG.
-- `EFGPoissonSolver` monta `K`, monta `b`, impõe Dirichlet por penalidade (DEC-0024) e resolve com matriz densa.
+- `EFGPoissonSolver` monta `K`, monta `b`, impõe Dirichlet por penalidade (DEC-0024) e resolve com backend esparso via `Eigen::SimplicialLDLT`.
+- `stiffness_matrix()` retorna uma cópia densa apenas para testes e diagnóstico.
 - Teste MMS Dirichlet para $u = \sin(\pi x)\sin(\pi y)$ passou:
   - potencial L2 5×5 = 0.00359684;
   - potencial L2 9×9 = 0.000827504;
@@ -65,12 +66,13 @@ Implementar e validar o PIDC de forma incremental:
 
 | Tarefa | Responsável | Prioridade |
 | --- | --- | --- |
-| T-035 | Implementar migração densa → esparsa em `EFGPoissonSolver` (DEC-0025) | Codex |
+| T-036 | Auditar T-032/T-035: métricas MMS e solver esparso contra DEC-0025 | Gemini + Claude |
+| T-037 | Definir teste mínimo de deposição conservativa de carga antes de implementar PIDC | Gemini + Claude |
 
 **Pendências antes de avançar para PIC/PIDC:**
 
-- Revisar matematicamente o solver EFG inicial.
-- Só migrar para esparso depois de preservar o teste MMS como referência.
+- Auditar matematicamente o solver EFG esparso e as métricas MMS ampliadas.
+- Definir e validar deposição conservativa antes de iniciar o ciclo PIDC.
 
 ## Decisões-chave vigentes
 
@@ -91,7 +93,7 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0021 | `PeriodicBoundary2D` como helper geométrico | aceita |
 | DEC-0023 | Raio de suporte MMS inicial: `1.8*h_g` via `MLSConfig` | aceita |
 | DEC-0024 | Penalidade para Dirichlet no EFG Poisson | aceita |
-| DEC-0025 | Migração do backend de K: denso → esparso | proposta |
+| DEC-0025 | Migração do backend de K: denso → esparso | aceita |
 
 ## Regras críticas
 

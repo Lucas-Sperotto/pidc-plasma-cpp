@@ -126,13 +126,13 @@ MmsResult run_mms(std::size_t node_count)
     pidc::EFGPoissonSolver solver;
     solver.assemble(nodes, domain, cells, mls, source, homogeneous_dirichlet);
     const Eigen::VectorXd solution = solver.solve();
+    const Eigen::MatrixXd k = solver.stiffness_matrix();
 
-    require(solver.stiffness_matrix().allFinite(), "stiffness matrix must be finite");
+    require(k.allFinite(), "stiffness matrix must be finite");
     require(solver.rhs().allFinite(), "rhs must be finite");
     require(solution.allFinite(), "solution must be finite");
 
     double max_symmetry_error = 0.0;
-    const Eigen::MatrixXd& k = solver.stiffness_matrix();
     for (Eigen::Index row = 0; row < k.rows(); ++row) {
         for (Eigen::Index col = 0; col < k.cols(); ++col) {
             max_symmetry_error = std::max(max_symmetry_error, std::abs(k(row, col) - k(col, row)));
@@ -189,6 +189,7 @@ int main()
                         "9x9 MMS field Linf error must improve over 5x5");
 
     std::cout << "efg_poisson_mms test passed\n";
+    std::cout.precision(17);
     std::cout << "potential L2 5x5: " << coarse.error.potential_l2 << '\n';
     std::cout << "potential L2 9x9: " << refined.error.potential_l2 << '\n';
     std::cout << "potential Linf 5x5: " << coarse.error.potential_linf << '\n';
