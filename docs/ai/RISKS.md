@@ -344,3 +344,118 @@ Mitigação:
 Seguir a sequência canônica: T-039 (CIC) → T-040 (campo manufaturado) → T-041
 (Poisson 1D) → T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
 Não fundir etapas. Cada etapa deve ter seu próprio teste antes de avançar.
+
+---
+
+## R-022 — `advance_particle_leapfrog_2d` sem inicialização de meio-passo
+
+Registrado por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
+
+`advance_particle_leapfrog_2d` em `PIDCLoop.hpp` executa:
+
+```cpp
+v += (q/m) * E * dt
+x += v * dt
+```
+
+Essa é a fórmula correta do leapfrog *se* a velocidade já estiver em t = -dt/2
+antes do primeiro passo. Porém não existe função `initialize_pidc_velocity_2d`
+análoga ao `initialize_leapfrog_velocity_1d` da Fase E. O `test_pidc_loop`
+começa com `v = {0, 0}`, interpretado como velocidade em t = 0, não t = -dt/2.
+Resultado: o primeiro passo é Euler-Cromer (semi-implícito), não leapfrog, e os
+passos subsequentes carregam o offset. Para 2 passos com campo pequeno (smoke)
+isso é invisível; para simulações longas (Langmuir 2D, reprodução da tese),
+degrada a conservação de energia que é a principal vantagem do leapfrog.
+
+Comparação com a Fase E: `initialize_leapfrog_velocity_1d` existe e é chamada
+explicitamente antes do loop. A analogia 2D está ausente.
+
+Mitigação:
+Criar `initialize_pidc_velocity_2d` que (1) deposita cargas, (2) resolve Poisson
+para obter E₀, (3) avança velocidades por -dt/2 sem avançar posições. Ver DEC-0034.
+Arquivos: `include/pidc/pidc/PIDCLoop.hpp`.
+
+---
+
+## R-023 — Contorno periódico ausente no avanço de partículas PIDC 2D
+
+Registrado por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
+
+`advance_particle_leapfrog_2d` avança posição sem aplicar nenhum contorno.
+Para domínio Dirichlet (caso atual do smoke test), se uma partícula sair do
+domínio, `mls_evaluate` vai falhar com `n < m` no próximo passo (R-002).
+Para domínio periódico futuro (Fase H, reprodução da tese), o contorno precisaria
+chamar `PeriodicBoundary2D::wrap`.
+
+O `test_pidc_loop.cpp` verifica `domain.contains(particle.position)` após cada
+passo, mas o loop não aplica contorno: a verificação detecta a falha sem corrigi-la.
+
+Mitigação:
+Decidir via DEC se (a) o chamador é responsável por aplicar contorno após cada
+passo — o que é a separação de responsabilidades mais limpa — ou (b)
+`pidc_advance_one_step` recebe um domínio e aplica contorno internamente. Para
+Dirichlet, a opção (a) com verificação de saída (`domain.contains`) é suficiente
+e foi implementada no teste. Para periódico, a opção (a) exigiria que o chamador
+faça o wrap explicitamente.
+
+---
+
+## R-024 — Carga depositada em nós de contorno não é zerada antes de Q/ε₀
+
+Registrado por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
+
+`deposit_charge_from_cells` deposita `q_p * phi_i` em todos os nós, inclusive
+nós de fronteira. Se uma partícula estiver próxima a um nó de fronteira, esse
+nó receberá carga física Q_boundary ≠ 0. O RHS externo será então
+`rhs[boundary] = Q_boundary / ε₀ ≠ 0`.
+
+Em `EFGPoissonSolver::solve(rhs)`, o `dirichlet_rhs_` é somado ao RHS externo.
+Para BC homogêneo, `dirichlet_rhs_[boundary] = 0`, então o RHS total em nós de
+fronteira é `Q_boundary/ε₀`. O penalty na diagonal de K (`≈ 1e12 * max_diag`)
+domina numericamente e força `u_boundary ≈ 0`, mas a carga física foi ignorada.
+
+Em unidades normalizadas de plasma onde as cargas podem ser da mesma ordem
+que os coeficientes de rigidez, essa "dominância" é menos garantida. Para BC
+não-homogêneo (u = g_boundary ≠ 0), a superposição `Q_boundary/ε₀ + penalty*g`
+tem um erro físico explícito.
+
+Mitigação:
+Antes de chamar `pidc_rhs_from_charge`, ou dentro dela, zerar as componentes do
+vetor de carga correspondentes a nós de fronteira Dirichlet. Isso requer que o
+solver ou o loop tenham conhecimento de quais nós são de fronteira — um acoplamento
+adicional que deve ser tratado por DEC.
+
+Para o smoke test atual com BC homogêneo e partículas sempre internas (longe da
+fronteira) o risco é inativo. Torna-se ativo ao aproximar partículas das paredes.
+
+---
+
+## R-025 — `pidc_advance_one_step` com 7 parâmetros — assinatura frágil
+
+Registrado por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
+
+```cpp
+PIDCStepDiagnostics pidc_advance_one_step(
+    std::vector<Particle>& particles,
+    const std::vector<Species>& species_list,
+    const NodeCloud& cloud,
+    const EFGPoissonSolver& solver,
+    const MLSConfig& mls_config,
+    double epsilon0,
+    double dt);
+```
+
+Qualquer expansão futura — adicionar domínio para contorno periódico (R-023),
+flag de diagnóstico detalhado, ou parâmetro de amortecimento — vai ampliar esta
+assinatura e quebrar todos os chamadores existentes (`test_pidc_loop.cpp`,
+`apps/pidc_smoke_2d.cpp`, etc.).
+
+Analogia: a Fase E resolveu o mesmo problema com `LangmuirConfig1D`, que encapsula
+`nx`, `dt`, `n_steps`, `perturbation_amplitude`. O resultado é que `run_langmuir_1d`
+recebe um único objeto.
+
+Mitigação:
+Introduzir `PIDCConfig` ou `PIDCSimulation` que encapsule `solver`, `cloud`,
+`mls_config`, `epsilon0`, e opcionalmente `domain`. Essa refatoração é baixo risco
+(puramente mecânica) mas deve ser feita antes de adicionar periodicidade, para
+evitar proliferação de parâmetros.

@@ -218,7 +218,7 @@ para cada passo de tempo:
 - [x] Deposição de carga com partículas aleatórias e semente fixa (`test_cic_deposition_reference_1d`, T-039B).
 - [x] Oscilação de Langmuir 1D.
 - [x] Smoke PIDC 2D Dirichlet com CSV (`data/output/pidc_smoke_2d.csv`).
-- [ ] Comparação PIC-FD versus PIDC (aguarda definição Gemini/Claude de caso comum).
+- [ ] Comparação PIC-FD versus PIDC (plano definido em T-046, aguarda implementação dos pré-requisitos).
 - [ ] Reprodução qualitativa da tese (Fase H/I; não declarar sem evidência).
 
 ---

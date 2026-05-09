@@ -4,6 +4,36 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Claude concluiu a revisão de T-046 (comparação PIC-FD vs. PIDC). DEC-0035 emendada: o princípio "maçãs com maçãs" em 2D foi aceito, mas a instabilidade de duas correntes 2D periódica foi redirecionada para o **Marco 7** — requer R-015, R-016, solver EFG periódico e PIC-FD 2D periódico, todos não implementados. O **Marco 6** foi reestruturado em duas fases incrementais: **Fase A** (campo manufaturado estático, sem Poisson, pré-condição T-047/DEC-0034) e **Fase B** (Langmuir 2D Dirichlet — novo `PoissonSolver2D_FD` + CIC 2D, evita R-015/R-016, usa EFG Dirichlet existente). Três tarefas propostas para Codex: T-047 (`initialize_pidc_velocity_2d`), T-048 (Fase A), T-049 (Fase B). Plano completo em `docs/validation/comparison_plan_pic_pidc.md` §8. **29/29 CTest inalterado.**
+
+---
+
+Atualizado em: 2026-05-09
+
+## Último resumo
+
+Gemini iniciou a tarefa T-046 para definir o caso de comparação PIC vs. PIDC. Foi proposto (DEC-0035) que a comparação seja feita em 2D com condições de contorno periódicas, usando a instabilidade de duas correntes como problema físico. Esta decisão, embora fisicamente robusta, implica um desenvolvimento significativo: estender o PIDC para periodicidade (resolvendo R-015/R-016) e criar um novo código de referência PIC-FD 2D. O plano detalhado foi registrado em `docs/validation/comparison_plan_pic_pidc.md` e agora aguarda a revisão de Claude.
+
+---
+
+Atualizado em: 2026-05-09
+
+## Último resumo
+
+Claude concluiu T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP. Riscos R-022–R-025 registrados em RISKS.md: R-022 (`advance_particle_leapfrog_2d` sem inicialização de meio-passo — Euler-Cromer no primeiro passo), R-023 (contorno periódico ausente no avanço 2D), R-024 (cargas em nós de fronteira não zeradas antes de Q/ε₀), R-025 (assinatura de 7 parâmetros em `pidc_advance_one_step`). DEC-0032 e DEC-0033 aceitas (proposta Gemini: relação b=Q/ε₀ e domínio circular como padrão — ambas mathematicamente corretas e implementadas). DEC-0034 proposta: `initialize_pidc_velocity_2d` análogo ao `initialize_leapfrog_velocity_1d` da Fase E — tarefa T-047 proposta para Codex. **Bloqueador físico mais urgente: R-022 — o smoke test passa mas qualquer simulação longa (Langmuir 2D, tese) vai degradar conservação de energia sem a inicialização.** 29/29 CTest inalterado.
+
+---
+
+## Último resumo
+
+Gemini concluiu a auditoria `T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS`. A relação matemática `b_i = Q_i / ε₀` entre a carga nodal `Q_i` e o vetor fonte de Poisson `b_i` foi confirmada como correta, e a `DEC-0032` foi proposta para formalizá-la. A `DEC-0033` também foi proposta para documentar que o domínio de influência padrão para o PIDC é circular, definido pelo `support_radius`, consistente com a implementação atual. As tarefas de revisão de arquitetura (Claude) e de definição do caso de comparação PIC-PIDC (Gemini/Claude) estão desbloqueadas.
+
+---
+
+Atualizado em: 2026-05-09
+
+## Último resumo
+
 Codex concluiu T-045D para fechamento operacional das Fases A-G. Adicionada a opção CMake `PIDC_ENABLE_JSON=OFF`; criados helpers `CircularInfluenceDomain` e `RectangularInfluenceDomain`; `EFGPoissonSolver::solve(rhs)` agora valida RHS externo e soma o RHS de penalidade Dirichlet cacheado. Fase F mínima implementada com `DiffuseCell`, `deposit_charge_from_cells`, `interpolate_field_pidc`, `pidc_advance_one_step` e app `pidc_smoke_2d`, que exporta `data/output/pidc_smoke_2d.csv` (3 passos, 4 partículas, carga total ≈ -5.97e-22, `max|E|=6.03e-07`, finito=1). Novos testes: `influence_domain`, `efg_poisson_external_rhs`, `pidc_diffuse_cell`, `pidc_field_interpolation`, `pidc_loop`. **29/29 CTest passando.** Tarefas de auditoria abertas para Gemini e Claude antes da comparação PIC-PIDC.
 
 ---

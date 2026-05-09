@@ -1035,71 +1035,128 @@ Impacto no código:
 Modificar `EFGPoissonSolver.hpp`. O teste MMS (`test_efg_poisson_mms`) e o futuro
 app do ciclo PIDC (T-045) devem ser atualizados para usar a nova interface.
 
+---
+
+## DEC-0032 — Relação entre Carga Nodal e Vetor Fonte de Poisson
+
+Status: aceita
+Proposta por: Gemini — 2026-05-09 (T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS)
+Aceita por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
+
+Contexto:
+O ciclo PIDC calcula as cargas nodais `Q_i` através da deposição e, em seguida, resolve o sistema linear `K u = b` para o potencial. A relação matemática exata entre o vetor de cargas `Q` e o vetor fonte `b` (o "right-hand side" ou RHS) deve ser explícita para garantir a correção física.
+
+Decisão:
+O vetor fonte `b` para a equação de Poisson `∇²u = -ρ/ε₀` será construído a partir do vetor de cargas nodais `Q` através da relação `b_i = Q_i / ε₀`.
+
+Justificativa:
+Esta relação deriva diretamente da forma fraca de Galerkin (`b_i = ∫ φ_i (ρ/ε₀) dΩ`) quando a densidade de carga `ρ` é modelada como uma coleção de cargas pontuais (partículas), `ρ(x) = Σ_p q_p δ(x - x_p)`. A propriedade de filtragem da função delta resulta em `b_i = (1/ε₀) Σ_p q_p φ_i(x_p)`. Como a carga nodal `Q_i` é definida como `Σ_p q_p φ_i(x_p)`, a relação `b_i = Q_i / ε₀` é matematicamente consistente.
+
+Impacto no código:
+O laço principal do PIDC (`pidc_advance_one_step` ou similar) deve, após chamar `deposit_charge`, dividir o vetor de cargas nodais resultante por `ε₀` antes de passá-lo como RHS para `EFGPoissonSolver::solve()`.
+
 Impacto na validação:
-`tests/test_efg_poisson_external_rhs.cpp` valida que `solve(rhs)` reutiliza a
-fatoração, rejeita RHS externo inválido e preserva o termo de penalidade
-Dirichlet não-homogêneo ao somar o RHS externo ao cache de contorno.
+Garante a escala física correta do potencial elétrico. Testes que verificam o campo elétrico ou o potencial contra valores conhecidos dependem desta convenção.
 
 ---
 
-## DEC-0032 — Domínios de influência como helpers geométricos
+## DEC-0033 — Definição do Domínio de Influência para PIDC
 
 Status: aceita
-Proposta e implementada por: Codex — 2026-05-09 (T-045D)
+Proposta por: Gemini — 2026-05-09 (T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS)
+Aceita por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
 
 Contexto:
-O TODO da Fase C pedia domínios circulares e retangulares. A formulação MLS
-validada até aqui usa raio circular via `MLSConfig::support_radius`; trocar a
-forma de suporte dentro de `mls_evaluate` sem auditoria poderia alterar a
-formulação matemática validada.
+A avaliação MLS depende de um "domínio de influência" para selecionar os nós vizinhos. A tese menciona este conceito, e o código o implementa através de um `support_radius` escalar. A recente adição dos helpers `CircularInfluenceDomain` e `RectangularInfluenceDomain` (T-045D) precisa ter seu papel clarificado.
 
 Decisão:
-Adicionar `CircularInfluenceDomain` e `RectangularInfluenceDomain` em
-`include/pidc/mls/InfluenceDomain.hpp` como helpers testados de pertinência e
-distância normalizada. Eles não alteram `mls_evaluate` nem os testes MLS/EFG
-validados.
+O mecanismo padrão para definir o domínio de influência no ciclo PIDC é um **domínio circular** definido pelo raio escalar `MLSConfig::support_radius`. A função `mls_evaluate` usa este raio para realizar uma busca por distância para encontrar os vizinhos. Os helpers `CircularInfluenceDomain` e `RectangularInfluenceDomain` são considerados ferramentas para testes e aplicações especializadas, não para o comportamento padrão do ciclo principal.
 
 Justificativa:
-Fecha a pendência estrutural sem misturar uma mudança matemática no núcleo MLS.
-O uso desses helpers em uma futura variante retangular de MLS deve passar por
-auditoria Gemini/Claude antes de substituir a distância circular já validada.
+Esta decisão documenta o estado atual da implementação, que é consistente com a literatura canônica de EFG (e.g., Belytschko et al., 1994) e com a tese de referência. Manter um domínio circular simples como padrão é uma hipótese de trabalho robusta e validável.
 
 Impacto no código:
-Novo header `InfluenceDomain.hpp` e teste `test_influence_domain`.
+Nenhuma alteração imediata, pois formaliza o comportamento existente. Qualquer futura implementação de domínios adaptativos ou não-circulares no ciclo principal exigirá uma nova decisão para substituir ou estender esta.
 
 Impacto na validação:
-`tests/test_influence_domain.cpp` valida inclusão de centro, bordas, pontos
-externos, distância normalizada e falhas para parâmetros inválidos.
+Os testes de validação existentes, como o MMS para Poisson (`test_efg_poisson_mms`), dependem implicitamente desta definição. A formalização aumenta a clareza sobre as hipóteses do modelo.
 
 ---
 
-## DEC-0033 — Smoke PIDC 2D inicial em domínio Dirichlet
+## DEC-0034 — Inicialização de velocidade half-step antes do loop PIDC 2D
 
-Status: aceita
-Proposta por: Gemini — 2026-05-09 (T-GEMINI-F-READINESS)
-Implementada por: Codex — 2026-05-09 (T-045D)
+Status: proposta
+Proposta por: Claude — 2026-05-09 (T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP)
 
 Contexto:
-R-015/R-016 registram que MLS e busca de vizinhos ainda não são periódicos.
-Mesmo assim, é possível validar o ciclo PIDC mínimo em domínio não-periódico
-com Dirichlet homogêneo antes de implementar periodicidade.
+O integrador leap-frog é correto apenas quando as velocidades estão deslocadas de
+meio passo em relação às posições. `advance_particle_leapfrog_2d` em `PIDCLoop.hpp`
+implementa o passo correto (`v += a*dt; x += v*dt`), mas não existe função de
+inicialização que desloque as velocidades para t = -dt/2 antes do primeiro passo.
+O `test_pidc_loop` começa com `v₀ = {0, 0}` sem inicialização, o que faz o
+primeiro passo ser Euler-Cromer em vez de leapfrog. Isso viola a simetria temporal
+que garante conservação de energia a segunda ordem. A Fase E resolveu o mesmo
+problema com `initialize_leapfrog_velocity_1d`. Ver R-022.
 
 Decisão:
-O primeiro ciclo PIDC 2D usa domínio `[0,1]^2`, nuvem regular pequena, Poisson
-EFG Dirichlet, `K` fatorada uma vez por `assemble_stiffness_only`, deposição por
-células difusas cacheadas, RHS `Q/epsilon0` recalculado por passo e interpolação
-`E(x_p) = -Σ_i u_i grad_phi_i(x_p)`.
+Criar `initialize_pidc_velocity_2d` em `PIDCLoop.hpp` com a seguinte semântica:
+
+1. Depositar cargas das partículas com a posição atual (t = 0).
+2. Resolver Poisson para obter E₀ = E(t = 0).
+3. Para cada partícula: `v_{-1/2} = v₀ - (q/m) * E₀ * dt/2`.
+4. A posição não é avançada nesta chamada.
+
+Após a inicialização, o loop com `pidc_advance_one_step` produz leapfrog verdadeiro.
 
 Justificativa:
-Valida integração entre deposição PIDC, Poisson EFG, interpolação de campo e
-avanço leap-frog 2D sem confundir o resultado com os riscos periódicos ainda
-abertos.
+O leapfrog (Störmer-Verlet) tem erro global O(dt²) e conserva energia a longo prazo
+apenas quando a velocidade está em t = -dt/2. Sem a inicialização, o primeiro passo
+introduz um erro O(dt) que persiste. Para simular a oscilação de Langmuir 2D ou
+reproduzir a tese (Fase H), a conservação de energia é critério de aceite.
 
 Impacto no código:
-Adiciona `DiffuseCell.hpp`, `PIDCFieldInterpolator.hpp`, `PIDCLoop.hpp` e
-`apps/pidc_smoke_2d.cpp`; estende `ChargeDeposition.hpp` com
-`deposit_charge_from_cells`.
+
+- Adicionar `initialize_pidc_velocity_2d` em `include/pidc/pidc/PIDCLoop.hpp`.
+- Atualizar `apps/pidc_smoke_2d.cpp` para chamar a inicialização antes do loop.
+- Adicionar teste de reversibilidade temporal em `test_pidc_loop`: dois passos
+  forward + dois backward devem retornar partículas à posição inicial.
+- Tarefa sugerida: T-047 (Codex).
 
 Impacto na validação:
-Novos testes `pidc_diffuse_cell`, `pidc_field_interpolation` e `pidc_loop`.
-O app `pidc_smoke_2d` exporta `data/output/pidc_smoke_2d.csv`.
+O teste de reversibilidade temporal é o critério de aceite desta decisão, análogo
+ao teste de reversibilidade em `test_leapfrog_1d`.
+
+---
+
+## DEC-0035 — Caso Comum para Comparação PIC-FD vs. PIDC
+
+Status: parcialmente aceita (emendada — ver revisão Claude abaixo)
+Proposta por: Gemini — 2026-05-09 (T-046)
+Revisada por: Claude — 2026-05-09 (T-046 revisão)
+
+Contexto:
+O Marco 6 do roadmap exige uma comparação direta entre o PIC de referência e o PIDC. As implementações atuais são incompatíveis: o PIC é 1D periódico e o PIDC é 2D com contorno de Dirichlet. A tarefa T-046 visa definir um caso comum sem misturar dimensionalidade ou condições de contorno.
+
+Decisão original (Gemini):
+A comparação será baseada na **instabilidade de duas correntes (Two-Stream Instability) em 2D com condições de contorno periódicas** para ambos os métodos.
+
+Justificativa original:
+A instabilidade de duas correntes é um problema canônico para códigos eletrostáticos, com uma taxa de crescimento teórica bem definida que serve como métrica de validação quantitativa. A escolha de 2D alinha a comparação com a implementação principal do PIDC. As condições de contorno periódicas são o cenário físico mais relevante para este problema e um passo necessário para a reprodução da tese (Marco 7).
+
+Impacto no código (proposta original):
+Esta decisão exige um trabalho de desenvolvimento substancial antes que a comparação possa ser executada:
+1.  **PIDC:** Extensão para periodicidade, o que implica resolver os riscos R-015 (MLS periódico) e R-016 (busca de vizinhos periódica) e implementar um solver de Poisson EFG 2D periódico.
+2.  **PIC-FD:** Criação de um novo código de referência PIC-FD 2D periódico, incluindo grade 2D, deposição 2D, solver de Poisson 2D (FFT) e interpolação 2D.
+
+### Emenda Claude — 2026-05-09
+
+**O que é aceito:** o princípio "maçãs com maçãs" (mesma dimensionalidade, mesma condição de contorno) e a escolha de 2D como dimensionalidade comum.
+
+**O que é redirecionado:** a instabilidade de duas correntes 2D periódica é fisicamente correta mas exige R-015, R-016, solver EFG periódico e PIC-FD 2D periódico — todos não implementados. Isso representa semanas de desenvolvimento e viola o princípio de comparação controlada exigido pelo Marco 6. **Este caso é redirecionado para o Marco 7.**
+
+**Marco 6 — abordagem revisada em duas fases:**
+
+- **Fase A:** campo manufaturado estático 2D, mesmo campo aplicado a PIC-2D e PIDC. Não requer Poisson. Mede apenas o erro do leapfrog 2D. Pré-condição: T-047 (DEC-0034). Tarefa: T-048.
+- **Fase B:** Langmuir 2D com BC Dirichlet (`[0,1]²`, perturbação senoidal, campo self-consistent). Requer novo módulo PIC-FD 2D Dirichlet (`Grid2D`, deposição CIC bilinear, `PoissonSolver2D_FD`, interpolação CIC 2D). Evita inteiramente R-015/R-016. Usa o solver EFG existente (sem extensão periódica). Tarefa: T-049.
+
+O plano detalhado está em `docs/validation/comparison_plan_pic_pidc.md` (Seção 8).

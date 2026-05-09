@@ -1,6 +1,6 @@
 # AI_BOARD — Quadro de comunicação entre IAs
 
-Atualizado em: 2026-05-09 (T-045D)
+Atualizado em: 2026-05-09 (T-046 revisão Claude)
 
 ## Regras
 
@@ -17,13 +17,13 @@ Nenhuma tarefa em andamento no momento.
 
 ---
 
-## Próximas tarefas sugeridas
+## Propostas
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP | Revisar arquitetura do solver cacheado, `PIDCLoop` e riscos periódicos | Claude | proposta |
-| T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS | Auditar `rhs = Q/epsilon0`, domínios de influência e hipóteses tese ↔ código | Gemini | proposta |
-| T-046 | Definir caso comum para comparação PIC-FD versus PIDC sem misturar periodicidade/dimensionalidade | Gemini + Claude | proposta |
+| T-049 | Módulo PIC-FD 2D Dirichlet (`Grid2D`, CIC 2D, `PoissonSolver2D_FD`, interpolação) + comparação Fase B | Codex | proposta |
+| T-048 | `PIC2DManufactured` + comparação Fase A (campo manufaturado, sem Poisson) | Codex | proposta |
+| T-047 | Implementar `initialize_pidc_velocity_2d` + teste de reversibilidade temporal (DEC-0034) | Codex | proposta |
 
 ---
 
@@ -31,6 +31,10 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-046 | Definir caso comum para comparação PIC-FD vs. PIDC (revisão Claude): DEC-0035 emendada; Marco 6 Fase A+B; Marco 7 two-stream; T-047/T-048/T-049 propostas | Claude | 2026-05-09 |
+| T-046 | Definir caso comum para comparação PIC-FD vs. PIDC (proposta Gemini) | Gemini | 2026-05-09 |
+| T-CLAUDE-F-ARCH-REVIEW-PIDC-LOOP | Revisar arquitetura PIDCLoop: R-022–R-025 em RISKS.md; DEC-0032/0033 aceitas; DEC-0034 proposta (leapfrog init); T-047 proposta para Codex | Claude | 2026-05-09 |
+| T-GEMINI-F-AUDIT-PIDC-RHS-DOMAINS | Auditar `rhs = Q/epsilon0`, domínios de influência e hipóteses tese ↔ código | Gemini | 2026-05-09 |
 | T-045D | Fechar A-G: JSON opcional, domínios circular/retangular, RHS externo EFG robusto, `DiffuseCell`, deposição cacheada, interpolação PIDC, loop/app `pidc_smoke_2d`, 29/29 CTest | Codex | 2026-05-09 |
 | T-045C | Implementar app `pidc_smoke_2d` com ciclo PIDC mínimo em domínio Dirichlet | Codex | 2026-05-09 |
 | T-045B | Implementar `interpolate_field_pidc` e teste com campo manufaturado | Codex | 2026-05-09 |
