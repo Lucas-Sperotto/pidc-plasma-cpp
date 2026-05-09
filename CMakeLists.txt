@@ -206,6 +206,17 @@ add_test(
     COMMAND pidc_test_efg_poisson_mms
 )
 
+add_executable(pidc_test_efg_poisson_external_rhs
+    tests/test_efg_poisson_external_rhs.cpp
+)
+
+target_link_libraries(pidc_test_efg_poisson_external_rhs PRIVATE pidc_core)
+
+add_test(
+    NAME efg_poisson_external_rhs
+    COMMAND pidc_test_efg_poisson_external_rhs
+)
+
 add_executable(pidc_test_charge_conservation
     tests/test_charge_conservation.cpp
 )
@@ -354,3 +365,15 @@ add_executable(pidc_phase_e_diagnostics
 )
 
 target_link_libraries(pidc_phase_e_diagnostics PRIVATE pidc_core)
+
+add_executable(pidc_marco3_mms_diagnostics
+    apps/marco3_mms_diagnostics.cpp
+)
+
+target_link_libraries(pidc_marco3_mms_diagnostics PRIVATE pidc_core)
+
+add_executable(pidc_smoke_2d
+    apps/pidc_smoke_2d.cpp
+)
+
+target_link_libraries(pidc_smoke_2d PRIVATE pidc_core)

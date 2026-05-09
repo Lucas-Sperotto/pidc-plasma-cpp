@@ -51,6 +51,7 @@ public:
         const auto n = static_cast<Eigen::Index>(nodes.size());
         std::vector<Eigen::Triplet<double>> stiffness_entries;
         rhs_ = Eigen::VectorXd::Zero(n);
+        dirichlet_rhs_ = Eigen::VectorXd::Zero(n);
 
         for (const GaussCell2D& cell : cells) {
             for (const GaussPoint2D& quadrature : cell.points) {
@@ -113,6 +114,7 @@ public:
         const auto n = static_cast<Eigen::Index>(nodes.size());
         std::vector<Eigen::Triplet<double>> stiffness_entries;
         rhs_ = Eigen::VectorXd::Zero(n);
+        dirichlet_rhs_ = Eigen::VectorXd::Zero(n);
 
         for (const GaussCell2D& cell : cells) {
             for (const GaussPoint2D& quadrature : cell.points) {
@@ -160,7 +162,7 @@ public:
             throw std::runtime_error{
                 "EFGPoissonSolver solve(rhs) called before assemble or assemble_stiffness_only"};
         }
-        return solve_with_cached_factorization(rhs);
+        return solve_with_cached_factorization(external_rhs_with_dirichlet(rhs));
     }
 
     Eigen::MatrixXd stiffness_matrix() const
@@ -176,6 +178,7 @@ public:
 private:
     Eigen::SparseMatrix<double> stiffness_{};
     Eigen::VectorXd rhs_{};
+    Eigen::VectorXd dirichlet_rhs_{};
     // DEC-0031: cached factorization — computed once per assemble*() call,
     // reused across all solve(rhs) calls in the PIDC time loop.
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> ldlt_{};
@@ -201,6 +204,20 @@ private:
             throw std::runtime_error{"EFGPoissonSolver produced a non-finite solution"};
         }
         return solution;
+    }
+
+    Eigen::VectorXd external_rhs_with_dirichlet(const Eigen::VectorXd& rhs) const
+    {
+        if (rhs.size() != stiffness_.rows()) {
+            throw std::invalid_argument{"EFGPoissonSolver external rhs has wrong size"};
+        }
+        if (!rhs.allFinite()) {
+            throw std::invalid_argument{"EFGPoissonSolver external rhs must be finite"};
+        }
+        if (dirichlet_rhs_.size() != stiffness_.rows()) {
+            throw std::runtime_error{"EFGPoissonSolver Dirichlet rhs cache is inconsistent"};
+        }
+        return rhs + dirichlet_rhs_;
     }
 
     static void require_finite(double value, const char* message)
@@ -272,6 +289,7 @@ private:
 
             const auto index = static_cast<Eigen::Index>(i);
             stiffness_entries.emplace_back(index, index, penalty);
+            dirichlet_rhs_(index) += penalty * value;
             rhs_(index) += penalty * value;
         }
 
