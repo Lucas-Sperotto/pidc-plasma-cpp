@@ -140,6 +140,17 @@ add_test(
     COMMAND pidc_test_mls_robustness
 )
 
+add_executable(pidc_test_influence_domain
+    tests/test_influence_domain.cpp
+)
+
+target_link_libraries(pidc_test_influence_domain PRIVATE pidc_core)
+
+add_test(
+    NAME influence_domain
+    COMMAND pidc_test_influence_domain
+)
+
 add_executable(pidc_test_regular_node_cloud
     tests/test_regular_node_cloud.cpp
 )
