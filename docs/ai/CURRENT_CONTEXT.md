@@ -44,10 +44,16 @@ Implementar e validar o PIDC de forma incremental:
 
 - `GaussCell2D` gera células retangulares com quadratura Gauss 2×2.
 - `MLSConfig` centraliza o raio de suporte usado por EFG.
-- `EFGPoissonSolver` monta `K`, monta `b`, impõe Dirichlet por substituição direta e resolve com matriz densa.
+- `EFGPoissonSolver` monta `K`, monta `b`, impõe Dirichlet por penalidade (DEC-0024) e resolve com matriz densa.
 - Teste MMS Dirichlet para $u = \sin(\pi x)\sin(\pi y)$ passou:
-  - L2 5×5 = 0.00359684;
-  - L2 9×9 = 0.000827504.
+  - potencial L2 5×5 = 0.00359684;
+  - potencial L2 9×9 = 0.000827504;
+  - potencial L∞ 5×5 = 0.0069852;
+  - potencial L∞ 9×9 = 0.00169752;
+  - campo L2 5×5 = 0.033052;
+  - campo L2 9×9 = 0.0136451;
+  - campo L∞ 5×5 = 0.105394;
+  - campo L∞ 9×9 = 0.0554929.
 
 **Infra:**
 
@@ -59,14 +65,11 @@ Implementar e validar o PIDC de forma incremental:
 
 | Tarefa | Responsável | Prioridade |
 | --- | --- | --- |
-| T-031 | Auditar `EFGPoissonSolver` contra formulação fraca, sinal e Dirichlet | Gemini + Claude |
-| T-032 | Adicionar métricas L∞ do potencial e L2/L∞ do campo no MMS | Codex |
-| T-033 | Planejar migração densa → esparsa preservando teste MMS | Claude + Codex |
+| T-035 | Implementar migração densa → esparsa em `EFGPoissonSolver` (DEC-0025) | Codex |
 
 **Pendências antes de avançar para PIC/PIDC:**
 
 - Revisar matematicamente o solver EFG inicial.
-- Medir L∞ do potencial e erros de campo.
 - Só migrar para esparso depois de preservar o teste MMS como referência.
 
 ## Decisões-chave vigentes
@@ -87,6 +90,8 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0020 | `NeighborSearchGrid` v1 não periódico | aceita |
 | DEC-0021 | `PeriodicBoundary2D` como helper geométrico | aceita |
 | DEC-0023 | Raio de suporte MMS inicial: `1.8*h_g` via `MLSConfig` | aceita |
+| DEC-0024 | Penalidade para Dirichlet no EFG Poisson | aceita |
+| DEC-0025 | Migração do backend de K: denso → esparso | proposta |
 
 ## Regras críticas
 

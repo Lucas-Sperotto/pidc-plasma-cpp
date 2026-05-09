@@ -1,5 +1,6 @@
 #include <Eigen/Dense>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -31,46 +32,83 @@ double source(pidc::Vec2 point)
     return 2.0 * kPi * kPi * exact_solution(point);
 }
 
+pidc::Vec2 exact_field(pidc::Vec2 point)
+{
+    return {
+        -kPi * std::cos(kPi * point.x) * std::sin(kPi * point.y),
+        -kPi * std::sin(kPi * point.x) * std::cos(kPi * point.y),
+    };
+}
+
 double homogeneous_dirichlet(pidc::Vec2)
 {
     return 0.0;
 }
 
-double evaluate_solution(
-    pidc::Vec2 point,
-    const pidc::NodeCloud& nodes,
-    const pidc::MLSConfig& config,
-    const Eigen::VectorXd& nodal_values)
-{
-    const pidc::ShapeFunctionData shape = pidc::mls_evaluate(point, nodes, config);
+struct ErrorMetrics {
+    double potential_l2{0.0};
+    double potential_linf{0.0};
+    double field_l2{0.0};
+    double field_linf{0.0};
+};
 
-    double value = 0.0;
-    for (std::size_t i = 0; i < shape.neighbor_ids.size(); ++i) {
-        value += shape.phi[i] * nodal_values(static_cast<Eigen::Index>(shape.neighbor_ids[i]));
-    }
-    return value;
+bool is_finite(ErrorMetrics metrics)
+{
+    return std::isfinite(metrics.potential_l2) &&
+           std::isfinite(metrics.potential_linf) &&
+           std::isfinite(metrics.field_l2) &&
+           std::isfinite(metrics.field_linf);
 }
 
-double l2_error(
+ErrorMetrics compute_error_metrics(
     const std::vector<pidc::GaussCell2D>& cells,
     const pidc::NodeCloud& nodes,
     const pidc::MLSConfig& config,
     const Eigen::VectorXd& nodal_values)
 {
-    double error_squared = 0.0;
+    double potential_error_squared = 0.0;
+    double field_error_squared = 0.0;
+    double potential_linf = 0.0;
+    double field_linf = 0.0;
+
     for (const pidc::GaussCell2D& cell : cells) {
-        for (const pidc::GaussPoint2D& point : cell.points) {
-            const double error = evaluate_solution(point.point, nodes, config, nodal_values) -
-                                 exact_solution(point.point);
-            error_squared += point.weight * error * error;
+        for (const pidc::GaussPoint2D& quadrature : cell.points) {
+            const pidc::ShapeFunctionData shape = pidc::mls_evaluate(quadrature.point, nodes, config);
+
+            double numerical_potential = 0.0;
+            pidc::Vec2 numerical_grad{0.0, 0.0};
+            for (std::size_t i = 0; i < shape.neighbor_ids.size(); ++i) {
+                const double value = nodal_values(static_cast<Eigen::Index>(shape.neighbor_ids[i]));
+                numerical_potential += shape.phi[i] * value;
+                numerical_grad.x += shape.grad_phi[i].x * value;
+                numerical_grad.y += shape.grad_phi[i].y * value;
+            }
+
+            const double potential_error = numerical_potential - exact_solution(quadrature.point);
+            potential_error_squared += quadrature.weight * potential_error * potential_error;
+            potential_linf = std::max(potential_linf, std::abs(potential_error));
+
+            const pidc::Vec2 numerical_field{-numerical_grad.x, -numerical_grad.y};
+            const pidc::Vec2 analytical_field = exact_field(quadrature.point);
+            const double field_error_x = numerical_field.x - analytical_field.x;
+            const double field_error_y = numerical_field.y - analytical_field.y;
+            const double field_error_norm = std::sqrt(
+                field_error_x * field_error_x + field_error_y * field_error_y);
+            field_error_squared += quadrature.weight * field_error_norm * field_error_norm;
+            field_linf = std::max(field_linf, field_error_norm);
         }
     }
 
-    return std::sqrt(error_squared);
+    return {
+        std::sqrt(potential_error_squared),
+        potential_linf,
+        std::sqrt(field_error_squared),
+        field_linf,
+    };
 }
 
 struct MmsResult {
-    double l2{0.0};
+    ErrorMetrics error{};
     double max_symmetry_error{0.0};
 };
 
@@ -110,7 +148,7 @@ MmsResult run_mms(std::size_t node_count)
         }
     }
 
-    return MmsResult{l2_error(cells, nodes, mls, solution), max_symmetry_error};
+    return MmsResult{compute_error_metrics(cells, nodes, mls, solution), max_symmetry_error};
 }
 
 } // namespace
@@ -129,11 +167,35 @@ int main()
     const MmsResult coarse = run_mms(5);
     const MmsResult refined = run_mms(9);
 
-    pidc::test::require(coarse.l2 < 1.0e-2, "5x5 MMS L2 error must be below tolerance");
-    pidc::test::require(refined.l2 < coarse.l2, "9x9 MMS L2 error must improve over 5x5");
+    pidc::test::require(is_finite(coarse.error), "5x5 MMS error metrics must be finite");
+    pidc::test::require(is_finite(refined.error), "9x9 MMS error metrics must be finite");
+
+    pidc::test::require(coarse.error.potential_l2 < 1.0e-2,
+                        "5x5 MMS potential L2 error must be below tolerance");
+    pidc::test::require(coarse.error.potential_linf < 1.0e-2,
+                        "5x5 MMS potential Linf error must be below tolerance");
+    pidc::test::require(coarse.error.field_l2 < 5.0e-2,
+                        "5x5 MMS field L2 error must be below tolerance");
+    pidc::test::require(coarse.error.field_linf < 1.2e-1,
+                        "5x5 MMS field Linf error must be below tolerance");
+
+    pidc::test::require(refined.error.potential_l2 < coarse.error.potential_l2,
+                        "9x9 MMS potential L2 error must improve over 5x5");
+    pidc::test::require(refined.error.potential_linf < coarse.error.potential_linf,
+                        "9x9 MMS potential Linf error must improve over 5x5");
+    pidc::test::require(refined.error.field_l2 < coarse.error.field_l2,
+                        "9x9 MMS field L2 error must improve over 5x5");
+    pidc::test::require(refined.error.field_linf < coarse.error.field_linf,
+                        "9x9 MMS field Linf error must improve over 5x5");
 
     std::cout << "efg_poisson_mms test passed\n";
-    std::cout << "L2 5x5: " << coarse.l2 << '\n';
-    std::cout << "L2 9x9: " << refined.l2 << '\n';
+    std::cout << "potential L2 5x5: " << coarse.error.potential_l2 << '\n';
+    std::cout << "potential L2 9x9: " << refined.error.potential_l2 << '\n';
+    std::cout << "potential Linf 5x5: " << coarse.error.potential_linf << '\n';
+    std::cout << "potential Linf 9x9: " << refined.error.potential_linf << '\n';
+    std::cout << "field L2 5x5: " << coarse.error.field_l2 << '\n';
+    std::cout << "field L2 9x9: " << refined.error.field_l2 << '\n';
+    std::cout << "field Linf 5x5: " << coarse.error.field_linf << '\n';
+    std::cout << "field Linf 9x9: " << refined.error.field_linf << '\n';
     return 0;
 }

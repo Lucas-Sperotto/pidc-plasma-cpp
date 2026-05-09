@@ -112,7 +112,7 @@ Resolver a equação de Poisson para casos manufaturados.
 - [x] Implementar quadratura de Gauss 2D.
 - [x] Montar matriz de rigidez `K`.
 - [x] Montar vetor de fontes `b`.
-- [x] Impor Dirichlet por substituição direta no caso interpolante.
+- [x] Impor Dirichlet por penalidade (DEC-0024).
 - [x] Resolver inicialmente com matriz densa.
 - [ ] Migrar para matriz esparsa após validação.
 
@@ -129,9 +129,9 @@ u(x,y) = \sin(\pi x)\sin(\pi y)
 ### Métricas
 
 - [x] erro L2 do potencial;
-- [ ] erro L∞ do potencial;
-- [ ] erro L2 do campo;
-- [ ] erro L∞ do campo;
+- [x] erro L∞ do potencial;
+- [x] erro L2 do campo;
+- [x] erro L∞ do campo;
 - [x] estudo de convergência ao refinar a nuvem.
 
 ---

@@ -83,12 +83,15 @@ Condições de contorno: $u = 0$ em $\partial\Omega$ (Dirichlet homogêneo).
 
 | Métrica | Valor alvo |
 | --- | --- |
-| Erro $L^2$ (nuvem 5×5) | $< 10^{-2}$ |
-| Erro $L^2$ (nuvem 9×9) | menor que nuvem 5×5 |
+| Erro $L^2$ do potencial (nuvem 5×5) | $< 10^{-2}$ |
+| Erro $L^\infty$ do potencial (nuvem 5×5) | $< 10^{-2}$ |
+| Erro $L^2$ do campo (nuvem 5×5) | $< 5\times10^{-2}$ |
+| Erro $L^\infty$ do campo (nuvem 5×5) | $< 1.2\times10^{-1}$ |
+| Erros em 9×9 | menores que os respectivos erros em 5×5 |
 | Ausência de NaN/Inf | obrigatório |
 
-A convergência com refinamento da nuvem não precisa ser demonstrada para
-aceite da Fase D, mas deve ser observável (erro reduz ao refinar).
+O campo manufaturado é avaliado como $\mathbf{E} = -\nabla u$. A norma $L^\infty$
+do campo usa a norma Euclidiana do erro vetorial em cada ponto de quadratura.
 
 ### Implementação de referência
 
@@ -96,12 +99,12 @@ aceite da Fase D, mas deve ser observável (erro reduz ao refinar).
 polinômios simples por Gauss 2×2.
 
 `tests/test_efg_poisson_mms.cpp` — usa `support_radius = 1.8*h_g`, monta e
-resolve o sistema denso inicial. Resultado em 2026-05-08:
+resolve o sistema denso inicial. Resultado em 2026-05-08 (T-032):
 
-| Nuvem | Erro L2 absoluto |
-| --- | --- |
-| 5×5 | 0.00359684 |
-| 9×9 | 0.000827504 |
+| Nuvem | Potencial L2 | Potencial L∞ | Campo L2 | Campo L∞ |
+| --- | --- | --- | --- | --- |
+| 5×5 | 0.00359684 | 0.0069852 | 0.033052 | 0.105394 |
+| 9×9 | 0.000827504 | 0.00169752 | 0.0136451 | 0.0554929 |
 
 CTest: 14/14 testes passando.
 
