@@ -1,6 +1,6 @@
 # CURRENT_CONTEXT — Contexto mínimo para retomada
 
-Atualizado em: 2026-05-08
+Atualizado em: 2026-05-09
 
 Estamos reconstruindo em C/C++17 o método Particle-In-Diffuse-Cell (PIDC),
 baseado na tese de Gleber Nelson Marques (INPE, 2008).
@@ -40,7 +40,7 @@ Implementar e validar o PIDC de forma incremental:
   - Ausência de `NaN`/`Inf` e condicionamento de $A$ testados em `mls_robustness`.
 - CTest: **14/14 testes passando**.
 
-**Fase D (Poisson EFG) validada no MMS inicial:**
+**Fase D (Poisson EFG) validada e Marco 3 fechado (2026-05-09):**
 
 - `GaussCell2D` gera células retangulares com quadratura Gauss 2×2.
 - `MLSConfig` centraliza o raio de suporte usado por EFG.
@@ -56,23 +56,55 @@ Implementar e validar o PIDC de forma incremental:
   - campo L∞ 5×5 = 0.105394;
   - campo L∞ 9×9 = 0.0554929.
 
+**Deposição conservativa de carga (T-037, 2026-05-09):**
+
+- `deposit_charge` em `include/pidc/pidc/ChargeDeposition.hpp` (DEC-0026 aceita).
+- Itera partículas → `mls_evaluate` → acumula `q_p * phi_i(xp)`.
+- Conservação `Σ Q_i = Σ q_p` garantida pela PU; verificada com tol 1e-12.
+- `test_charge_conservation`: 5 subtestes; 15/15 CTest passando.
+
+**Deposição CIC 1D implementada e testada (T-039, 2026-05-09):**
+
+- `deposit_charge_cic_1d` em `include/pidc/pic/ChargeDeposition1D.hpp` (header-only, sem Eigen, DEC-0028).
+- Algoritmo CIC: `Q[left] += q*(1-f)`, `Q[right] += q*f`, onde `f = fraction_in_cell(x_p)`.
+- Conservação `|ΣQ_i − Σq_p| < 1e-12` garantida pela partição da unidade dos pesos CIC.
+- `test_cic_deposition_1d`: 6 subtestes (centro 50/50, 100% sobre nó, periodicidade, conservação, tamanho, throw).
+- Plano `docs/ai/PHASE_E_PIC1D_PLAN.md` criado e aprovado.
+- CTest: **17/17 testes passando**.
+
+**PIC baseline 1D — grade criada e auditada (T-038A/B/C, 2026-05-09):**
+
+- `pic::Grid1D` em `include/pidc/pic/Grid1D.hpp` (namespace `pidc::pic`).
+- Semântica periódica semiaberta `[xmin, xmax)`, `nx` nós = `nx` células, `dx = L/nx` (DEC-0027 aceita).
+- Métodos: `size`, `coordinate`, `wrap_position`, `cell_index`, `left_node_index`, `right_node_index`, `fraction_in_cell`.
+- `test_pic_grid1d` passa; 16/16 CTest passando.
+- **Fronteiras arquiteturais definidas (T-038C):** módulo `pic/` independente de `mls/`, `efg/` e Eigen.
+  - Vetores nodais PIC 1D: `std::vector<double>` (DEC-0028).
+  - Reutilizar `Particle`/`Species` existentes, usando apenas componente `.x`.
+  - `PoissonSolver1D` será separado do `EFGPoissonSolver` (diferentes algoritmos/dimensões).
+  - Comparação PIC vs PIDC adiada para depois das validações individuais.
+- Riscos R-018–R-021 registrados.
+- Sequência de implementação: T-039 (CIC) → T-040 (Poisson1D) → T-041 (campo) → T-042 (leap-frog) → T-043 (Langmuir).
+
 **Infra:**
 
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
 - `scripts/build.sh` e `scripts/run_tests.sh` existem.
+- CTest atual: **17/17 testes passando**.
 
 ## Próximos passos
 
-| Tarefa | Responsável | Prioridade |
-| --- | --- | --- |
-| T-036 | Auditar T-032/T-035: métricas MMS e solver esparso contra DEC-0025 | Gemini + Claude |
-| T-037 | Definir teste mínimo de deposição conservativa de carga antes de implementar PIDC | Gemini + Claude |
+| Tarefa | Descrição | Responsável | Prioridade |
+| --- | --- | --- | --- |
+| T-040 | Solver Poisson 1D periódico (DFT manual `std::complex<double>`), independente de Eigen, teste MMS 1D | Codex | alta |
+| T-041 | Interpolação campo CIC 1D: `interpolate_field_cic_1d`, 5 subtestes | Codex | alta |
 
-**Pendências antes de avançar para PIC/PIDC:**
+**Pendências antes de avançar para PIDC (Fase F):**
 
-- Auditar matematicamente o solver EFG esparso e as métricas MMS ampliadas.
-- Definir e validar deposição conservativa antes de iniciar o ciclo PIDC.
+- Completar sequência PIC 1D: T-039 → T-040 → T-041 (campo) → T-042 (leap-frog) → T-043 (Langmuir).
+- R-017: cache LDLT em `EFGPoissonSolver` — resolver antes de Phase F.
+- R-015, R-016, DEC-0022: periodicidade MLS/busca — bloqueantes para Phase F.
 
 ## Decisões-chave vigentes
 
@@ -94,6 +126,9 @@ Implementar e validar o PIDC de forma incremental:
 | DEC-0023 | Raio de suporte MMS inicial: `1.8*h_g` via `MLSConfig` | aceita |
 | DEC-0024 | Penalidade para Dirichlet no EFG Poisson | aceita |
 | DEC-0025 | Migração do backend de K: denso → esparso | aceita |
+| DEC-0026 | `deposit_charge`: função livre para deposição conservativa de carga | aceita |
+| DEC-0027 | Grade periódica 1D: `nx` nós = `nx` células, `dx = L/nx` | aceita |
+| DEC-0028 | Vetores nodais PIC 1D como `std::vector<double>`, sem Eigen | aceita |
 
 ## Regras críticas
 

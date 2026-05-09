@@ -1,6 +1,23 @@
 # AI_STATUS — Estado técnico consolidado
 
-Atualizado em: 2026-05-08
+Atualizado em: 2026-05-09
+
+## Último resumo
+
+Gemini concluiu a auditoria matemática do plano da Fase E (T-AUDIT-E-MATH). O plano sequencial (T-039 a T-044) foi validado como matematicamente sólido. A convenção de grade (DEC-0027) e o método de deposição CIC (T-039) estão corretos. Foi proposta a DEC-0029 para formalizar a estratégia de "um teste por componente", garantindo que o solver de Poisson, a interpolação e o leap-frog sejam validados com testes de unidade (MMS, campo manufaturado, reversibilidade) antes da simulação integrada de Langmuir. Os riscos de comparação PIC vs. PIDC foram identificados (dimensionalidade, parâmetros, diagnósticos). A Fase E pode prosseguir conforme planejado.
+---
+
+## Último resumo
+
+Claude concluiu T-039. Plano `PHASE_E_PIC1D_PLAN.md` aprovado e registrado em `docs/ai/`. `deposit_charge_cic_1d` implementada em `include/pidc/pic/ChargeDeposition1D.hpp` (header-only, sem Eigen, DEC-0028). Acumula `q*(1-f)` no nó esquerdo e `q*f` no nó direito (CIC). Teste `test_cic_deposition_1d` cobre 6 subtestes: 50/50 no centro, 100% sobre nó, periodicidade próxima a xmax, conservação global `|ΣQ_i − Σq_p| < 1e-12`, tamanho de retorno e species_id inválido → throw. **17/17 testes passando.** Próxima tarefa: T-040 (Codex) — `PoissonSolver1D` periódico.
+
+---
+
+## Último resumo anterior
+
+Claude concluiu T-037 (com base no plano do Gemini e DEC-0026). `deposit_charge` implementada em `include/pidc/pidc/ChargeDeposition.hpp`: itera partículas, chama `mls_evaluate`, acumula `q_p * phi_i(x_p)`. Teste `test_charge_conservation` cobre: conservação global multi-partícula (5 subtestes), partícula única, lista vazia, espécie inválida e resolução 9×9. **15/15 testes passando.** A Fase E (PIC baseline) pode ser iniciada pelo Codex (T-038).
+
+---
 
 ## Estado geral
 
@@ -41,25 +58,46 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | efg_poisson_mms | passou em 2026-05-08 com backend esparso; potencial L2 5×5 = 0.00359683506821715, potencial L2 9×9 = 0.000827503569222836, potencial L∞ 5×5 = 0.00698519578344722, potencial L∞ 9×9 = 0.00169751665145062, campo L2 5×5 = 0.0330520262581074, campo L2 9×9 = 0.0136450944195131, campo L∞ 5×5 = 0.105393836778107, campo L∞ 9×9 = 0.0554928606259795 |
 | partition unity | passou em 2026-05-08 (coberto por mls_shape_function) |
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
-| charge conservation | não iniciado |
+| charge conservation (PIDC) | passou em 2026-05-09 (test_charge_conservation, 15 subtestes) |
+| cic_deposition_1d | passou em 2026-05-09 (test_cic_deposition_1d, 6 subtestes) |
 | Poisson MMS | passou em 2026-05-08 |
 | Langmuir 1D | não iniciado |
 
-## Último resumo
-
-Codex concluiu T-035 (2026-05-08). `EFGPoissonSolver` agora armazena `K` como
-`Eigen::SparseMatrix<double>`, monta por `Eigen::Triplet<double>` e resolve com
-`Eigen::SimplicialLDLT`. A penalidade Dirichlet da DEC-0024 foi preservada como
-acréscimo diagonal, e `stiffness_matrix()` retorna uma cópia densa apenas para
-testes/diagnóstico. O teste MMS manteve as métricas de T-032 na escala de
-diferença esperada (< 1e-12 contra o baseline denso). Não houve implementação de
-PIC, PIDC, deposição, interpolação temporal ou caso grande.
-
 ---
 
-### Histórico anterior
+## Histórico
 
-Codex concluiu T-032 (2026-05-08). O teste `efg_poisson_mms` agora mede erro
+### 2026-05-09: T-039 (Claude — plano Fase E + deposição CIC 1D)
+
+Plano arquitetural da Fase E aprovado e gravado em `docs/ai/PHASE_E_PIC1D_PLAN.md`. `deposit_charge_cic_1d` implementada em `include/pidc/pic/ChargeDeposition1D.hpp` (header-only, sem Eigen). Algoritmo CIC: `Q[left] += q*(1-f); Q[right] += q*f` onde `f = fraction_in_cell`. Conservação pela partição da unidade. Teste `test_cic_deposition_1d` com 6 subtestes (50/50 centro, 100% nó, periodicidade, conservação, tamanho, throw). 17/17 testes passando.
+
+### 2026-05-09: T-038C (Claude — revisão arquitetural PIC 1D)
+Claude finalizou T-038C. Revisão arquitetural da Fase E (PIC 1D):
+(1) `include/pidc/pic/` + namespace `pidc::pic` — correto.
+(2) Reutilizar `Particle`/`Species` existentes no PIC 1D (usar apenas `.x`), sem duplicação prematura.
+(3) Módulo PIC 1D deve ser **independente de `mls/`, `efg/` e Eigen** — R-018, DEC-0028.
+(4) `PoissonSolver1D` será separado do `EFGPoissonSolver` — diferentes algoritmos/dimensões.
+(5) Comparação PIC vs PIDC adiada para depois das validações individuais.
+DEC-0027 aceita. DEC-0028 aceita. R-018–R-021 registrados. Sequência T-039→T-040→T-041→T-042→T-043.
+
+### 2026-05-09: T-037 (Gemini + Claude — deposição conservativa de carga)
+Gemini definiu DEC-0026 (interface `deposit_charge`). Claude implementou `include/pidc/pidc/ChargeDeposition.hpp`: função livre que itera partículas, chama `mls_evaluate` e acumula `q_p * phi_i(x_p)` nos índices nodais. Conservação garantida pela partição da unidade. Teste `test_charge_conservation` cobre: (1) conservação global multi-partícula 5×5; (2) partícula única; (3) lista vazia → vetor zero; (4) species_id inválido → `out_of_range`; (5) conservação em grade 9×9. 15/15 testes passando. DEC-0026 aceita. Fase E (PIC baseline, T-038) desbloqueada para Codex.
+
+### 2026-05-09: T-036 (Claude — revisão arquitetural e fechamento Marco 3)
+Claude finalizou T-036. Revisão arquitetural do `EFGPoissonSolver` após T-032/T-035:
+(1) Implementação correta e alinhada com DEC-0024/DEC-0025; 14/14 testes passando.
+(2) Acoplamento implícito em `impose_dirichlet_penalty` documentado — funciona corretamente mas depende de `stiffness_` populado antes da penalidade.
+(3) `stiffness_matrix()` retorna cópia densa O(n²) — legítimo para testes, não deve ser chamado no ciclo temporal do PIDC.
+(4) R-017 registrado: `solve()` recria `SimplicialLDLT` a cada chamada — não-bloqueante para Phase D, bloqueante para Phase F.
+(5) R-006 atualizado: assemble/solve são interfaces separadas desde T-034; o resíduo é o cache da fatoração (R-017).
+(6) Marco 3 do ROADMAP.md marcado como concluído; exportação CSV e script de plotagem diferidos como não-bloqueantes.
+T-037 está em andamento: definir e implementar teste de deposição conservativa antes de Fase E.
+
+### 2026-05-08: T-035 (Codex)
+Codex concluiu T-035. `EFGPoissonSolver` agora armazena `K` como `Eigen::SparseMatrix<double>`, monta por `Eigen::Triplet<double>` e resolve com `Eigen::SimplicialLDLT`. A penalidade Dirichlet da DEC-0024 foi preservada como acréscimo diagonal, e `stiffness_matrix()` retorna uma cópia densa apenas para testes/diagnóstico. O teste MMS manteve as métricas de T-032 na escala de diferença esperada (< 1e-12 contra o baseline denso). Não houve implementação de PIC, PIDC, deposição, interpolação temporal ou caso grande.
+
+### 2026-05-08: T-032 (Codex)
+Codex concluiu T-032. O teste `efg_poisson_mms` agora mede erro
 L2/L∞ do potencial e L2/L∞ do campo manufaturado, com campo avaliado como
 `E = -grad(u_h)` a partir dos gradientes MLS. As métricas são finitas e refinam
 de 5×5 para 9×9: potencial L2 0.00359684 → 0.000827504; potencial L∞
@@ -67,34 +105,26 @@ de 5×5 para 9×9: potencial L2 0.00359684 → 0.000827504; potencial L∞
 0.105394 → 0.0554929. Não houve implementação de PIC, PIDC, deposição ou caso grande.
 
 ---
-
-### Histórico anterior
-
-Claude concluiu T-034 e T-033 (2026-05-08). T-034: bug real identificado na eliminação sequencial de Dirichlet para caso não-homogêneo; `impose_dirichlet` substituído por `impose_dirichlet_penalty` (DEC-0024 aceita) — apenas diagonal de K é modificada, simetria preservada exatamente, homogêneo/não-homogêneo tratados identicamente. Tolerância do teste de contorno ajustada de `1e-12` para `1e-10`. 14/14 testes passando, L2 inalterado. T-033: DEC-0025 proposta para migração futura densa → esparsa via `SimplicialLDLT` (Codex, após Phase D validada).
+### 2026-05-08: T-034, T-033 (Claude)
+Claude concluiu T-034 e T-033. T-034: bug real identificado na eliminação sequencial de Dirichlet para caso não-homogêneo; `impose_dirichlet` substituído por `impose_dirichlet_penalty` (DEC-0024 aceita) — apenas diagonal de K é modificada, simetria preservada exatamente, homogêneo/não-homogêneo tratados identicamente. Tolerância do teste de contorno ajustada de `1e-12` para `1e-10`. 14/14 testes passando, L2 inalterado. T-033: DEC-0025 proposta para migração futura densa → esparsa via `SimplicialLDLT` (Codex, após Phase D validada).
 
 ---
-
-### Histórico anterior
-
+### 2026-05-08: T-031 (Gemini)
 Gemini concluiu T-031: Auditoria do `EFGPoissonSolver`. A implementação de Codex (T-Poisson) está matematicamente correta e consistente com as decisões `DEC-0005` (sinal) e `DEC-0006` (forma fraca). A imposição de Dirichlet por modificação da matriz é funcional, mas frágil. Para melhorar a robustez, foi proposta a `DEC-0024` para adotar o método de penalidade. Uma nova tarefa `T-034` foi criada para Claude revisar esta decisão e planejar a refatoração.
 
 ---
-
-### Histórico anterior
-
-Codex concluiu T-Poisson (2026-05-08). Foram adicionados `MLSConfig`, `GaussCell2D` com quadratura Gauss 2×2, e `EFGPoissonSolver` denso inicial para o problema manufaturado Dirichlet. O teste `efg_poisson_mms` monta `K`, monta `b`, impõe Dirichlet homogêneo, resolve o sistema e valida erro L2: 5×5 = 0.00359684 (< 1e-2) e 9×9 = 0.000827504 (< 5×5). CTest passou com 14/14 testes. Não houve implementação de PIC, PIDC, deposição de carga, campo interpolado ou caso grande.
+### 2026-05-08: T-Poisson (Codex)
+Codex concluiu T-Poisson. Foram adicionados `MLSConfig`, `GaussCell2D` com quadratura Gauss 2×2, e `EFGPoissonSolver` denso inicial para o problema manufaturado Dirichlet. O teste `efg_poisson_mms` monta `K`, monta `b`, impõe Dirichlet homogêneo, resolve o sistema e valida erro L2: 5×5 = 0.00359684 (< 1e-2) e 9×9 = 0.000827504 (< 5×5). CTest passou com 14/14 testes. Não houve implementação de PIC, PIDC, deposição de carga, campo interpolado ou caso grande.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-023 (Gemini)
 Gemini concluiu T-023 e Codex finalizou a remoção manual pendente: conforme `DEC-0019` (agora `aceita`), o campo `volume` foi removido da struct `Node`, e os testes/initializers foram ajustados. A justificativa é que a quadratura EFG (`DEC-0018`) usa células explícitas, tornando o campo redundante e uma fonte de ambiguidade (`R-009`).
 
 ---
 
-### Histórico anterior
-
-Gemini concluiu T-028 e T-030 (2026-05-08). **Auditoria de validação e riscos concluída.**
+### 2026-05-08: T-028, T-030 (Gemini)
+Gemini concluiu T-028 e T-030. **Auditoria de validação e riscos concluída.**
 
 1. `VALIDATION_PLAN.md` (T-028): As tolerâncias e o caso MMS estão corretos. Adicionada nota sobre a origem da tolerância de $10^{-10}$.
 2. Riscos e Decisões (T-030): Confirmado que as implementações não-periódicas de MLS e busca de vizinhos (R-015, R-016) são corretas para a Fase D (Poisson Dirichlet). A estratégia para a Fase F periódica (DEC-0022) e o uso de ponteiro bruto em `NeighborSearchGrid` (R-014) para a Fase D são aceitáveis.
@@ -102,106 +132,88 @@ Gemini concluiu T-028 e T-030 (2026-05-08). **Auditoria de validação e riscos 
 **Resultado:** A tarefa `T-Poisson` está totalmente desbloqueada e pronta para ser iniciada pelo Codex.
 
 ---
+### 2026-05-08: T-029 (Claude)
+Claude concluiu T-029: revisão dos contratos de `NeighborSearchGrid` e `PeriodicBoundary2D`. Implementações estão corretas para Phase D (não-periódica). Registrados R-014 (ponteiro bruto para NodeCloud), R-015 (mls_evaluate não periódico, bloqueante para Phase F) e R-016 (query_radius não periódico, bloqueante para Phase F). Proposta DEC-0022 (estratégia de sobrecargas periódicas para Phase F). T-Poisson permanece desbloqueada para Phase D. T-030 proposta para Gemini confirmar os riscos antes de T-Poisson.
 
-### Histórico anterior
+---
+### 2026-05-08: T-024, T-025, T-026 (Codex)
+Codex concluiu T-024, T-025 e T-026. T-024 adicionou guarda explícita em `mls_evaluate` para raio de suporte positivo e finito, além do teste `mls_robustness` para ausência de NaN/Inf e condicionamento da matriz MLS. T-025 criou `NeighborSearchGrid` não periódico, com resultados ordenados e teste contra busca bruta. T-026 criou `PeriodicBoundary2D` com `wrap` e `minimum_image`, sem acoplar partículas, MLS ou PIDC. A Fase B geométrica mínima está completa para a próxima validação. CTest passou com 12/12 testes.
 
-Claude concluiu T-029 (2026-05-08): revisão dos contratos de `NeighborSearchGrid` e `PeriodicBoundary2D`. Implementações estão corretas para Phase D (não-periódica). Registrados R-014 (ponteiro bruto para NodeCloud), R-015 (mls_evaluate não periódico, bloqueante para Phase F) e R-016 (query_radius não periódico, bloqueante para Phase F). Proposta DEC-0022 (estratégia de sobrecargas periódicas para Phase F). T-Poisson permanece desbloqueada para Phase D. T-030 proposta para Gemini confirmar os riscos antes de T-Poisson.
+---
+### 2026-05-08: Fases 0/A/B/C (Claude)
+Claude concluiu auditoria das Fases 0/A/B/C. Resultados: (1) scripts/build.sh e run_tests.sh criados — Fase A completa; (2) DEC-0018 aceita — T-Poisson desbloqueada para Codex; (3) DEC-0019 proposta sobre semântica de Node::volume — aguarda decisão de Professor/Gemini (T-023); (4) docs/validation/VALIDATION_PLAN.md criado com tolerâncias quantitativas para Fases C e D; (5) Tarefas T-025 (NeighborSearchGrid), T-026 (PeriodicBoundary2D), T-028 (revisar VALIDATION_PLAN) e T-Poisson formalizadas no AI_BOARD. Fase B permanece incompleta (NeighborSearchGrid e PeriodicBoundary2D ausentes). 9/9 testes passando.
 
 ---
 
-### Histórico anterior
-
-Codex concluiu T-024, T-025 e T-026 (2026-05-08). T-024 adicionou guarda explícita em `mls_evaluate` para raio de suporte positivo e finito, além do teste `mls_robustness` para ausência de NaN/Inf e condicionamento da matriz MLS. T-025 criou `NeighborSearchGrid` não periódico, com resultados ordenados e teste contra busca bruta. T-026 criou `PeriodicBoundary2D` com `wrap` e `minimum_image`, sem acoplar partículas, MLS ou PIDC. A Fase B geométrica mínima está completa para a próxima validação. CTest passou com 12/12 testes.
-
----
-
-### Histórico anterior
-
-Claude concluiu auditoria das Fases 0/A/B/C (2026-05-08). Resultados: (1) scripts/build.sh e run_tests.sh criados — Fase A completa; (2) DEC-0018 aceita — T-Poisson desbloqueada para Codex; (3) DEC-0019 proposta sobre semântica de Node::volume — aguarda decisão de Professor/Gemini (T-023); (4) docs/validation/VALIDATION_PLAN.md criado com tolerâncias quantitativas para Fases C e D; (5) Tarefas T-025 (NeighborSearchGrid), T-026 (PeriodicBoundary2D), T-028 (revisar VALIDATION_PLAN) e T-Poisson formalizadas no AI_BOARD. Fase B permanece incompleta (NeighborSearchGrid e PeriodicBoundary2D ausentes). 9/9 testes passando.
-
----
-
-### Histórico anterior
-
+### 2026-05-08: T-021 (Claude)
 Claude concluiu T-021: R-013 era falso positivo. A fórmula de gradiente em `mls_evaluate` foi verificada matematicamente correta via diferenciação implícita de `A c = p(x)`. O "termo extra" apontado por Gemini (`(∇p)ᵀ A⁻¹ pᵢ wᵢ`) faz parte do primeiro componente da derivada implícita; a confusão foi entre `A⁻¹ pᵢ` (vector por vizinho) e `c = A⁻¹ p(x)` (vector no ponto de consulta). Testes assimétricos adicionados para `{0.3, 0.7}`, `{0.6, 0.4}` e `{0.37, 0.61}` — 9/9 testes passam. **T-Poisson desbloqueada** (pendente DEC-0018 aceita e confirmação Gemini T-022).
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-018 (Codex)
 Codex revisou a T-018 após ela ter sido atribuída ao Gemini por engano. A implementação inicial de `RegularNodeCloud2D` usava caminhos e métodos inexistentes de `Domain2D`; foi corrigida para usar `pidc/Domain2D.hpp`, `lower()`, `width()` e `height()`, e o teste foi adaptado ao framework `tests/test_utils.hpp`. O duplicado de `R-013` em `docs/ai/RISKS.md` foi removido. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_test_regular_node_cloud`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 9/9 testes.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-020 (Gemini)
 Gemini concluiu T-020: Auditoria matemática de `MLSShapeFunction`. **Foi encontrado um bug crítico na implementação do gradiente (T-017).** A fórmula implementada está incorreta, mas o teste passou devido a uma simetria no caso de teste que mascarou o erro. O risco foi registrado como R-013 e uma nova tarefa de correção, T-021, foi proposta para Claude. **A implementação do solver de Poisson (T-Poisson) está bloqueada até que T-021 seja concluída.**
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-018 (Revisão)
 T-018 foi integrada e revisada: `RegularNodeCloud2D` cria uma `NodeCloud` determinística a partir de `Domain2D`, incluindo domínios quadrados/retangulares, linha única, coluna única e erro controlado para dimensão zero. Com isso, a Fase B do `TODO.md` avança. O CTest agora executa 9/9 testes com sucesso.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-019 (Claude)
 Claude concluiu T-019: revisão de arquitetura MLS → EFG. Registrados R-010 (raio de suporte sem propriedade), R-011 (busca O(N) acumulada em EFG) e R-012 (células de integração não definidas) em `docs/ai/RISKS.md`. Proposta DEC-0018 (quadratura por células retangulares Gauss 2×2) em `docs/ai/DECISIONS.md`. `CURRENT_CONTEXT.md` atualizado para refletir o estado real. `TODO.md` Fase C sincronizado. **Bloqueante:** DEC-0018 precisa ser aceita antes de implementar o assembler EFG Poisson.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-005 (Codex)
 Codex concluiu T-005: framework de testes definido como CTest + executáveis C++ simples, com helper comum `tests/test_utils.hpp` para `require` e `approx_equal`. Todos os testes existentes foram migrados para o helper. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 8/8 testes.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-017 (Claude)
 Claude concluiu T-017: `MLSShapeFunction` implementada em `include/pidc/mls/MLSShapeFunction.hpp` como função livre `mls_evaluate(Vec2, const NodeCloud&, double) -> ShapeFunctionData`. Monta a matriz de momento $A$ (3×3), resolve $A\mathbf{c} = \mathbf{p}(\mathbf{x})$ via `PartialPivLU`, e computa gradientes diferenciando implicitamente o sistema linear. Teste `test_mls_shape_function.cpp` cobre partição da unidade, reprodução linear, gradientes de PU e LR, segundo ponto de consulta e exceção com vizinhos insuficientes. 8/8 testes passando (DEC-0016).
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-016 (Codex)
 Codex concluiu T-016: Eigen foi adicionada ao CMake com `find_package(Eigen3 3.3 REQUIRED NO_MODULE)` e propagada por `pidc_core` via `Eigen3::Eigen`. O teste `eigen_dependency` foi registrado no CTest e passou. `cmake -S . -B build`, `cmake --build build -j`, `./build/pidc_smoke`, `./build/pidc_test_eigen_dependency`, `/usr/bin/ctest --test-dir build --output-on-failure` e `git diff --check` passaram com 7/7 testes.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-015 (Gemini)
 Gemini concluiu T-015: Confirmação de que o repositório está sincronizado com as tarefas T-002, T-013 e T-014. Como próximo passo, foi proposta a tarefa T-016 para o Codex: adicionar a dependência da biblioteca Eigen via CMake, um pré-requisito para a Fase C (MLS/EFG).
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-014 (Gemini)
 Gemini concluiu T-014: Revisão e conclusão de tarefas pendentes. T-004 (convenção de unidades) foi formalmente concluída, e a entrada incorreta T-008 foi removida do quadro. Decisões implementadas (`DEC-0005`, `DEC-0008`, `DEC-0013`) foram atualizadas para o status `aceita`, sincronizando a documentação.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-013 (Gemini)
 Gemini concluiu T-013: Sincronização do `TODO.md` com o `AI_BOARD.md`. As tarefas de implementação de `Species`, `NodeCloud`, `PolynomialBasis` e `WeightFunction` foram marcadas como concluídas, refletindo o trabalho já realizado por Claude e Codex.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-002 (Gemini)
 Gemini concluiu T-002: Auditoria das equações em `docs/03_modelo_matematico_minimo.md`. O documento foi atualizado para refletir as decisões `DEC-0005` (unidades SI) e `DEC-0007` (estratégia de contorno), removendo ambiguidades.
 
 ---
 
-### Histórico anterior
-
+### 2026-05-08: T-012 (Claude)
 Claude concluiu T-012: `PolynomialBasis` linear 2D criada em
 `include/pidc/mls/PolynomialBasis.hpp`. Funções `linear_basis(x)`,
 `linear_basis_dx()`, `linear_basis_dy()`. 6/6 testes passando.
 Todos os ingredientes sem Eigen para `MLSShapeFunction` estão prontos.
 
 ---
-Claude concluiu T-010 (rescate de T-008 / DEC-0011): `Species.hpp` criado em `include/pidc/`,
+### 2026-05-08: T-010 (Claude)
+Claude concluiu T-010 (resgate de T-008 / DEC-0011): `Species.hpp` criado em `include/pidc/`,
 `Particle.hpp` refatorado para usar `species_id` (removidos `charge` e `mass`), `smoke.cpp`
 atualizado, `test_species.cpp` criado usando padrão `require()`. 4/4 testes passando.
 Nota: T-008 havia sido marcada como concluída por Gemini sem implementação real — violação de R-003.

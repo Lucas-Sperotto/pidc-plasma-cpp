@@ -1,6 +1,6 @@
 # AI_BOARD — Quadro de comunicação entre IAs
 
-Atualizado em: 2026-05-08
+Atualizado em: 2026-05-09 (plano técnico Fase E)
 
 ## Regras
 
@@ -21,8 +21,11 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-036 | Auditar T-032/T-035: métricas MMS e solver esparso contra DEC-0025 | Gemini + Claude | proposta |
-| T-037 | Definir teste mínimo de deposição conservativa de carga antes de implementar PIDC | Gemini + Claude | proposta |
+| T-040 | Implementar campo elétrico manufaturado em `Grid1D` (`ManufacturedField1D.hpp`) + teste analítico | Codex | proposta |
+| T-041 | Implementar Poisson 1D periódico por FD/DFT manual (`PoissonSolver1D.hpp`) + teste MMS discreto | Codex | proposta |
+| T-042 | Implementar interpolação CIC campo → partícula (`FieldInterpolation1D.hpp`) + teste manufaturado | Codex | proposta |
+| T-043 | Implementar leap-frog 1D isolado (`LeapFrog1D.hpp`) + testes analíticos e reversibilidade | Codex | proposta |
+| T-044 | Implementar oscilação de Langmuir 1D (`Langmuir1D.hpp`) + métrica de frequência dominante | Codex | proposta |
 
 ---
 
@@ -30,6 +33,14 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-AUDIT-E-MATH | Auditar matematicamente o plano da Fase E PIC 1D | Gemini | 2026-05-09 |
+| T-PLAN-E | Criar `PHASE_E_PIC1D_TECH_PLAN.md`; corrigir numeração T-040–T-044 após plano divergente; CTest 17/17 | Codex | 2026-05-09 |
+| T-039 | Plano PHASE_E_PIC1D_PLAN.md aprovado; `deposit_charge_cic_1d` + `test_cic_deposition_1d`; CTest 17/17 | Claude | 2026-05-09 |
+| T-038C | Revisão arquitetural PIC 1D: DEC-0027 aceita, DEC-0028, R-018–R-021 registrados | Claude | 2026-05-09 |
+| T-038B | Auditar matematicamente o contrato da grade PIC 1D e propor T-039 | Gemini | 2026-05-09 |
+| T-038A | Criar `pic::Grid1D` periódico semiaberto e `test_pic_grid1d`; CTest 16/16 passando | Codex | 2026-05-09 |
+| T-037 | Definir DEC-0026; implementar deposit_charge; test_charge_conservation 15/15 passando | Gemini + Claude | 2026-05-09 |
+| T-036 | Auditar T-032/T-035; revisão arquitetural EFGPoissonSolver; fechamento Marco 3; R-017 registrado | Gemini + Claude | 2026-05-09 |
 | T-035 | Implementar migração densa → esparsa em EFGPoissonSolver (DEC-0025) | Codex | 2026-05-08 |
 | T-032 | Adicionar métricas L∞ do potencial e L2/L∞ do campo manufaturado para Poisson MMS | Codex | 2026-05-08 |
 | T-034 | Aceitar DEC-0024; refatorar `impose_dirichlet` → penalidade; planejar DEC-0025 (T-033) | Claude | 2026-05-08 |

@@ -239,3 +239,100 @@ Mitigação:
 Antes de Phase F, criar `NeighborSearchGrid::query_radius_periodic(Vec2, double,
 const PeriodicBoundary2D&)` que replica o ponto de consulta nas 8 imagens
 periódicas vizinhas e une os resultados (removendo duplicatas). DEC-0022 proposta.
+
+---
+
+## R-017 — `EFGPoissonSolver::solve()` recria fatoração LDLT a cada chamada
+
+Registrado por: Claude — 2026-05-09 (T-036)
+
+`solve()` instancia `Eigen::SimplicialLDLT` localmente e chama `.compute(stiffness_)`
+em toda invocação. Para Phase D (MMS estático: uma montagem + um solve), o custo
+é negligível. Para Phase F (ciclo PIDC: `K` constante por passo de tempo, apenas
+`b` varia), re-fatorar K a cada passo desperdiça O(n^1.5) sem benefício.
+
+Contexto: o R-006 original apontou o risco de K ser remontado em todo passo.
+A interface atual já separa `assemble()` de `solve()` (R-006 parcialmente resolvido),
+mas a fatoração de K não é cacheada — o que ainda bloqueia uso eficiente em Phase F.
+
+Mitigação:
+Antes de Phase F, adicionar `factorize()` à interface do solver (ou cache interno
+lazy) para que a fatoração de K seja reutilizada entre passos de tempo. Manter
+`assemble()` + `factorize()` separados de `solve(b)` no ciclo temporal do PIDC.
+
+Arquivo afetado: `include/pidc/efg/EFGPoissonSolver.hpp`.
+
+**Nota adicional:** `stiffness_matrix()` retorna `Eigen::MatrixXd` (cópia densa
+O(n²)). Uso legítimo em testes de simetria; não deve ser chamado no ciclo temporal.
+Se Phase F precisar inspecionar K, preferir iterador esparso direto.
+
+**Atualização R-006 (2026-05-09):** assemble/solve já são métodos distintos desde
+T-034/T-035. O problema residual é o cache da fatoração (descrito acima como R-017).
+
+---
+
+## R-018 — Acoplamento prematuro entre módulos `pic/` e `pidc/` ou `efg/`
+
+Registrado por: Claude — 2026-05-09 (T-038C)
+
+Se `include/pidc/pic/` importar headers de `mls/` ou `efg/`, o PIC 1D perde
+sua função de **referência independente** para comparação com o PIDC. A deposição
+CIC e o solver Poisson FD/FFT não precisam de MLS, EFG ou Eigen.
+
+Mitigação:
+Proibir `#include "pidc/mls/..."`, `#include "pidc/efg/..."` e `#include <Eigen/...>`
+em qualquer header de `include/pidc/pic/`. A DEC-0028 formaliza isso para vetores.
+Inspecionar includes antes de aceitar qualquer PR na Fase E.
+
+---
+
+## R-019 — Ambiguidade "nx nós" vs "nx células" em grade periódica
+
+Registrado por: Claude — 2026-05-09 (T-038C)
+
+Para grade **não-periódica** (FEM clássico), `n_nodes = n_cells + 1`. Para grade
+**periódica** (PIC canônico), `n_nodes = n_cells = nx`. Colaboradores familiarizados
+com FEM ou grade não-periódica podem inicializar `Grid1D` com `nx+1` nós por engano,
+gerando um nó fantasma e off-by-one em deposição/interpolação.
+
+`DEC-0027` registra a convenção correta, mas o risco persiste enquanto não houver
+um comentário explícito no construtor de `Grid1D`.
+
+Mitigação:
+Adicionar ao construtor de `Grid1D` um comentário de uma linha que explicite:
+`// periodic: nx nodes == nx cells; node nx is a periodic image of node 0`.
+
+---
+
+## R-020 — `Particle` 2D usado em PIC 1D: componente y ignorado
+
+Registrado por: Claude — 2026-05-09 (T-038C)
+
+`pidc::Particle` armazena `Vec2 position` e `Vec2 velocity`. O PIC 1D usa apenas
+`particle.position.x` e `particle.velocity.x`. O componente `.y` é zero não
+inicializado pelo código PIC e nunca verificado.
+
+Isso não é um bug no estado atual (y nunca entra em nenhuma equação PIC 1D),
+mas pode enganar leitores e causar inicialização silenciosa incorreta se
+o PIC 1D for estendido para 2D sem revisar todas as inicializações.
+
+Mitigação:
+Documentar nos testes PIC 1D que `.position.y` e `.velocity.y` não são utilizados.
+Se o PIC for estendido para 2D, criar `Particle2D` ou reutilizar `Particle` com
+inicialização explícita de ambos os componentes.
+
+---
+
+## R-021 — Tentativa prematura de Langmuir antes de validar deposição e campo
+
+Registrado por: Claude — 2026-05-09 (T-038C)
+
+O critério de aceite da Fase E é a oscilação de Langmuir com frequência correta.
+Isso requer: (1) deposição CIC conservativa, (2) solver Poisson 1D com teste MMS,
+(3) interpolação de campo com teste manufaturado, (4) leap-frog com teste de
+reversibilidade. Pular diretamente para Langmuir sem validar cada passo
+individualmente vai mascarar erros de sinal, escala ou fase.
+
+Mitigação:
+Seguir a sequência de tarefas T-039 → T-040 → T-041 → T-042 → T-043 (Langmuir)
+sem fundir etapas. Cada etapa deve ter seu próprio teste antes de avançar.

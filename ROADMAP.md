@@ -28,18 +28,19 @@ Entrega:
 
 ---
 
-## Marco 3 — Poisson por EFG
+## Marco 3 — Poisson por EFG ✓ CONCLUÍDO (2026-05-09)
 
 Resultado esperado: solver resolve problema manufaturado com erro medido.
 
 Entrega:
 
-- montagem de `K`
-- montagem de `b`
-- imposição de Dirichlet
-- exportação CSV
-- script de plotagem
-- relatório de validação
+- [x] montagem de `K` (esparso, `SimplicialLDLT`, DEC-0025)
+- [x] montagem de `b`
+- [x] imposição de Dirichlet (penalidade, DEC-0024)
+- [x] métricas MMS: L2/L∞ do potencial e do campo com convergência verificada
+- [ ] exportação CSV — diferido (não bloqueia Marco 4)
+- [ ] script de plotagem — diferido (não bloqueia Marco 4)
+- [ ] relatório de validação formal — diferido (métricas registradas em AI_STATUS.md)
 
 ---
 

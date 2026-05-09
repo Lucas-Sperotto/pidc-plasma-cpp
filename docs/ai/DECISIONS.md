@@ -805,3 +805,165 @@ Impacto na validação:
 Após a migração, `efg_poisson_mms` manteve os erros do baseline denso com
 diferença abaixo de `1e-12` nos valores de referência de T-032. A suíte CTest
 permanece com 14/14 testes passando.
+
+---
+
+## DEC-0026 — Interface para Deposição de Carga PIDC
+
+Status: aceita
+Proposta por: Gemini — 2026-05-09 (T-037)
+Aceita e implementada por: Claude — 2026-05-09 (T-037)
+
+Contexto:
+A Fase F (PIDC) requer um módulo para depositar as cargas das partículas nos nós da
+nuvem. Este processo deve ser globalmente conservativo, uma propriedade garantida
+pela partição da unidade do MLS. É necessário definir uma interface clara para
+esta operação.
+
+Decisão:
+Criar uma função livre `deposit_charge` em um novo header
+`include/pidc/pidc/ChargeDeposition.hpp`. A interface será:
+
+```cpp
+Eigen::VectorXd deposit_charge(
+    const NodeCloud& cloud,
+    const std::vector<Particle>& particles,
+    const std::vector<Species>& species_list,
+    const MLSConfig& mls_config);
+```
+
+A função irá iterar sobre as partículas, avaliar as funções de forma MLS em cada
+posição de partícula (`mls_evaluate`), e acumular a carga `q_p * phi_i(x_p)` no
+índice nodal `i` correspondente. O retorno é um `Eigen::VectorXd` com as cargas
+nodais totais. A busca de vizinhos será feita internamente por `mls_evaluate`.
+
+Justificativa:
+Uma função livre é stateless e fácil de testar. Ela depende de componentes já
+validados (`NodeCloud`, `Particle`, `Species`, `mls_evaluate`). A interface
+explícita torna as dependências claras.
+
+Impacto no código:
+Criação de `include/pidc/pidc/ChargeDeposition.hpp` e
+`tests/test_charge_conservation.cpp`.
+
+Impacto na validação:
+O novo teste `test_charge_conservation` validará a propriedade `Σ Q_i = Σ q_p`
+para um conjunto determinístico de partículas, confirmando a conservação de
+carga global.
+
+---
+
+## DEC-0027 — Convenção de grade periódica 1D para PIC de referência
+
+Status: aceita
+Proposta por: Gemini — 2026-05-09 (T-038B)
+Aceita por: Claude — 2026-05-09 (T-038C)
+
+Contexto:
+A Fase E (PIC de referência) requer uma grade 1D periódica. Uma convenção clara
+e padrão é necessária para evitar erros de "off-by-one" e garantir a correta
+implementação da deposição de carga, interpolação de campo e solvers de Poisson
+baseados em FFT.
+
+Decisão:
+Para uma grade 1D com `nx` células em um domínio `[xmin, xmax)` de comprimento
+`L = xmax - xmin`:
+1.  A grade terá **`nx` nós** e **`nx` células**.
+2.  O espaçamento da grade é `dx = L / nx`.
+3.  Os nós são indexados de `0` a `nx-1`, com posições `x_i = xmin + i * dx`.
+4.  O nó `nx` é uma imagem periódica do nó `0`.
+5.  A célula `j` é o intervalo `[x_j, x_{j+1})`.
+6.  Uma partícula em `x_p` está na célula `j = floor((x_p - xmin) / dx)`.
+7.  A deposição de carga CIC para uma partícula na célula `j` afeta os nós `j` e `(j + 1) % nx`.
+
+Justificativa:
+Esta é a convenção padrão em códigos PIC canônicos (e.g., Birdsall & Langdon).
+Ela simplifica a lógica de indexação periódica e é compatível com solvers de
+diferenças finitas e FFT que assumem `N` pontos de dados para `N` coeficientes de Fourier.
+
+Impacto no código:
+`pic::Grid1D` (T-038A) já segue esta convenção. As futuras funções de deposição
+(`T-039`) e interpolação devem aderir estritamente a ela.
+
+---
+
+## DEC-0028 — Vetor de cargas nodais PIC 1D como `std::vector<double>`
+
+Status: aceita
+Proposta por: Claude — 2026-05-09 (T-038C)
+
+Contexto:
+As funções de deposição e interpolação do PIC 1D (`include/pidc/pic/`) devem
+permanecer independentes de Eigen. O módulo PIC de referência não monta matrizes
+nem resolve sistemas lineares densos/esparsos — apenas opera sobre vetores 1D simples.
+
+Decisão:
+O vetor de cargas nodais retornado por `deposit_charge_cic_1d` e consumido pelo
+`PoissonSolver1D` deve ser `std::vector<double>`, não `Eigen::VectorXd`.
+
+```cpp
+// deposit_charge_cic_1d retorna:
+std::vector<double>   // tamanho nx, uma entrada por nó
+
+// PoissonSolver1D recebe e retorna:
+std::vector<double>   // potencial nodal
+```
+
+Justificativa:
+1. Mantém `include/pidc/pic/` livre de qualquer dependência de Eigen.
+2. `std::vector<double>` é suficiente para vetores 1D e compatível com FFT real.
+3. Separa claramente o caminho PIC (grade, std::vector) do caminho EFG/PIDC
+   (nuvem de nós, Eigen::VectorXd).
+4. Facilita futura integração com bibliotecas FFT (FFTW, Eigen::FFT, etc.)
+   sem adaptadores de tipo.
+
+Impacto no código:
+`include/pidc/pic/ChargeDeposition1D.hpp` e `include/pidc/pic/PoissonSolver1D.hpp`
+usam `std::vector<double>` para todos os vetores nodais.
+
+Impacto na validação:
+Os testes do PIC 1D não incluem `<Eigen/Dense>`. A conversão para `Eigen::VectorXd`
+só ocorre se, e quando, um teste de comparação direta PIC vs PIDC for implementado.
+
+---
+
+## DEC-0029 — Validação separada para componentes do PIC 1D
+
+Status: proposta
+Proposta por: Gemini — 2026-05-09 (T-AUDIT-E-MATH)
+
+Contexto:
+A Fase E (PIC 1D de referência) culmina na simulação da oscilação de Langmuir (T-044).
+Conforme o risco R-021, pular diretamente para a simulação física sem validar os
+componentes individuais (solver de Poisson, interpolação, etc.) pode mascarar
+erros. É preciso formalizar a estratégia de validação incremental.
+
+Decisão:
+A sequência de validação para a Fase E deve ser estritamente seguida, com cada
+componente tendo seu próprio teste de unidade antes da integração:
+1.  **Deposição (T-039):** A deposição de carga CIC 1D deve ser validada por sua
+    propriedade de conservação de carga (`ΣQ_i = Σq_p`), como já foi feito. A
+    fórmula canônica é `Q_j += q(1-f)` e `Q_{j+1} += qf`, onde `f` é a
+    fração da célula.
+2.  **Solver de Poisson (T-041):** O solver de Poisson 1D periódico (baseado em
+    Diferenças Finitas e FFT) deve ser validado com um Teste de Solução
+    Manufaturada (MMS) discreto, independente da simulação de Langmuir. Isso
+    verifica a correta implementação do Laplaciano discreto e do tratamento
+    da condição de periodicidade/neutralidade (zerar o modo k=0).
+3.  **Interpolação (T-042):** A interpolação de campo CIC deve ser validada com um
+    campo elétrico manufaturado, verificando se o campo interpolado na posição
+    da partícula corresponde ao valor analítico.
+4.  **Integrador Temporal (T-043):** O integrador leap-frog deve ser validado em
+    isolamento, testando a reversibilidade no tempo e a conservação de energia
+    em um campo de força simples (e.g., oscilador harmônico).
+
+Justificativa:
+Esta abordagem "um teste por componente" garante que, ao montar a simulação
+completa de Langmuir (T-044), qualquer desvio do resultado teórico pode ser
+atribuído à física do modelo ou à interação dos componentes, e não a um bug
+fundamental em um dos blocos de construção. Isso é consistente com a regra de
+ouro do projeto: "Nenhuma fase posterior deve mascarar erro de fase anterior."
+
+Impacto no código:
+Reforça o plano de tarefas T-040 a T-044, garantindo que cada uma produza um
+teste de unidade específico e desacoplado.
