@@ -4,6 +4,12 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Claude concluiu T-044 (Langmuir 1D). `run_langmuir_1d` implementada em `include/pidc/pic/Langmuir1D.hpp` (header-only, sem Eigen). Integra a cadeia completa PIC 1D: deposição CIC → Poisson periódico (DFT) → interpolação CIC → leap-frog → diagnóstico. Unidades normalizadas: ε₀=1, q_mac=-L/N, m_mac=L/N, q/m=-1, ω_pe=1. Perturbação modo-1 de amplitude 1e-3; 2500 passos de dt=0.05. Frequência observada extraída por DFT O(n²/2) da série temporal de Re[Ê_k=1]. Resultado: ω_obs=1.005 ∈ [0.8, 1.2]·ω_pe. Deriva de energia ≤ 25%; erro de carga ≤ 1e-10. `test_langmuir_1d` cobre T1–T4; tempo de execução ≈ 0.41 s. **Fase E completa. 24/24 testes passando.**
+
+---
+
+## Último resumo anterior
+
 Codex concluiu T-039B. `tests/test_cic_deposition_reference_1d.cpp` foi criado para registrar casos de referência de deposição CIC 1D: partícula no centro de célula com divisão 50/50, partícula no centro do domínio sobre nó, e conjunto determinístico gerado por semente fixa com conservação global e reprodutibilidade. Nenhum código de produção foi alterado nesta tarefa. **23/23 testes passando.**
 
 ---

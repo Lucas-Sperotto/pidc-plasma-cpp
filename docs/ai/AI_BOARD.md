@@ -1,6 +1,6 @@
 # AI_BOARD — Quadro de comunicação entre IAs
 
-Atualizado em: 2026-05-09 (T-039B)
+Atualizado em: 2026-05-09 (T-044)
 
 ## Regras
 
@@ -21,7 +21,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-044 | Implementar oscilação de Langmuir 1D (`Langmuir1D.hpp`) + métrica de frequência dominante | Codex | proposta |
+| T-045 | Iniciar Fase F — PIDC completo: resolver R-017 (cache LDLT), revisar R-015/R-016/DEC-0022 | Professor / Claude | proposta |
 
 ---
 
@@ -29,6 +29,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-044 | Implementar oscilação de Langmuir 1D (`Langmuir1D.hpp`) + `test_langmuir_1d`; ω_obs=1.005∈[0.8,1.2]; CTest 24/24 | Claude | 2026-05-09 |
 | T-039B | Adicionar casos de referência CIC 1D: partícula central e conjunto determinístico com semente fixa; CTest 23/23 | Codex | 2026-05-09 |
 | T-043B | Validar contorno periódico PIC 1D em movimento (`test_pic_periodic_motion_1d`); CTest 22/22 | Codex | 2026-05-09 |
 | T-043 | Implementar leap-frog 1D isolado (`LeapFrog1D.hpp`) + `test_leapfrog_1d`; CTest 21/21 | Codex | 2026-05-09 |

@@ -293,3 +293,14 @@ add_test(
     NAME pic_periodic_motion_1d
     COMMAND pidc_test_pic_periodic_motion_1d
 )
+
+add_executable(pidc_test_langmuir_1d
+    tests/test_langmuir_1d.cpp
+)
+
+target_link_libraries(pidc_test_langmuir_1d PRIVATE pidc_core)
+
+add_test(
+    NAME langmuir_1d
+    COMMAND pidc_test_langmuir_1d
+)

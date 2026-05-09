@@ -126,6 +126,16 @@ Implementar e validar o PIDC de forma incremental:
 - Não houve implementação de Langmuir, MLS, EFG ou PIDC.
 - CTest: **22/22 testes passando**.
 
+**Oscilação de Langmuir 1D implementada e testada (T-044, 2026-05-09):**
+
+- `run_langmuir_1d` em `include/pidc/pic/Langmuir1D.hpp` (header-only, sem Eigen).
+- Integra a cadeia completa PIC 1D: deposição CIC → Poisson periódico (DFT) → interpolação CIC → leap-frog.
+- Unidades normalizadas: ε₀=1, q_mac=-L/N, m_mac=L/N, q/m=-1 → ω_pe=1.
+- Perturbação modo-1 senoidal (A=1e-3); leapfrog inicializado por meio passo antes do laço.
+- Diagnóstico: série temporal Re[Ê_{k=1}] → DFT O(n²/2) → ω_obs = 1.005 ∈ [0.8, 1.2]·ω_pe.
+- `test_langmuir_1d` cobre: T1 frequência, T2 deriva de energia, T3 conservação de carga, T4 finitude.
+- **Fase E concluída. CTest: 24/24 testes passando.**
+
 **PIC baseline 1D — grade criada e auditada (T-038A/B/C, 2026-05-09):**
 
 - `pic::Grid1D` em `include/pidc/pic/Grid1D.hpp` (namespace `pidc::pic`).
@@ -145,17 +155,17 @@ Implementar e validar o PIDC de forma incremental:
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
 - `scripts/build.sh` e `scripts/run_tests.sh` existem.
-- CTest atual: **23/23 testes passando**.
+- CTest atual: **24/24 testes passando**.
 
 ## Próximos passos
 
 | Tarefa | Descrição | Responsável | Prioridade |
 | --- | --- | --- | --- |
-| T-044 | Oscilação de Langmuir 1D após leap-frog | Codex | média |
+| T-045 | Iniciar Fase F — PIDC completo: resolver R-017 (cache LDLT), revisar R-015/R-016/DEC-0022 | Professor / Claude | proposta |
 
 **Pendências antes de avançar para PIDC (Fase F):**
 
-- Completar sequência PIC 1D: T-044 (Langmuir).
+- Fase E concluída (T-044 ✓).
 - R-017: cache LDLT em `EFGPoissonSolver` — resolver antes de Phase F.
 - R-015, R-016, DEC-0022: periodicidade MLS/busca — bloqueantes para Phase F.
 

@@ -151,7 +151,7 @@ Implementar um PIC simples para comparação com o PIDC.
 - [x] Interpolação do campo para partículas (`interpolate_field_cic_1d`, T-042).
 - [x] Leap-frog isolado (`initialize_leapfrog_velocity_1d`, `leapfrog_advance_1d`, T-043).
 - [x] Contorno periódico em movimento (`test_pic_periodic_motion_1d`, T-043B).
-- [ ] Caso físico de oscilação de Langmuir 1D.
+- [x] Caso físico de oscilação de Langmuir 1D (`Langmuir1D.hpp`, T-044; ω_obs=1.005 ∈ [0.8,1.2]·ω_pe).
 
 ### Critério de aceite
 
