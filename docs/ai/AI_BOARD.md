@@ -21,8 +21,10 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-GEMINI-F-READINESS | Auditar R-015/R-016/R-017/DEC-0022; propor sequência mínima T-045; spec em `docs/ai/GEMINI_TASKS/T_GEMINI_F_READINESS.md` | Gemini | proposta |
-| T-045 | Iniciar Fase F — PIDC completo (aguarda T-GEMINI-F-READINESS) | Professor / Claude | proposta |
+| T-045C | Implementar app `pidc_smoke_2d` com ciclo PIDC mínimo em domínio Dirichlet (usa T-045A, T-045B) | Claude | proposta |
+| T-045B | Implementar `interpolate_field_pidc` e teste com campo manufaturado | Codex | proposta |
+| T-045A | Implementar DEC-0031 (cache da fatoração em `EFGPoissonSolver`) e resolver R-017 | Claude | proposta |
+| T-045 | Iniciar Fase F — PIDC completo (desmembrada em T-045A/B/C) | Professor | concluída |
 
 ---
 
@@ -30,6 +32,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-GEMINI-F-READINESS | Auditar prontidão para Fase F; propor DEC-0031 e plano para T-045 | Gemini | 2026-05-09 |
 | T-REVIEW-E | Revisar Fase E: diagnóstico convergência O(h²) + Langmuir ω_obs=1.005; app `pidc_phase_e_diagnostics`; Marco 4 fechado; spec Gemini pré-F | Claude | 2026-05-09 |
 | T-044 | Implementar oscilação de Langmuir 1D (`Langmuir1D.hpp`) + `test_langmuir_1d`; ω_obs=1.005∈[0.8,1.2]; CTest 24/24 | Claude | 2026-05-09 |
 | T-039B | Adicionar casos de referência CIC 1D: partícula central e conjunto determinístico com semente fixa; CTest 23/23 | Codex | 2026-05-09 |

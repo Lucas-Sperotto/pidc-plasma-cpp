@@ -4,6 +4,11 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Gemini concluiu a auditoria de prontidão para a Fase F (T-GEMINI-F-READINESS). R-017 (ausência de cache de fatoração em `EFGPoissonSolver`) foi confirmado como um bloqueador de desempenho, e a `DEC-0031` foi proposta para corrigi-lo. Foi recomendado iniciar a Fase F com um domínio Dirichlet não-periódico para isolar a validação do ciclo PIDC da complexidade da periodicidade (R-015/R-016). A tarefa T-045 foi desmembrada em subtarefas: T-045A (refatorar `EFGPoissonSolver`), T-045B (implementar `interpolate_field_pidc`), e T-045C (criar app `pidc_smoke_2d` com o ciclo PIDC mínimo).
+---
+
+## Último resumo
+
 Claude concluiu T-REVIEW-E. App diagnóstico `apps/phase_e_diagnostics.cpp` criado: (A) convergência Poisson 1D MMS — O(h²) confirmada para nx={16,32,64,128}, L∞(φ)=2.008e-04 e L∞(E)=1.262e-03 em nx=128; (B) interpolação CIC — erro decresce de 1.18e-01 para 1.89e-03 entre nx=16 e nx=128; (C) Langmuir ω_obs=1.005, deriva=2.51%, erro de carga=5.6e-16. CSVs exportados em `data/output/`. Script `scripts/plot_phase_e.py` gera figura de convergência log-log. Marco 4 fechado em ROADMAP.md. Tarefa para Gemini criada em `docs/ai/GEMINI_TASKS/T_GEMINI_F_READINESS.md`. **24/24 CTest passando.**
 
 ---
