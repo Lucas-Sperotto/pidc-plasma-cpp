@@ -134,6 +134,31 @@ Critérios de aceite em `tests/test_manufactured_field_1d.cpp`:
 
 Resultado em 2026-05-09 (T-040): `manufactured_field_1d` passou; CTest 18/18.
 
+### T-041 — Poisson 1D periódico por FD/DFT manual
+
+Equação resolvida:
+
+$$\frac{\partial^2\phi}{\partial x^2} = -\frac{\rho}{\epsilon_0}$$
+
+Condições:
+
+- domínio periódico em `Grid1D`;
+- gauge de potencial médio zero;
+- vetores nodais `std::vector<double>`;
+- sem Eigen, EFG, MLS ou PIDC.
+
+Critérios de aceite em `tests/test_poisson_solver_1d.cpp`:
+
+| Propriedade | Tolerância |
+| --- | --- |
+| Erro $L^\infty$ de $\phi$ contra `SineManufacturedField1D`, `nx=128` | $< 10^{-3}$ |
+| Erro $L^\infty$ de $E$ contra `SineManufacturedField1D`, `nx=128` | $< 5\times10^{-3}$ |
+| Média do potencial calculado | $< 10^{-12}$ |
+| Densidade nula → potencial e campo nulos | $< 10^{-12}$ |
+| Falha controlada para tamanho incorreto ou `epsilon0 <= 0` | obrigatório |
+
+Resultado em 2026-05-09 (T-041): `poisson_solver_1d` passou; CTest 19/19.
+
 ---
 
 ## Fases posteriores (referência)

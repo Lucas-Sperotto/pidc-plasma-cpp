@@ -81,8 +81,19 @@ Implementar e validar o PIDC de forma incremental:
   - $\rho(x) = \epsilon_0 A(2\pi/L)^2\sin(2\pi x/L)$.
 - Funções de amostragem nodal: `sample_potential`, `sample_electric_field`, `sample_charge_density`.
 - `test_manufactured_field_1d` cobre valores analíticos, periodicidade, tamanhos dos vetores e soma de `rho` aproximadamente zero.
-- Não há ainda Poisson 1D, interpolação campo→partícula, leap-frog ou Langmuir.
+- Na T-040 não houve implementação de Poisson 1D, interpolação campo→partícula, leap-frog ou Langmuir.
 - CTest: **18/18 testes passando**.
+
+**Poisson 1D periódico implementado e testado (T-041, 2026-05-09):**
+
+- `PoissonResult1D` e `solve_poisson_periodic_1d` em `include/pidc/pic/PoissonSolver1D.hpp`.
+- Resolve $\partial^2\phi/\partial x^2 = -\rho/\epsilon_0$ em `Grid1D` periódico.
+- Backend: DFT manual com `std::complex<double>` e autovalores do operador de diferenças finitas periódico.
+- Gauge: potencial médio zero (`phi_hat[0] = 0` e remoção do resíduo médio numérico).
+- Campo nodal: diferença central periódica `E_i = -(phi_{i+1} - phi_{i-1})/(2 dx)`.
+- `test_poisson_solver_1d` valida MMS periódico contra `SineManufacturedField1D`, gauge, densidade zero e falhas de entrada.
+- Não há ainda interpolação campo→partícula, leap-frog ou Langmuir.
+- CTest: **19/19 testes passando**.
 
 **PIC baseline 1D — grade criada e auditada (T-038A/B/C, 2026-05-09):**
 
@@ -103,18 +114,18 @@ Implementar e validar o PIDC de forma incremental:
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
 - `scripts/build.sh` e `scripts/run_tests.sh` existem.
-- CTest atual: **18/18 testes passando**.
+- CTest atual: **19/19 testes passando**.
 
 ## Próximos passos
 
 | Tarefa | Descrição | Responsável | Prioridade |
 | --- | --- | --- | --- |
-| T-041 | Solver Poisson 1D periódico por diferenças finitas/DFT manual, independente de Eigen, teste MMS discreto | Codex | alta |
 | T-042 | Interpolação campo CIC 1D: `interpolate_field_cic_1d`, teste com campo manufaturado | Codex | alta |
+| T-043 | Leap-frog 1D isolado com teste analítico e reversibilidade | Codex | média |
 
 **Pendências antes de avançar para PIDC (Fase F):**
 
-- Completar sequência PIC 1D: T-041 (Poisson) → T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
+- Completar sequência PIC 1D: T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
 - R-017: cache LDLT em `EFGPoissonSolver` — resolver antes de Phase F.
 - R-015, R-016, DEC-0022: periodicidade MLS/busca — bloqueantes para Phase F.
 

@@ -4,6 +4,12 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Codex concluiu T-041. `solve_poisson_periodic_1d` foi criado em `include/pidc/pic/PoissonSolver1D.hpp`, resolvendo $\partial^2\phi/\partial x^2 = -\rho/\epsilon_0$ em `Grid1D` periódico via DFT manual e autovalores de diferenças finitas, com gauge de média zero. `test_poisson_solver_1d` valida MMS periódico contra `SineManufacturedField1D`, campo nodal, gauge, densidade zero e falhas de entrada. Nenhuma interpolação campo→partícula, leap-frog ou Langmuir foi implementado. **19/19 testes passando.**
+
+---
+
+## Último resumo anterior
+
 Gemini concluiu T-040B: auditoria matemática da implementação do campo manufaturado 1D (T-040). A solução `phi(x) = A*sin(2πx/L)` e suas derivadas (`E`, `rho`) foram validadas como matematicamente corretas, periódicas e auto-consistentes. A densidade de carga `rho` tem média nula, satisfazendo a condição para o solver de Poisson periódico. A `DEC-0030` foi proposta para formalizar esta convenção. A implementação de T-040 está correta e bem-escopada. **A tarefa T-041 (PoissonSolver1D) está desbloqueada.**
 ---
 
@@ -37,9 +43,9 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | geometry | `Domain2D` inicial com contorno periódico via `wrapPeriodic(Vec2)`; `NodeCloud`, `RegularNodeCloud2D`, `NeighborSearchGrid` e `PeriodicBoundary2D` criados |
 | mls | `ShapeFunctionData` (contrato); `WeightFunction` quártica; `PolynomialBasis` linear 2D; `MLSShapeFunction` com `mls_evaluate` (PU + LR validados, guarda de raio de suporte e robustez finita testadas) |
 | efg | `GaussCell2D` e `EFGPoissonSolver` esparso implementados; Poisson MMS Dirichlet passou em 5×5 e 9×9 com métricas de potencial e campo |
-| pic | não iniciado |
-| pidc | não iniciado |
-| validation | CTest com 14 testes; gradiente MLS verificado em 4 pontos incluindo 3 assimétricos; R-013 fechado como falso positivo; `VALIDATION_PLAN.md` criado; robustez MLS, busca de vizinhança, fronteira periódica, quadratura e Poisson MMS com campo testados |
+| pic | `Grid1D`, deposição CIC 1D, campo manufaturado 1D e Poisson 1D periódico implementados e testados; ainda sem interpolação campo→partícula, leap-frog ou Langmuir |
+| pidc | `deposit_charge` conservativo implementado em `include/pidc/pidc/ChargeDeposition.hpp` (T-037) |
+| validation | CTest com 19 testes; inclui MLS, EFG Poisson MMS, conservação de carga PIDC, `Grid1D`, deposição CIC 1D, campo manufaturado 1D e Poisson MMS 1D periódico |
 | scripts | `scripts/build.sh` e `scripts/run_tests.sh` criados |
 
 ## Testes
@@ -65,12 +71,17 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 | linear reproduction | passou em 2026-05-08 (coberto por mls_shape_function) |
 | charge conservation (PIDC) | passou em 2026-05-09 (test_charge_conservation, 15 subtestes) |
 | cic_deposition_1d | passou em 2026-05-09 (test_cic_deposition_1d, 6 subtestes) |
+| manufactured_field_1d | passou em 2026-05-09 |
+| poisson_solver_1d | passou em 2026-05-09 |
 | Poisson MMS | passou em 2026-05-08 |
 | Langmuir 1D | não iniciado |
 
 ---
 
 ## Histórico
+
+### 2026-05-09: T-041 (Codex — Poisson 1D periódico)
+Codex criou `include/pidc/pic/PoissonSolver1D.hpp` com `PoissonResult1D` e `solve_poisson_periodic_1d`. O solver usa `std::vector<double>`, DFT manual com `std::complex<double>`, autovalores do operador de diferenças finitas periódico e gauge de potencial médio zero. O campo nodal é calculado por diferença central periódica. `tests/test_poisson_solver_1d.cpp` valida contra `SineManufacturedField1D`, verifica erro L∞ do potencial e do campo, média de potencial nula, densidade zero e falhas para tamanho incorreto/`epsilon0` inválido. CTest 19/19 passando. Não houve implementação de interpolação campo→partícula, leap-frog ou Langmuir.
 
 ### 2026-05-09: T-039 (Claude — plano Fase E + deposição CIC 1D)
 

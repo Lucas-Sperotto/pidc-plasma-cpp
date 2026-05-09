@@ -147,7 +147,7 @@ Implementar um PIC simples para comparação com o PIDC.
 - [x] Infraestrutura mínima de grade 1D periódica semiaberta (`pic::Grid1D`, T-038A).
 - [x] Deposição de carga em grade regular (`deposit_charge_cic_1d`, T-039).
 - [x] Campo elétrico manufaturado em `Grid1D` (`SineManufacturedField1D`, T-040).
-- [ ] Solver de Poisson por diferenças finitas ou FFT.
+- [x] Solver de Poisson por diferenças finitas/DFT manual (`solve_poisson_periodic_1d`, T-041).
 - [ ] Interpolação do campo para partículas.
 - [ ] Leap-frog.
 - [ ] Contorno periódico.
@@ -211,6 +211,7 @@ para cada passo de tempo:
 ### Casos
 
 - [x] Poisson MMS 2D.
+- [x] Poisson MMS 1D periódico (test_poisson_solver_1d).
 - [x] Conservação de carga global e por partícula (test_charge_conservation).
 - [x] Campo elétrico manufaturado em `Grid1D` (test_manufactured_field_1d).
 - [ ] Deposição de carga com uma partícula no centro.

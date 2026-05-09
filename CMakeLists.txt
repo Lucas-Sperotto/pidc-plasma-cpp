@@ -238,3 +238,14 @@ add_test(
     NAME manufactured_field_1d
     COMMAND pidc_test_manufactured_field_1d
 )
+
+add_executable(pidc_test_poisson_solver_1d
+    tests/test_poisson_solver_1d.cpp
+)
+
+target_link_libraries(pidc_test_poisson_solver_1d PRIVATE pidc_core)
+
+add_test(
+    NAME poisson_solver_1d
+    COMMAND pidc_test_poisson_solver_1d
+)
