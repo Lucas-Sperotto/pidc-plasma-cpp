@@ -110,6 +110,32 @@ CTest: 14/14 testes passando.
 
 ---
 
+## Fase E — PIC 1D de referência
+
+### T-040 — Campo manufaturado 1D em grade periódica
+
+Campo analítico:
+
+$$\phi(x) = A\sin(2\pi x/L)$$
+
+$$E(x) = -A(2\pi/L)\cos(2\pi x/L)$$
+
+$$\rho(x) = \epsilon_0 A(2\pi/L)^2\sin(2\pi x/L)$$
+
+Critérios de aceite em `tests/test_manufactured_field_1d.cpp`:
+
+| Propriedade | Tolerância |
+| --- | --- |
+| Valores analíticos em $0$, $L/4$, $L/2$, $3L/4$ | $< 10^{-12}$ |
+| Periodicidade entre $x$ e $x \pm L$ | $< 10^{-12}$ |
+| Tamanho dos vetores amostrados | igual a `grid.size()` |
+| Soma nodal de $\rho_i$ em grade periódica uniforme | $< 10^{-12}$ |
+| Ausência de Eigen no módulo PIC 1D | obrigatório |
+
+Resultado em 2026-05-09 (T-040): `manufactured_field_1d` passou; CTest 18/18.
+
+---
+
 ## Fases posteriores (referência)
 
 | Fase | Critério principal |

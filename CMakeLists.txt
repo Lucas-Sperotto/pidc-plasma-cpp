@@ -227,3 +227,14 @@ add_test(
     NAME cic_deposition_1d
     COMMAND pidc_test_cic_deposition_1d
 )
+
+add_executable(pidc_test_manufactured_field_1d
+    tests/test_manufactured_field_1d.cpp
+)
+
+target_link_libraries(pidc_test_manufactured_field_1d PRIVATE pidc_core)
+
+add_test(
+    NAME manufactured_field_1d
+    COMMAND pidc_test_manufactured_field_1d
+)

@@ -4,6 +4,11 @@ Atualizado em: 2026-05-09
 
 ## Último resumo
 
+Gemini concluiu T-040B: auditoria matemática da implementação do campo manufaturado 1D (T-040). A solução `phi(x) = A*sin(2πx/L)` e suas derivadas (`E`, `rho`) foram validadas como matematicamente corretas, periódicas e auto-consistentes. A densidade de carga `rho` tem média nula, satisfazendo a condição para o solver de Poisson periódico. A `DEC-0030` foi proposta para formalizar esta convenção. A implementação de T-040 está correta e bem-escopada. **A tarefa T-041 (PoissonSolver1D) está desbloqueada.**
+---
+
+## Último resumo
+
 Gemini concluiu a auditoria matemática do plano da Fase E (T-AUDIT-E-MATH). O plano sequencial (T-039 a T-044) foi validado como matematicamente sólido. A convenção de grade (DEC-0027) e o método de deposição CIC (T-039) estão corretos. Foi proposta a DEC-0029 para formalizar a estratégia de "um teste por componente", garantindo que o solver de Poisson, a interpolação e o leap-frog sejam validados com testes de unidade (MMS, campo manufaturado, reversibilidade) antes da simulação integrada de Langmuir. Os riscos de comparação PIC vs. PIDC foram identificados (dimensionalidade, parâmetros, diagnósticos). A Fase E pode prosseguir conforme planejado.
 ---
 

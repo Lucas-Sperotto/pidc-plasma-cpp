@@ -334,5 +334,6 @@ reversibilidade. Pular diretamente para Langmuir sem validar cada passo
 individualmente vai mascarar erros de sinal, escala ou fase.
 
 Mitigação:
-Seguir a sequência de tarefas T-039 → T-040 → T-041 → T-042 → T-043 (Langmuir)
-sem fundir etapas. Cada etapa deve ter seu próprio teste antes de avançar.
+Seguir a sequência canônica: T-039 (CIC) → T-040 (campo manufaturado) → T-041
+(Poisson 1D) → T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
+Não fundir etapas. Cada etapa deve ter seu próprio teste antes de avançar.

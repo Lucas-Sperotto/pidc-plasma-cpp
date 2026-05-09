@@ -1,11 +1,15 @@
 # Plano Arquitetural — Fase E: PIC 1D de Referência
 
 Aprovado em: 2026-05-09
+Atualizado em: 2026-05-09 (T-040C — sincronização de numeração)
+
+**Nota:** A numeração canônica desta Fase E foi definida definitivamente em
+`docs/ai/PHASE_E_PIC1D_TECH_PLAN.md`. Este documento usa a mesma numeração.
 
 **Contexto:** Antes de implementar a Fase F (PIDC completo), precisamos de um PIC 1D
 clássico e validado independentemente. Esse código serve como referência para comparação
-futura com o PIDC e valida a sequência física completa: deposição CIC → Poisson periódico
-→ interpolação de campo → leap-frog → oscilação de Langmuir.
+futura com o PIDC e valida a sequência física completa: deposição CIC → campo manufaturado
+→ Poisson periódico → interpolação de campo → leap-frog → oscilação de Langmuir.
 
 As fronteiras arquiteturais foram estabelecidas em T-038C (DEC-0027/0028, R-018–R-021).
 O módulo `include/pidc/pic/` é proibido de incluir `mls/`, `efg/` ou `<Eigen/>`.
@@ -28,19 +32,28 @@ Nenhum critério de "referência" é satisfeito sem o item 5.
 
 ## Sequência de tarefas
 
-| ID    | Módulo                    | Responsável | Arquivo principal                              |
-|-------|---------------------------|-------------|------------------------------------------------|
-| T-039 | Deposição CIC 1D          | Codex       | `include/pidc/pic/ChargeDeposition1D.hpp`      |
-| T-040 | Poisson 1D periódico      | Codex       | `include/pidc/pic/PoissonSolver1D.hpp`         |
-| T-041 | Interpolação campo CIC 1D | Codex       | `include/pidc/pic/FieldInterpolation1D.hpp`    |
-| T-042 | Leap-frog 1D              | Codex       | `include/pidc/pic/LeapFrog1D.hpp`              |
-| T-043 | Langmuir 1D (integração)  | Codex       | `apps/langmuir_1d.cpp`                         |
+| ID     | Módulo                        | Estado  | Arquivo principal                                |
+|--------|-------------------------------|---------|--------------------------------------------------|
+| T-038A | Grid1D periódico              | ✓ pronto | `include/pidc/pic/Grid1D.hpp`                   |
+| T-039  | Deposição CIC 1D              | ✓ pronto | `include/pidc/pic/ChargeDeposition1D.hpp`       |
+| T-040  | Campo elétrico manufaturado   | ✓ pronto | `include/pidc/pic/ManufacturedField1D.hpp`      |
+| T-041  | Poisson 1D periódico          | pendente | `include/pidc/pic/PoissonSolver1D.hpp`          |
+| T-042  | Interpolação campo CIC 1D     | pendente | `include/pidc/pic/FieldInterpolation1D.hpp`     |
+| T-043  | Leap-frog 1D                  | pendente | `include/pidc/pic/LeapFrog1D.hpp`               |
+| T-044  | Langmuir 1D (integração)      | pendente | `include/pidc/pic/Langmuir1D.hpp`               |
 
 Cada tarefa desbloqueia a próxima. Nenhuma tarefa pode ser pulada.
 
 ---
 
-## T-039 — Deposição CIC 1D
+## T-038A — Grid1D periódico (concluída)
+
+`include/pidc/pic/Grid1D.hpp` — semântica semiaberta `[xmin, xmax)`, `nx` nós = `nx`
+células, `dx = L/nx` (DEC-0027). Teste `test_pic_grid1d` passando.
+
+---
+
+## T-039 — Deposição CIC 1D (concluída)
 
 ### Arquivo
 `include/pidc/pic/ChargeDeposition1D.hpp`
@@ -48,39 +61,32 @@ Cada tarefa desbloqueia a próxima. Nenhuma tarefa pode ser pulada.
 ### Interface
 ```cpp
 namespace pidc::pic {
-
-// DEC-0028: retorna std::vector<double>, sem Eigen
 std::vector<double> deposit_charge_cic_1d(
     const Grid1D& grid,
     const std::vector<pidc::Particle>& particles,
     const std::vector<pidc::Species>& species_list);
-
 } // namespace pidc::pic
 ```
 
-### Algoritmo
-Para cada partícula `p`:
-- `f = grid.fraction_in_cell(x_p)` ∈ [0.0, 1.0)
-- `left  = grid.left_node_index(x_p)`
-- `right = grid.right_node_index(x_p)` = `(left+1) % nx`
-- `Q[left] += q * (1.0 - f)`
-- `Q[right] += q * f`
-
-Onde `q = species_list[p.species_id].charge`.
-
-### Testes obrigatórios — `tests/test_cic_deposition_1d.cpp`
-1. Partícula no centro da célula → 50% em `left`, 50% em `right`.
-2. Partícula sobre o nó `i` (f=0.0) → 100% em nó `i`.
-3. Partícula próxima a `xmax` → periodicidade: nós `nx-1` e `0`.
-4. Conservação global: `|Σ Q_i − Σ q_p| < 1e-12` com 10 partículas aleatórias.
-5. Vetor de retorno tem tamanho `grid.size()`.
-
-### Critério de aceite
-Todos os 5 subtestes passam. CTest: 17/17.
+Algoritmo CIC: `Q[left] += q*(1-f)`, `Q[right] += q*f`.
+Conservação: `|ΣQ_i − Σq_p| < 1e-12`.
+Teste `test_cic_deposition_1d`: 6 subtestes passando.
 
 ---
 
-## T-040 — Poisson 1D periódico (DFT/FD)
+## T-040 — Campo elétrico manufaturado (concluída)
+
+### Arquivo
+`include/pidc/pic/ManufacturedField1D.hpp`
+
+Fornece soluções analíticas exatas (φ, E, ρ) para validação do solver Poisson (T-041)
+e do interpolador (T-042). Sem dependência de Eigen.
+
+Teste `test_manufactured_field_1d` passando. CTest: 18/18.
+
+---
+
+## T-041 — Poisson 1D periódico (pendente)
 
 ### Arquivo
 `include/pidc/pic/PoissonSolver1D.hpp`
@@ -90,8 +96,8 @@ Todos os 5 subtestes passam. CTest: 17/17.
 namespace pidc::pic {
 
 struct PoissonResult1D {
-    std::vector<double> potential;  // φ_i, tamanho nx
-    std::vector<double> field;      // E_i centrado periódico, tamanho nx
+    std::vector<double> potential;    // φ_i, tamanho nx
+    std::vector<double> electric_field; // E_i centrado periódico, tamanho nx
 };
 
 // Resolve ∇²φ = -ρ/ε₀ com condição periódica.
@@ -99,33 +105,34 @@ struct PoissonResult1D {
 PoissonResult1D solve_poisson_periodic_1d(
     const Grid1D& grid,
     const std::vector<double>& charge_density,
-    double epsilon0 = 8.854187817e-12);
+    double epsilon0 = 1.0);
 
 } // namespace pidc::pic
 ```
 
 ### Algoritmo (DFT manual via `std::complex<double>`)
-1. DFT forward: `ρ̂_k = Σ_j ρ_j · exp(-2πi·j·k/n)`
-2. Autovalores FD: `μ_k = 2·(cos(2πk/n) - 1) / dx²`
-3. `φ̂_k = -ρ̂_k / (ε₀ · μ_k)`, com `φ̂_0 = 0`
+1. DFT forward de `ρ_i`
+2. Autovalores FD: `λ_k = 4·sin²(πk/n)/dx²`
+3. `φ̂_k = ρ̂_k / (ε₀·λ_k)`, com `φ̂_0 = 0` (gauge)
 4. DFT inverse
 5. Campo: `E_i = -(φ_{(i+1)%n} - φ_{(i-1+n)%n}) / (2·dx)`
 
-Sem Eigen, sem FFT externa. Apenas `<complex>`, `<cmath>`, `<vector>`.
+Sem Eigen, sem FFT externa.
 
 ### Testes obrigatórios — `tests/test_poisson_1d.cpp`
-MMS: `ρ(x) = ε₀ · (2π/L)² · sin(2πx/L)` → `φ(x) = sin(2πx/L)`.
-1. `||φ_computed − φ_exact||_∞ < 5e-3` para `nx=32`.
-2. `||E_computed − E_exact||_∞ < 5e-3` para `nx=32`.
-3. Potencial médio ≈ 0 (gauge verificado).
-4. Tamanho de retorno = `nx`.
+MMS discreto: construir `ρ_i` a partir do laplaciano FD de `φ_i = sin(2πx_i/L)`.
+1. `||φ_computed − φ_exact||_∞ < 1e-10` para nx=32.
+2. `||E_computed − E_exact||_∞ < 1e-10` para nx=32.
+3. Potencial médio `< 1e-12` (gauge).
+4. Densidade zero → potencial e campo zero.
+5. Tamanho de retorno = nx.
 
 ### Critério de aceite
-CTest: 18/18.
+CTest: 19/19.
 
 ---
 
-## T-041 — Interpolação de campo CIC 1D
+## T-042 — Interpolação campo CIC 1D (pendente)
 
 ### Arquivo
 `include/pidc/pic/FieldInterpolation1D.hpp`
@@ -137,8 +144,14 @@ namespace pidc::pic {
 // CIC reverso: E_p = E[left]*(1-f) + E[right]*f
 double interpolate_field_cic_1d(
     const Grid1D& grid,
-    const std::vector<double>& E_nodes,
+    const std::vector<double>& field_nodes,
     double x);
+
+// Sobrecarga vetorial por partícula
+std::vector<double> interpolate_field_cic_1d(
+    const Grid1D& grid,
+    const std::vector<double>& field_nodes,
+    const std::vector<pidc::Particle>& particles);
 
 } // namespace pidc::pic
 ```
@@ -147,15 +160,16 @@ double interpolate_field_cic_1d(
 1. Centro de célula → média dos dois nós.
 2. Sobre nó `i` (f=0) → `E_nodes[i]` exato.
 3. Campo uniforme → retorna a constante em qualquer posição.
-4. Campo linear → interpolação precisa em ponto interior.
+4. Campo manufaturado (`sinusoidal_electric_field_1d`, nx=128): erro `< 3e-3`.
 5. Periodicidade: perto de `xmax` interpola `nx-1` e `0`.
+6. Tamanho errado → throw.
 
 ### Critério de aceite
-CTest: 19/19.
+CTest: 20/20.
 
 ---
 
-## T-042 — Leap-frog 1D (Störmer-Verlet)
+## T-043 — Leap-frog 1D (pendente)
 
 ### Arquivo
 `include/pidc/pic/LeapFrog1D.hpp`
@@ -164,10 +178,18 @@ CTest: 19/19.
 ```cpp
 namespace pidc::pic {
 
+// Recua velocidade de dt/2 a partir de v(t=0) para inicializar o stagger
+void initialize_leapfrog_velocity_1d(
+    pidc::Particle& particle,
+    double electric_field,
+    double charge_over_mass,
+    double dt);
+
+// Avança: v_{n+1/2} = v_{n-1/2} + (q/m)*E*dt; x_{n+1} = x_n + v_{n+1/2}*dt
 void leapfrog_advance_1d(
     pidc::Particle& particle,
     const Grid1D& grid,
-    double E_at_particle,
+    double electric_field,
     double charge_over_mass,
     double dt);
 
@@ -175,34 +197,48 @@ void leapfrog_advance_1d(
 ```
 
 ### Testes obrigatórios — `tests/test_leapfrog_1d.cpp`
-1. Campo zero → movimento uniforme.
-2. Campo uniforme → aceleração verificada em 2 passos.
-3. Reversibilidade: 100 forward + 100 backward → erro < 1e-10.
+1. Campo zero → movimento uniforme, posição linear.
+2. Campo constante → posição e velocidade analíticas em 2 passos.
+3. Reversibilidade: 100 passos forward + 100 passos backward → erro `< 1e-10`.
 4. Periodicidade: posição além de `xmax` retorna para `[xmin, xmax)`.
 
 ### Critério de aceite
-CTest: 20/20.
+CTest: 21/21.
 
 ---
 
-## T-043 — Langmuir 1D (integração completa)
+## T-044 — Langmuir 1D (pendente)
 
 ### Arquivo
-`apps/langmuir_1d.cpp`
+`include/pidc/pic/Langmuir1D.hpp` + teste `tests/test_langmuir_1d.cpp`
 
-### Setup — unidades normalizadas
+### Unidades normalizadas
 - `ε₀ = 1`, `e = 1`, `m_e = 1`, `n₀ = 1` → `ω_pe = 1`
-- `L = 1.0`, `nx = 32`, `N_e = 64`, `dt = 0.1`, `A = 0.01`
-- Perturbação: `x_p = p*L/N + A*sin(2π*x_p/L)`
+- `L = 1.0`, `nx = 64`, `N_e = 128`, `dt = 0.05`, perturbação `A = 1e-3`
 
 ### Sequência por passo
-1. `deposit_charge_cic_1d` → `rho`
-2. `solve_poisson_periodic_1d` → `phi`, `E_nodes`
-3. `interpolate_field_cic_1d` para cada partícula
-4. `leapfrog_advance_1d` para cada partícula
+1. `deposit_charge_cic_1d` → `Q[nx]`
+2. Somar fundo iônico: `ρ_i = Q_i/dx + 1.0`
+3. `solve_poisson_periodic_1d` → `phi[nx]`, `E_nodes[nx]`
+4. `interpolate_field_cic_1d` para cada partícula
+5. `leapfrog_advance_1d` para cada partícula
 
 ### Critério de aceite (Marco 4)
-`ω_obs ∈ [0.8, 1.2] × ω_pe` após `T_sim = 20 / ω_pe`.
+`ω_obs ∈ [0.8, 1.2] × ω_pe` após `T_sim = 2500 × dt`.
+
+---
+
+## Arquivos esperados por tarefa
+
+| Tarefa | Header | Teste |
+|--------|--------|-------|
+| T-038A | `Grid1D.hpp` | `test_pic_grid1d.cpp` ✓ |
+| T-039  | `ChargeDeposition1D.hpp` | `test_cic_deposition_1d.cpp` ✓ |
+| T-040  | `ManufacturedField1D.hpp` | `test_manufactured_field_1d.cpp` ✓ |
+| T-041  | `PoissonSolver1D.hpp` | `test_poisson_1d.cpp` |
+| T-042  | `FieldInterpolation1D.hpp` | `test_field_interpolation_1d.cpp` |
+| T-043  | `LeapFrog1D.hpp` | `test_leapfrog_1d.cpp` |
+| T-044  | `Langmuir1D.hpp` | `test_langmuir_1d.cpp` |
 
 ---
 
@@ -211,14 +247,15 @@ CTest: 20/20.
 1. Nenhum `#include "pidc/mls/..."` ou `#include "pidc/efg/..."` em `include/pidc/pic/`.
 2. Nenhum `#include <Eigen/...>` em `include/pidc/pic/`.
 3. Não usar `EFGPoissonSolver` nem `mls_evaluate` no código PIC 1D.
-4. Não avançar para T-043 sem T-039–T-042 individualmente validados.
+4. Não avançar para T-044 sem T-039–T-043 individualmente validados.
 5. Não declarar "PIC 1D validado" sem o critério de Langmuir.
-6. Não comparar PIC vs PIDC antes de T-043 completo e Fase F completa.
+6. Não comparar PIC vs PIDC antes de T-044 completo e Fase F completa.
 
 ---
 
-## Estado ao iniciar (pré-T-039)
+## Estado ao corrigir a numeração (T-040C)
 
-- CTest: 16/16 passando
-- `Grid1D` pronto (`include/pidc/pic/Grid1D.hpp`, T-038A)
-- DEC-0027, DEC-0028 aceitas; R-018–R-021 registrados
+- CTest: **18/18 passando**
+- Concluídas: T-038A, T-039, T-040
+- Próxima tarefa: **T-041** (Codex) — `PoissonSolver1D` periódico
+- Plano técnico detalhado: `docs/ai/PHASE_E_PIC1D_TECH_PLAN.md`

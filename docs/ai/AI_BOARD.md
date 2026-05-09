@@ -1,6 +1,6 @@
 # AI_BOARD — Quadro de comunicação entre IAs
 
-Atualizado em: 2026-05-09 (plano técnico Fase E)
+Atualizado em: 2026-05-09 (T-040)
 
 ## Regras
 
@@ -21,7 +21,6 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-040 | Implementar campo elétrico manufaturado em `Grid1D` (`ManufacturedField1D.hpp`) + teste analítico | Codex | proposta |
 | T-041 | Implementar Poisson 1D periódico por FD/DFT manual (`PoissonSolver1D.hpp`) + teste MMS discreto | Codex | proposta |
 | T-042 | Implementar interpolação CIC campo → partícula (`FieldInterpolation1D.hpp`) + teste manufaturado | Codex | proposta |
 | T-043 | Implementar leap-frog 1D isolado (`LeapFrog1D.hpp`) + testes analíticos e reversibilidade | Codex | proposta |
@@ -33,6 +32,7 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-040 | Implementar campo elétrico manufaturado em `Grid1D` (`ManufacturedField1D.hpp`) + `test_manufactured_field_1d`; CTest 18/18 | Codex | 2026-05-09 |
 | T-AUDIT-E-MATH | Auditar matematicamente o plano da Fase E PIC 1D | Gemini | 2026-05-09 |
 | T-PLAN-E | Criar `PHASE_E_PIC1D_TECH_PLAN.md`; corrigir numeração T-040–T-044 após plano divergente; CTest 17/17 | Codex | 2026-05-09 |
 | T-039 | Plano PHASE_E_PIC1D_PLAN.md aprovado; `deposit_charge_cic_1d` + `test_cic_deposition_1d`; CTest 17/17 | Claude | 2026-05-09 |

@@ -72,37 +72,49 @@ Implementar e validar o PIDC de forma incremental:
 - Plano `docs/ai/PHASE_E_PIC1D_PLAN.md` criado e aprovado.
 - CTest: **17/17 testes passando**.
 
+**Campo manufaturado 1D implementado e testado (T-040, 2026-05-09):**
+
+- `SineManufacturedField1D` em `include/pidc/pic/ManufacturedField1D.hpp` (header-only, sem Eigen).
+- Fórmulas:
+  - $\phi(x) = A\sin(2\pi x/L)$;
+  - $E(x) = -A(2\pi/L)\cos(2\pi x/L)$;
+  - $\rho(x) = \epsilon_0 A(2\pi/L)^2\sin(2\pi x/L)$.
+- Funções de amostragem nodal: `sample_potential`, `sample_electric_field`, `sample_charge_density`.
+- `test_manufactured_field_1d` cobre valores analíticos, periodicidade, tamanhos dos vetores e soma de `rho` aproximadamente zero.
+- Não há ainda Poisson 1D, interpolação campo→partícula, leap-frog ou Langmuir.
+- CTest: **18/18 testes passando**.
+
 **PIC baseline 1D — grade criada e auditada (T-038A/B/C, 2026-05-09):**
 
 - `pic::Grid1D` em `include/pidc/pic/Grid1D.hpp` (namespace `pidc::pic`).
 - Semântica periódica semiaberta `[xmin, xmax)`, `nx` nós = `nx` células, `dx = L/nx` (DEC-0027 aceita).
 - Métodos: `size`, `coordinate`, `wrap_position`, `cell_index`, `left_node_index`, `right_node_index`, `fraction_in_cell`.
-- `test_pic_grid1d` passa; 16/16 CTest passando.
+- `test_pic_grid1d` passa; suíte atual 18/18 CTest passando.
 - **Fronteiras arquiteturais definidas (T-038C):** módulo `pic/` independente de `mls/`, `efg/` e Eigen.
   - Vetores nodais PIC 1D: `std::vector<double>` (DEC-0028).
   - Reutilizar `Particle`/`Species` existentes, usando apenas componente `.x`.
   - `PoissonSolver1D` será separado do `EFGPoissonSolver` (diferentes algoritmos/dimensões).
   - Comparação PIC vs PIDC adiada para depois das validações individuais.
 - Riscos R-018–R-021 registrados.
-- Sequência de implementação: T-039 (CIC) → T-040 (Poisson1D) → T-041 (campo) → T-042 (leap-frog) → T-043 (Langmuir).
+- Sequência correta de implementação: T-039 (CIC) → T-040 (campo manufaturado) → T-041 (Poisson1D) → T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
 
 **Infra:**
 
 - CMake/C++17 funcional; Eigen3 integrado via `find_package`.
 - `tests/test_utils.hpp` com `pidc::test::require` e `pidc::test::approx_equal`.
 - `scripts/build.sh` e `scripts/run_tests.sh` existem.
-- CTest atual: **17/17 testes passando**.
+- CTest atual: **18/18 testes passando**.
 
 ## Próximos passos
 
 | Tarefa | Descrição | Responsável | Prioridade |
 | --- | --- | --- | --- |
-| T-040 | Solver Poisson 1D periódico (DFT manual `std::complex<double>`), independente de Eigen, teste MMS 1D | Codex | alta |
-| T-041 | Interpolação campo CIC 1D: `interpolate_field_cic_1d`, 5 subtestes | Codex | alta |
+| T-041 | Solver Poisson 1D periódico por diferenças finitas/DFT manual, independente de Eigen, teste MMS discreto | Codex | alta |
+| T-042 | Interpolação campo CIC 1D: `interpolate_field_cic_1d`, teste com campo manufaturado | Codex | alta |
 
 **Pendências antes de avançar para PIDC (Fase F):**
 
-- Completar sequência PIC 1D: T-039 → T-040 → T-041 (campo) → T-042 (leap-frog) → T-043 (Langmuir).
+- Completar sequência PIC 1D: T-041 (Poisson) → T-042 (interpolação) → T-043 (leap-frog) → T-044 (Langmuir).
 - R-017: cache LDLT em `EFGPoissonSolver` — resolver antes de Phase F.
 - R-015, R-016, DEC-0022: periodicidade MLS/busca — bloqueantes para Phase F.
 

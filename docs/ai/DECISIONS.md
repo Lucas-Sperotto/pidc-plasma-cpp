@@ -967,3 +967,36 @@ ouro do projeto: "Nenhuma fase posterior deve mascarar erro de fase anterior."
 Impacto no código:
 Reforça o plano de tarefas T-040 a T-044, garantindo que cada uma produza um
 teste de unidade específico e desacoplado.
+
+---
+
+## DEC-0030 — Convenção para Teste de Solução Manufaturada (MMS) 1D
+
+Status: proposta
+Proposta por: Gemini — 2026-05-09 (T-040B)
+
+Contexto:
+A validação do solver de Poisson 1D (T-041) e da interpolação de campo 1D (T-042)
+requer uma solução analítica conhecida (manufaturada) que seja compatível com o
+domínio periódico.
+
+Decisão:
+Adotar a seguinte solução manufaturada para todos os testes de componentes 1D:
+
+1.  **Potencial:** `phi(x) = A * sin(2π * x / L)`
+2.  **Campo Elétrico:** `E(x) = -dphi/dx = -A * (2π/L) * cos(2π * x / L)`
+3.  **Densidade de Carga:** `rho(x) = -ε₀ * d²phi/dx² = ε₀ * A * (2π/L)² * sin(2π * x / L)`
+
+Onde `L` é o comprimento do domínio e `A` é uma amplitude (e.g., 1.0).
+
+Justificativa:
+Esta solução é analiticamente simples, infinitamente diferenciável e, crucialmente,
+periódica em `phi`, `E` e `rho` no domínio `[0, L]`. A densidade de carga `rho`
+tem média nula, satisfazendo a condição de compatibilidade para o solver de
+Poisson periódico.
+
+Impacto no código:
+`ManufacturedField1D.hpp` (T-040) já implementa esta convenção. `PoissonSolver1D`
+(T-041) usará `rho(x)` como o termo fonte, e o teste validará a solução numérica
+`phi_h` contra a `phi(x)` analítica. `FieldInterpolation1D` (T-042) usará `E(x)`
+como o campo de referência.
