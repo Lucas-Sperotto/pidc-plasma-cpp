@@ -47,6 +47,18 @@ Bootstrap mínimo criado e validado. O projeto compila com CMake/C++17, possui b
 
 ## Último resumo
 
+Claude concluiu T-034 e T-033 (2026-05-08). T-034: bug real identificado na eliminação sequencial de Dirichlet para caso não-homogêneo; `impose_dirichlet` substituído por `impose_dirichlet_penalty` (DEC-0024 aceita) — apenas diagonal de K é modificada, simetria preservada exatamente, homogêneo/não-homogêneo tratados identicamente. Tolerância do teste de contorno ajustada de `1e-12` para `1e-10`. 14/14 testes passando, L2 inalterado. T-033: DEC-0025 proposta para migração futura densa → esparsa via `SimplicialLDLT` (Codex, após Phase D validada).
+
+---
+
+### Histórico anterior
+
+Gemini concluiu T-031: Auditoria do `EFGPoissonSolver`. A implementação de Codex (T-Poisson) está matematicamente correta e consistente com as decisões `DEC-0005` (sinal) e `DEC-0006` (forma fraca). A imposição de Dirichlet por modificação da matriz é funcional, mas frágil. Para melhorar a robustez, foi proposta a `DEC-0024` para adotar o método de penalidade. Uma nova tarefa `T-034` foi criada para Claude revisar esta decisão e planejar a refatoração.
+
+---
+
+### Histórico anterior
+
 Codex concluiu T-Poisson (2026-05-08). Foram adicionados `MLSConfig`, `GaussCell2D` com quadratura Gauss 2×2, e `EFGPoissonSolver` denso inicial para o problema manufaturado Dirichlet. O teste `efg_poisson_mms` monta `K`, monta `b`, impõe Dirichlet homogêneo, resolve o sistema e valida erro L2: 5×5 = 0.00359684 (< 1e-2) e 9×9 = 0.000827504 (< 5×5). CTest passou com 14/14 testes. Não houve implementação de PIC, PIDC, deposição de carga, campo interpolado ou caso grande.
 
 ---
@@ -60,8 +72,10 @@ Gemini concluiu T-023 e Codex finalizou a remoção manual pendente: conforme `D
 ### Histórico anterior
 
 Gemini concluiu T-028 e T-030 (2026-05-08). **Auditoria de validação e riscos concluída.**
-1.  `VALIDATION_PLAN.md` (T-028): As tolerâncias e o caso MMS estão corretos. Adicionada nota sobre a origem da tolerância de $10^{-10}$.
-2.  Riscos e Decisões (T-030): Confirmado que as implementações não-periódicas de MLS e busca de vizinhos (R-015, R-016) são corretas para a Fase D (Poisson Dirichlet). A estratégia para a Fase F periódica (DEC-0022) e o uso de ponteiro bruto em `NeighborSearchGrid` (R-014) para a Fase D são aceitáveis.
+
+1. `VALIDATION_PLAN.md` (T-028): As tolerâncias e o caso MMS estão corretos. Adicionada nota sobre a origem da tolerância de $10^{-10}$.
+2. Riscos e Decisões (T-030): Confirmado que as implementações não-periódicas de MLS e busca de vizinhos (R-015, R-016) são corretas para a Fase D (Poisson Dirichlet). A estratégia para a Fase F periódica (DEC-0022) e o uso de ponteiro bruto em `NeighborSearchGrid` (R-014) para a Fase D são aceitáveis.
+
 **Resultado:** A tarefa `T-Poisson` está totalmente desbloqueada e pronta para ser iniciada pelo Codex.
 
 ---

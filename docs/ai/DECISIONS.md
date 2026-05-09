@@ -722,3 +722,85 @@ Impacto na validação:
 `tests/test_mls_robustness.cpp` confirma equivalência entre as chamadas por
 `double` e por `MLSConfig`. `tests/test_efg_poisson_mms.cpp` usa a configuração
 centralizada no MMS.
+
+---
+
+## DEC-0024 — Estratégia para Condições de Contorno de Dirichlet no EFG
+
+Status: aceita
+Proposta por: Gemini — 2026-05-08 (T-031)
+Aceita por: Claude — 2026-05-08 (T-034). Implementada em `EFGPoissonSolver.hpp`.
+
+Contexto:
+A implementação inicial do `EFGPoissonSolver` (T-Poisson) impõe BCs de Dirichlet
+modificando diretamente as linhas/colunas da matriz. Esse método tem um bug
+silencioso para Dirichlet não-homogêneo com múltiplos nós de contorno: ao processar
+o nó `i` (zerando a coluna `i`), a atualização posterior da rhs para o nó `j` usa
+`K(i, j)` que já foi zerado, perdendo a contribuição cruzada. Para Dirichlet
+homogêneo (`g = 0`) o bug não se manifesta — o teste MMS passava, mas por razão errada.
+
+Decisão:
+Adotar o **método de penalidade** para impor BCs de Dirichlet. Para um nó de
+contorno `i` com valor prescrito `u_i = g_i`:
+
+`K_ii += P`,  `b_i += P * g_i`,  com `P = 1e12 * max(diag(K))`.
+
+Justificativa:
+O método de penalidade trata cada nó de contorno independentemente (sem efeitos
+colaterais), preserva a simetria exata (apenas a diagonal é tocada), e é correto
+para Dirichlet homogêneo e não-homogêneo com o mesmo código. A solução no contorno
+é aproximadamente `g_i` com erro relativo `O(max(K_ii)/P) = O(1e-12)`, tolerável
+para as fases D–F. Compatível com migração futura para `SimplicialLDLT` (DEC-0025).
+
+Impacto no código:
+`impose_dirichlet` substituído por `impose_dirichlet_penalty` em
+`include/pidc/efg/EFGPoissonSolver.hpp`. Tolerância do teste de contorno em
+`tests/test_efg_poisson_mms.cpp` ajustada de `1e-12` para `1e-10`.
+
+Impacto na validação:
+Todos os 14 testes continuam passando. L2 5×5 e 9×9 inalterados.
+
+---
+
+## DEC-0025 — Migração do backend de K: denso → esparso
+
+Status: proposta
+Proposta por: Claude — 2026-05-08 (T-033)
+
+Contexto:
+DEC-0003 (densa primeiro, esparsa depois) e DEC-0024 (penalidade aceita).
+Com o método de penalidade, K permanece simétrica positiva definida após as BCs,
+o que habilita `Eigen::SimplicialLDLT` como solver esparso.
+
+Decisão proposta:
+Quando a migração for executada (por Codex, em tarefa futura), substituir
+internamente em `EFGPoissonSolver`:
+
+```text
+Eigen::MatrixXd stiffness_                  →  Eigen::SparseMatrix<double> stiffness_
+Eigen::FullPivLU<Eigen::MatrixXd>           →  Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
+assembly via stiffness_(row, col) +=        →  lista de Eigen::Triplet<double> + setFromTriplets()
+stiffness_matrix() retorna MatrixXd const&  →  retorna cópia densa (ou remover se testes dispensarem)
+```
+
+A interface pública (`assemble`, `solve`, `rhs`) permanece idêntica. Nenhum
+arquivo de teste precisa mudar.
+
+Justificativa:
+A simetria garantida por DEC-0024 é pré-condição para SimplicialLDLT (exige SPD).
+A interface estável permite a troca de backend sem alterar os testes de regressão MMS.
+
+Pré-requisitos:
+
+- DEC-0024 aceita (feita em T-034).
+- Todos os testes MMS passando com backend denso (14/14).
+- Phase D completamente validada antes de migrar.
+
+Impacto no código:
+Afeta apenas `include/pidc/efg/EFGPoissonSolver.hpp`. Nenhum outro módulo é afetado.
+
+Impacto na validação:
+Após a migração, executar `bash scripts/run_tests.sh` e confirmar que L2 5×5 e 9×9
+são numericamente idênticos ao backend denso (diferença < 1e-12).
+
+Responsável pela implementação: Codex (tarefa futura após Phase D validada).

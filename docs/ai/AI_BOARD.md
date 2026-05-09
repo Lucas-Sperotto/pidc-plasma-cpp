@@ -21,9 +21,8 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável sugerido | Status |
 | --- | --- | --- | --- |
-| T-031 | Auditar `EFGPoissonSolver` contra formulação fraca, sinal de Poisson e imposição Dirichlet | Gemini + Claude | proposta |
 | T-032 | Adicionar métricas L∞ do potencial e L2/L∞ do campo manufaturado para Poisson MMS | Codex | proposta |
-| T-033 | Planejar migração densa → esparsa sem alterar testes MMS | Claude + Codex | proposta |
+| T-035 | Implementar migração densa → esparsa em EFGPoissonSolver (DEC-0025) | Codex | proposta |
 
 ---
 
@@ -31,6 +30,9 @@ Nenhuma tarefa em andamento no momento.
 
 | ID | Tarefa | Responsável | Data |
 | --- | --- | --- | --- |
+| T-034 | Aceitar DEC-0024; refatorar `impose_dirichlet` → penalidade; planejar DEC-0025 (T-033) | Claude | 2026-05-08 |
+| T-033 | Planejar migração densa → esparsa: DEC-0025 registrada em DECISIONS.md | Claude | 2026-05-08 |
+| T-031 | Auditar `EFGPoissonSolver` e propor DEC-0024 para BCs de Dirichlet | Gemini | 2026-05-08 |
 | T-Poisson | Implementar assembler EFG Poisson (GaussCell2D + Gauss 2×2); teste MMS | Codex | 2026-05-08 |
 | T-023 | Decidir e implementar destino de `Node::volume` (DEC-0019) | Gemini | 2026-05-08 |
 | T-030 | Confirmar riscos R-014/015/016 e DEC-0022 (desbloqueia T-Poisson) | Gemini | 2026-05-08 |

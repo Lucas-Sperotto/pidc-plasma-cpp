@@ -67,7 +67,7 @@ public:
             }
         }
 
-        impose_dirichlet(nodes, domain, dirichlet);
+        impose_dirichlet_penalty(nodes, domain, dirichlet);
 
         if (!stiffness_.allFinite() || !rhs_.allFinite()) {
             throw std::runtime_error{"EFGPoissonSolver assembled non-finite matrix or rhs"};
@@ -128,11 +128,20 @@ private:
                std::abs(point.y - domain.upper().y) <= tolerance;
     }
 
-    void impose_dirichlet(
+    // DEC-0024: penalty method for Dirichlet BCs — preserves symmetry and
+    // handles homogeneous/non-homogeneous cases identically. For non-homogeneous
+    // Dirichlet with multiple boundary nodes, this is also correct (unlike the
+    // row/column elimination approach, which has order-dependence when g_i != 0).
+    // Future sparse migration (DEC-0025): only the diagonal is touched, so
+    // Eigen::SparseMatrix + SimplicialLDLT can be used without structural changes.
+    void impose_dirichlet_penalty(
         const NodeCloud& nodes,
         const Domain2D& domain,
         const ScalarField2D& dirichlet)
     {
+        const double max_diag = stiffness_.diagonal().cwiseAbs().maxCoeff();
+        const double penalty  = 1.0e12 * std::max(max_diag, 1.0);
+
         for (std::size_t i = 0; i < nodes.size(); ++i) {
             const Vec2 position = nodes[i].position;
             if (!is_boundary_node(position, domain)) {
@@ -143,16 +152,8 @@ private:
             require_finite(value, "EFGPoissonSolver Dirichlet field returned a non-finite value");
 
             const auto index = static_cast<Eigen::Index>(i);
-            for (Eigen::Index row = 0; row < rhs_.size(); ++row) {
-                if (row != index) {
-                    rhs_(row) -= stiffness_(row, index) * value;
-                }
-            }
-
-            stiffness_.row(index).setZero();
-            stiffness_.col(index).setZero();
-            stiffness_(index, index) = 1.0;
-            rhs_(index) = value;
+            stiffness_(index, index) += penalty;
+            rhs_(index)              += penalty * value;
         }
     }
 };

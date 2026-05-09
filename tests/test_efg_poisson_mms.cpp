@@ -105,8 +105,8 @@ MmsResult run_mms(std::size_t node_count)
     for (std::size_t i = 0; i < nodes.size(); ++i) {
         const pidc::Vec2 position = nodes[i].position;
         if (position.x == 0.0 || position.x == 1.0 || position.y == 0.0 || position.y == 1.0) {
-            require(std::abs(solution(static_cast<Eigen::Index>(i))) < 1.0e-12,
-                    "homogeneous Dirichlet boundary nodes must be zero");
+            require(std::abs(solution(static_cast<Eigen::Index>(i))) < 1.0e-10,
+                    "homogeneous Dirichlet boundary nodes must be approximately zero (penalty method)");
         }
     }
 
